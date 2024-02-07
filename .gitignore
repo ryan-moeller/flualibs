@@ -1,0 +1,6 @@
+*.gz
+.*
+!.gitignore
+*.so*
+*.core
+*.pico
