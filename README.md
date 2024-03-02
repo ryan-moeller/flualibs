@@ -10,4 +10,6 @@ $ make SRCTOP=/usr/src
 TODO
 ----
 
-Most of the manpages are unfinished copies.
+- write md, xor, and roken manpages
+- improve tests and samples
+- improve README
