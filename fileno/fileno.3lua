@@ -76,7 +76,7 @@ local changelist = {
 	}
 }
 
-local eventt = kq:kevent(changelist)
+local event = kq:kevent(changelist)
 repeat
 	coroutine.resume(event.udata, event)
 	event = kq:kevent()
