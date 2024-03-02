@@ -55,18 +55,18 @@ system calls.
 Iterate status of all kld files.
 .It Dv for mod in kldstat.modstat(kld.id) do ... end
 Iterate status of all mods in a kld file given by
-.Pq kld.id .
+.Fa kld.id .
 .Pp
 The
-.Pq kld
+.Fa kld
 and
-.Pq mod
+.Fa mod
 returned match the status structs described in
 .Xr kldstat 2
 and
 .Xr modstat 2 ,
 respectively, without the
-.Pq version
+.Fa version
 fields.
 .Sh EXAMPLES
 Describe all kld files and modules as JSON:

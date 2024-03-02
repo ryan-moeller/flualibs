@@ -113,7 +113,7 @@ This is implemented as kqueuex(KQUEUE_CLOEXEC) so the returned
 file descriptor is automatically closed on execve(2).
 .It Dv event = kq:kevent([changelist])
 Apply an optional
-.Pq changelist
+.Fa changelist
 to the queue and wait for an event to return.
 .It Dv kq:close()
 Close the kernel event queue descriptor.

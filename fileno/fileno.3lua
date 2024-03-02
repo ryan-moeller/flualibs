@@ -48,7 +48,7 @@ library routine as a method on file handle objects.
 .Bl -tag -width XXXX
 .It Dv fd = io.stdin:fileno()
 Get the fileno of the
-.Pq stdin
+.Fa stdin
 file handle.
 .Sh EXAMPLES
 Wait for stdin to be readable using kqueue:
