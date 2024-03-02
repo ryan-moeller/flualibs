@@ -1,5 +1,4 @@
-package.cpath = "/home/ryan/libmq/?.so;" .. package.cpath
-package.cpath = "/home/ryan/libkqueue/?.so;" .. package.cpath
+package.cpath = "../libmq/?.so;" .. package.cpath
 
 local mq = require("mq")
 local kqueue = require("kqueue")
