@@ -24,90 +24,135 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.Dd January 15, 2024
-.Dt MQ 3lua
+.Dd March 1, 2024
+.Dt KQUEUE 3lua
 .Os
 .Sh NAME
-.Nm open ,
-.Nm unlink ,
+.Nm kqueue ,
+.Nm :kevent ,
 .Nm :close ,
-.Nm :getattr ,
-.Nm :setattr ,
-.Nm :send ,
-.Nm :receive ,
-.Nm O_RDONLY ,
-.Nm O_WRONLY ,
-.Nm O_RDWR ,
-.Nm O_CREAT ,
-.Nm O_EXCL ,
-.Nm O_NONBLOCK
+.Nm EV_ADD ,
+.Nm EV_ENABLE ,
+.Nm EV_DISABLE ,
+.Nm EV_DISPATCH ,
+.Nm EV_DELETE ,
+.Nm EV_RECEIPT ,
+.Nm EV_ONESHOT ,
+.Nm EV_CLEAR ,
+.Nm EV_EOF ,
+.Nm EV_ERROR ,
+.Nm EV_KEEPUDATA ,
+.Nm EVFILT_READ ,
+.Nm EVFILT_WRITE ,
+.Nm EVFILT_EMPTY ,
+.Nm EVFILT_AIO ,
+.Nm EVFILT_VNODE ,
+.Nm EVFILT_PROC ,
+.Nm EVFILT_PROCDESC ,
+.Nm EVFILT_SIGNAL ,
+.Nm EVFILT_TIMER ,
+.Nm EVFILT_USER ,
+.Nm NOTE_FFNOP ,
+.Nm NOTE_FFAND ,
+.Nm NOTE_FFOR ,
+.Nm NOTE_FFCOPY ,
+.Nm NOTE_FFCTRLMASK ,
+.Nm NOTE_FFLAGSMASK ,
+.Nm NOTE_TRIGGER ,
+.Nm NOTE_LOWAT ,
+.Nm NOTE_FILE_POLL ,
+.Nm NOTE_DELETE ,
+.Nm NOTE_WRITE ,
+.Nm NOTE_EXTEND ,
+.Nm NOTE_ATTRIB ,
+.Nm NOTE_LINK ,
+.Nm NOTE_RENAME ,
+.Nm NOTE_REVOKE ,
+.Nm NOTE_OPEN ,
+.Nm NOTE_CLOSE ,
+.Nm NOTE_CLOSE_WRITE ,
+.Nm NOTE_READ ,
+.Nm NOTE_EXIT ,
+.Nm NOTE_FORK ,
+.Nm NOTE_EXEC ,
+.Nm NOTE_PCTRLMASK ,
+.Nm NOTE_PDATAMASK ,
+.Nm NOTE_TRACK ,
+.Nm NOTE_TRACKERR ,
+.Nm NOTE_CHILD ,
+.Nm NOTE_SECONDS ,
+.Nm NOTE_MSECONDS ,
+.Nm NOTE_USECONDS ,
+.Nm NOTE_NSECONDS ,
+.Nm NOTE_ABSTIME
 .Nd Lua bindings for
-.Xr mq_open 2 ,
-.Xr mq_unlink 2 ,
-.Xr mq_close 2 ,
-.Xr mq_getattr 2 ,
-.Xr mq_setattr 2 ,
-.Xr mq_send 2 ,
-.Xr mq_receive 2 .
+.Xr kqueue 2 ,
+.Xr kevent 2 .
 .Sh SYNOPSIS
 .Bd -literal
-local mq = require('mq')
+local kqueue = require('kqueue')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv q = mq.open(name, oflags[, mode[, attr]])
-.It Dv attr = q:getattr()
-.It Dv q:setattr(attr)
-.It Dv q:send(msg, prio)
-.It Dv msg, prio = q:receive(attr.msgsize)
-.It Dv q:close()
-.It Dv mq.unlink(name)
+.It Dv kq = kqueue.kqueue()
+.It Dv event = kq:kevent([changelist])
+.It Dv kq:close()
 .El
 .Sh DESCRIPTION
 The
-.Nm mq
+.Nm kqueue
 module provides bindings for the
-.Xr mqueuefs 5
+.Xr kqueue 2
+and
+.Xr kevent 2
 system calls.
 .Bl -tag -width XXXX
-.It Dv q = mq.open(name, oflags[, mode[, attr]])
-Open a message queue with the given
-.Pq name
-and
-.Pq oflags .
-.It Dv for mod in kldstat.modstat(kld.id) do ... end
-Iterate status of all mods in a kld file given by
-.Pq kld.id .
-.Pp
-The
-.Pq kld
-and
-.Pq mod
-returned match the status structs described in
-.Xr kldstat 2
-and
-.Xr modstat 2 ,
-respectively, without the
-.Pq version
-fields.
+.It Dv kq = kqueue.kqueue()
+Create a new kernel event queue and return a descriptor.
+This is implemented as kqueuex(KQUEUE_CLOEXEC) so the returned
+file descriptor is automatically closed on execve(2).
+.It Dv event = kq:kevent([changelist])
+Apply an optional
+.Pq changelist
+to the queue and wait for an event to return.
+.It Dv kq:close()
+Close the kernel event queue descriptor.
 .Sh EXAMPLES
-Describe all kld files and modules as JSON:
+Wait for stdin to be readable using kqueue:
 .Bd -literal -offset indent
-local kldstat = require('kldstat')
+require('fileno')
+local kqueue = require('kqueue')
 local ucl = require('ucl')
 
-local klds = {}
-for kld in kldstat.kldstat() do
-    kld.mods = {}
-    for mod in kldstat.modstat(kld.id) do
-        table.insert(kld.mods, mod)
-    end
-    table.insert(klds, kld)
-end
-print(ucl.to_json(klds))
+local kq = kqueue.kqueue()
+
+local changelist = {
+	{
+		ident = io.stdin:fileno(),
+		filter = kqueue.EVFILT_READ,
+		flags = kqueue.EV_ADD,
+		fflags = 0,
+		data = 0,
+		udata = coroutine.create(function (event) repeat
+			print("stdin is readable: ", ucl.to_json(event))
+			local len = event.data
+			local data = io.stdin:read(len)
+			io.stdout:write(data)
+			event = coroutine.yield()
+		until false end)
+	}
+}
+
+local event = kq:kevent(changelist)
+repeat
+	coroutine.resume(event.udata, event)
+	event = kq:kevent()
+until false
+
+kq:close()
 .Ed
 .Sh SEE ALSO
-.Xr kldstat 2 ,
-.Xr modstat 2
+.Xr fileno 3lua,
+.Xr kqueue 2
 .Sh AUTHORS
 .An Ryan Moeller
