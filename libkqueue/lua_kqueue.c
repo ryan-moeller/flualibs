@@ -344,7 +344,7 @@ luaopen_kqueue(lua_State *L)
 	lua_pushinteger(L, NOTE_TRIGGER);
 	lua_settable(L, -3);
 
-	lua_pushstring(L, "NOTE_LOAWT");
+	lua_pushstring(L, "NOTE_LOWAT");
 	lua_pushinteger(L, NOTE_LOWAT);
 	lua_settable(L, -3);
 
