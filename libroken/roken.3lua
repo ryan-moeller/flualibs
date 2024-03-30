@@ -24,90 +24,46 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.Dd January 15, 2024
-.Dt MQ 3lua
+.Dd March 30, 2024
+.Dt ROKEN 3lua
 .Os
 .Sh NAME
-.Nm open ,
-.Nm unlink ,
-.Nm :close ,
-.Nm :getattr ,
-.Nm :setattr ,
-.Nm :send ,
-.Nm :receive ,
-.Nm O_RDONLY ,
-.Nm O_WRONLY ,
-.Nm O_RDWR ,
-.Nm O_CREAT ,
-.Nm O_EXCL ,
-.Nm O_NONBLOCK
-.Nd Lua bindings for
-.Xr mq_open 2 ,
-.Xr mq_unlink 2 ,
-.Xr mq_close 2 ,
-.Xr mq_getattr 2 ,
-.Xr mq_setattr 2 ,
-.Xr mq_send 2 ,
-.Xr mq_receive 2 .
+.Nm roken
+.Nd Lua bindings for base64_encode and base64_decode.
 .Sh SYNOPSIS
 .Bd -literal
-local mq = require('mq')
+base64 = require('roken')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv q = mq.open(name, oflags[, mode[, attr]])
-.It Dv attr = q:getattr()
-.It Dv q:setattr(attr)
-.It Dv q:send(msg, prio)
-.It Dv msg, prio = q:receive(attr.msgsize)
-.It Dv q:close()
-.It Dv mq.unlink(name)
+.It Dv str = base64.encode(data)
+.It Dv data = base64.decode(str)
 .El
 .Sh DESCRIPTION
 The
-.Nm mq
-module provides bindings for the
-.Xr mqueuefs 5
-system calls.
+.Nm roken
+module provides bindings for the libroken base64 encode and decode functions.
 .Bl -tag -width XXXX
-.It Dv q = mq.open(name, oflags[, mode[, attr]])
-Open a message queue with the given
-.Pq name
-and
-.Pq oflags .
-.It Dv for mod in kldstat.modstat(kld.id) do ... end
-Iterate status of all mods in a kld file given by
-.Pq kld.id .
-.Pp
-The
-.Pq kld
-and
-.Pq mod
-returned match the status structs described in
-.Xr kldstat 2
-and
-.Xr modstat 2 ,
-respectively, without the
-.Pq version
-fields.
+.It Dv str = base64.encode(data)
+Encode the given
+.Pq data
+string to a base64 string.
+.It Dv data = base64.decode(str)
+Decode the given base64-encoded string
+.Pq str
+to the original plain data string.
 .Sh EXAMPLES
-Describe all kld files and modules as JSON:
+Encode and decode a string as base64:
 .Bd -literal -offset indent
-local kldstat = require('kldstat')
-local ucl = require('ucl')
+base64 = require('roken')
 
-local klds = {}
-for kld in kldstat.kldstat() do
-    kld.mods = {}
-    for mod in kldstat.modstat(kld.id) do
-        table.insert(kld.mods, mod)
-    end
-    table.insert(klds, kld)
-end
-print(ucl.to_json(klds))
+input = "Hello, FreeBSD!"
+encoded = base64.encode(input)
+output = base64.decode(encoded)
+assert(output == input)
 .Ed
 .Sh SEE ALSO
-.Xr kldstat 2 ,
-.Xr modstat 2
+.Xr md 3lua
+.Xr xor 3lua
 .Sh AUTHORS
 .An Ryan Moeller
