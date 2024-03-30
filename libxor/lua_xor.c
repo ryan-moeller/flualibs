@@ -38,16 +38,16 @@
 int luaopen_xor(lua_State *);
 
 static int
-l_xor_unmask(lua_State *L)
+l_xor_apply(lua_State *L)
 {
 	const int keylen = 4;
 	unsigned char key[keylen];
-	const char *payload;
+	const char *input;
 	size_t len;
-	char *str;
+	char *output;
 
-	payload = luaL_checklstring(L, 1, &len);
-	luaL_argcheck(L, payload != NULL, 1, "`payload' expected");
+	input = luaL_checklstring(L, 1, &len);
+	luaL_argcheck(L, input != NULL, 1, "`input' expected");
 
 	luaL_checktype(L, 2, LUA_TTABLE);
 	luaL_argcheck(L, luaL_len(L, 2) == keylen, 2, "`key' with length 4 expected");
@@ -60,24 +60,24 @@ l_xor_unmask(lua_State *L)
 	}
 	lua_pop(L, keylen);
 
-	str = (char *)malloc(len);
-	if (str == NULL) {
+	output = (char *)malloc(len);
+	if (output == NULL) {
 		luaL_error(L, "malloc failed: %s", strerror(errno));
 	}
 
 	for (size_t i = 0; i < len; ++i) {
-		str[i] = payload[i] ^ key[i % keylen];
+		output[i] = input[i] ^ key[i % keylen];
 	}
 
-	lua_pushlstring(L, str, len);
+	lua_pushlstring(L, output, len);
 
-	free(str);
+	free(output);
 	
 	return (1);
 }
 
 static const struct luaL_Reg l_xor_funcs[] = {
-	{"unmask", l_xor_unmask},
+	{"apply", l_xor_apply},
 	{NULL, NULL}
 };
 
