@@ -34,7 +34,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "luaerror.h"
+#include "../luaerror.h"
 
 #define SHA_CTX_METATABLE "SHA_CTX"
 

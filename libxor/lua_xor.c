@@ -33,7 +33,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "luaerror.h"
+#include "../luaerror.h"
 
 int luaopen_xor(lua_State *);
 

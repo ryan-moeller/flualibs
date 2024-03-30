@@ -37,7 +37,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "luaerror.h"
+#include "../luaerror.h"
 
 int luaopen_kldstat(lua_State *);
 
