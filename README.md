@@ -10,6 +10,5 @@ $ make SRCTOP=/usr/src
 TODO
 ----
 
-- write md, xor, and roken manpages
 - improve tests and samples
 - improve README
