@@ -232,221 +232,65 @@ luaopen_kqueue(lua_State *L)
 
 	luaL_setfuncs(L, l_kqueue_funcs, 0);
 
-	lua_pushstring(L, "EV_ADD");
-	lua_pushinteger(L, EV_ADD);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EV_ENABLE");
-	lua_pushinteger(L, EV_ENABLE);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EV_DISABLE");
-	lua_pushinteger(L, EV_DISABLE);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EV_DISPATCH");
-	lua_pushinteger(L, EV_DISPATCH);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EV_DELETE");
-	lua_pushinteger(L, EV_DELETE);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EV_RECEIPT");
-	lua_pushinteger(L, EV_RECEIPT);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EV_ONESHOT");
-	lua_pushinteger(L, EV_ONESHOT);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EV_CLEAR");
-	lua_pushinteger(L, EV_CLEAR);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EV_EOF");
-	lua_pushinteger(L, EV_EOF);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EV_ERROR");
-	lua_pushinteger(L, EV_ERROR);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EV_KEEPUDATA");
-	lua_pushinteger(L, EV_KEEPUDATA);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EVFILT_READ");
-	lua_pushinteger(L, EVFILT_READ);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EVFILT_WRITE");
-	lua_pushinteger(L, EVFILT_WRITE);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EVFILT_EMPTY");
-	lua_pushinteger(L, EVFILT_EMPTY);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EVFILT_AIO");
-	lua_pushinteger(L, EVFILT_AIO);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EVFILT_VNODE");
-	lua_pushinteger(L, EVFILT_VNODE);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EVFILT_PROC");
-	lua_pushinteger(L, EVFILT_PROC);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EVFILT_PROCDESC");
-	lua_pushinteger(L, EVFILT_PROCDESC);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EVFILT_SIGNAL");
-	lua_pushinteger(L, EVFILT_SIGNAL);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EVFILT_TIMER");
-	lua_pushinteger(L, EVFILT_TIMER);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EVFILT_USER");
-	lua_pushinteger(L, EVFILT_USER);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_FFNOP");
-	lua_pushinteger(L, NOTE_FFNOP);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_FFAND");
-	lua_pushinteger(L, NOTE_FFAND);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_FFOR");
-	lua_pushinteger(L, NOTE_FFOR);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_FFCOPY");
-	lua_pushinteger(L, NOTE_FFCOPY);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_FFCTRLMASK");
-	lua_pushinteger(L, NOTE_FFCTRLMASK);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_FFLAGSMASK");
-	lua_pushinteger(L, NOTE_FFLAGSMASK);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_TRIGGER");
-	lua_pushinteger(L, NOTE_TRIGGER);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_LOWAT");
-	lua_pushinteger(L, NOTE_LOWAT);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_FILE_POLL");
-	lua_pushinteger(L, NOTE_FILE_POLL);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_DELETE");
-	lua_pushinteger(L, NOTE_DELETE);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_WRITE");
-	lua_pushinteger(L, NOTE_WRITE);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_EXTEND");
-	lua_pushinteger(L, NOTE_EXTEND);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_ATTRIB");
-	lua_pushinteger(L, NOTE_ATTRIB);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_LINK");
-	lua_pushinteger(L, NOTE_LINK);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_RENAME");
-	lua_pushinteger(L, NOTE_RENAME);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_REVOKE");
-	lua_pushinteger(L, NOTE_REVOKE);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_OPEN");
-	lua_pushinteger(L, NOTE_OPEN);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_CLOSE");
-	lua_pushinteger(L, NOTE_CLOSE);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_CLOSE_WRITE");
-	lua_pushinteger(L, NOTE_CLOSE_WRITE);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_READ");
-	lua_pushinteger(L, NOTE_READ);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_EXIT");
-	lua_pushinteger(L, NOTE_EXIT);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_FORK");
-	lua_pushinteger(L, NOTE_FORK);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_EXEC");
-	lua_pushinteger(L, NOTE_EXEC);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_PCTRLMASK");
-	lua_pushinteger(L, NOTE_PCTRLMASK);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_PDATAMASK");
-	lua_pushinteger(L, NOTE_PDATAMASK);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_TRACK");
-	lua_pushinteger(L, NOTE_TRACK);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_TRACKERR");
-	lua_pushinteger(L, NOTE_TRACKERR);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_CHILD");
-	lua_pushinteger(L, NOTE_CHILD);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_SECONDS");
-	lua_pushinteger(L, NOTE_SECONDS);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_MSECONDS");
-	lua_pushinteger(L, NOTE_MSECONDS);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_USECONDS");
-	lua_pushinteger(L, NOTE_USECONDS);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_NSECONDS");
-	lua_pushinteger(L, NOTE_NSECONDS);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "NOTE_ABSTIME");
-	lua_pushinteger(L, NOTE_ABSTIME);
-	lua_settable(L, -3);
-
+#define SETCONST(ident) ({ \
+	lua_pushstring(L, #ident); \
+	lua_pushinteger(L, ident); \
+	lua_settable(L, -3); \
+})
+	SETCONST(EV_ADD);
+	SETCONST(EV_ENABLE);
+	SETCONST(EV_DISABLE);
+	SETCONST(EV_DISPATCH);
+	SETCONST(EV_DELETE);
+	SETCONST(EV_RECEIPT);
+	SETCONST(EV_ONESHOT);
+	SETCONST(EV_CLEAR);
+	SETCONST(EV_EOF);
+	SETCONST(EV_ERROR);
+	SETCONST(EV_KEEPUDATA);
+	SETCONST(EVFILT_READ);
+	SETCONST(EVFILT_WRITE);
+	SETCONST(EVFILT_EMPTY);
+	SETCONST(EVFILT_AIO);
+	SETCONST(EVFILT_VNODE);
+	SETCONST(EVFILT_PROC);
+	SETCONST(EVFILT_PROCDESC);
+	SETCONST(EVFILT_SIGNAL);
+	SETCONST(EVFILT_TIMER);
+	SETCONST(EVFILT_USER);
+	SETCONST(NOTE_FFNOP);
+	SETCONST(NOTE_FFAND);
+	SETCONST(NOTE_FFOR);
+	SETCONST(NOTE_FFCOPY);
+	SETCONST(NOTE_FFCTRLMASK);
+	SETCONST(NOTE_FFLAGSMASK);
+	SETCONST(NOTE_TRIGGER);
+	SETCONST(NOTE_LOWAT);
+	SETCONST(NOTE_FILE_POLL);
+	SETCONST(NOTE_DELETE);
+	SETCONST(NOTE_WRITE);
+	SETCONST(NOTE_EXTEND);
+	SETCONST(NOTE_ATTRIB);
+	SETCONST(NOTE_LINK);
+	SETCONST(NOTE_RENAME);
+	SETCONST(NOTE_REVOKE);
+	SETCONST(NOTE_OPEN);
+	SETCONST(NOTE_CLOSE);
+	SETCONST(NOTE_CLOSE_WRITE);
+	SETCONST(NOTE_READ);
+	SETCONST(NOTE_EXIT);
+	SETCONST(NOTE_FORK);
+	SETCONST(NOTE_EXEC);
+	SETCONST(NOTE_PCTRLMASK);
+	SETCONST(NOTE_PDATAMASK);
+	SETCONST(NOTE_TRACK);
+	SETCONST(NOTE_TRACKERR);
+	SETCONST(NOTE_CHILD);
+	SETCONST(NOTE_SECONDS);
+	SETCONST(NOTE_MSECONDS);
+	SETCONST(NOTE_USECONDS);
+	SETCONST(NOTE_NSECONDS);
+	SETCONST(NOTE_ABSTIME);
+#undef SETCONST
 	return (1);
 }
