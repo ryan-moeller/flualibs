@@ -297,29 +297,17 @@ luaopen_mq(lua_State *L)
 
 	luaL_setfuncs(L, l_mq_funcs, 0);
 
-	lua_pushstring(L, "O_RDONLY");
-	lua_pushnumber(L, O_RDONLY);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "O_WRONLY");
-	lua_pushnumber(L, O_WRONLY);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "O_RDWR");
-	lua_pushnumber(L, O_RDWR);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "O_CREAT");
-	lua_pushnumber(L, O_CREAT);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "O_EXCL");
-	lua_pushnumber(L, O_EXCL);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "O_NONBLOCK");
-	lua_pushnumber(L, O_NONBLOCK);
-	lua_settable(L, -3);
-
+#define SETCONST(ident) ({ \
+	lua_pushstring(L, #ident); \
+	lua_pushnumber(L, ident); \
+	lua_settable(L, -3); \
+})
+	SETCONST(O_RDONLY);
+	SETCONST(O_WRONLY);
+	SETCONST(O_RDWR);
+	SETCONST(O_CREAT);
+	SETCONST(O_EXCL);
+	SETCONST(O_NONBLOCK);
+#undef SETCONST
 	return (1);
 }
