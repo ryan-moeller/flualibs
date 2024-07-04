@@ -78,6 +78,7 @@ l_base64_decode(lua_State *L)
 	data = malloc(len);
 	res = base64_decode(str, data);
 	if (res == -1) {
+		free(data);
 		luaL_error(L, "base64_decode failed");
 	}
 	lua_pushlstring(L, data, len);
