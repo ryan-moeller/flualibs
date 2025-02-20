@@ -153,9 +153,6 @@ static const struct luaL_Reg l_kldstat_funcs[] = {
 int
 luaopen_kldstat(lua_State *L)
 {
-	lua_newtable(L);
-
-	luaL_setfuncs(L, l_kldstat_funcs, 0);
-
+	luaL_newlib(L, l_kldstat_funcs);
 	return (1);
 }
