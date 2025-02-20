@@ -203,7 +203,7 @@ l_mq_receive(lua_State *L)
 		luaL_error(L, "failed to receive on mq: %s", strerror(errno));
 	}
 	lua_pushlstring(L, buf, len);
-	lua_pushnumber(L, prio);
+	lua_pushinteger(L, prio);
 	return (2);
 }
 
