@@ -96,9 +96,6 @@ static const struct luaL_Reg l_roken_funcs[] = {
 int
 luaopen_roken(lua_State *L)
 {
-	lua_newtable(L);
-
-	luaL_setfuncs(L, l_roken_funcs, 0);
-
+	luaL_newlib(L, l_roken_funcs);
 	return (1);
 }
