@@ -72,15 +72,15 @@ module provides bindings for File Transfer Library
 .Pq libfetch
 function calls.
 .Bl -tag -width XXXX
-.It Dv f = fetch.get(URL[, flags])
+.It Dv f, errmsg, errcode = fetch.get(URL[, flags])
 Wraps fetchGetURL.
-.It Dv f = fetch.put(URL[, flags])
+.It Dv f, errmsg, errcode = fetch.put(URL[, flags])
 Wraps fetchPutURL.
-.It Dv f, stat = fetch.xget(URL[, flags])
+.It Dv f, stat_or_errmsg, errcode = fetch.xget(URL[, flags])
 Wraps fetchXGetURL.
-.It Dv stat = fetch.stat(URL[, flags])
+.It Dv stat, errmsg, errcode = fetch.stat(URL[, flags])
 Wraps fetchStatURL.
-.It Dv ents = fetch.list(URL[, flags])
+.It Dv ents, errmsg, errcode = fetch.list(URL[, flags])
 Wraps fetchListURL.
 .Sh EXAMPLES
 Get the contents of a URL:
