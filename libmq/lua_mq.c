@@ -50,8 +50,7 @@ l_mq_open(lua_State *L)
 	mqd_t mq, *mqp;
 
 	mqp = (mqd_t *)lua_newuserdata(L, sizeof (mq));
-	luaL_getmetatable(L, MQ_METATABLE);
-	lua_setmetatable(L, -2);
+	luaL_setmetatable(L, MQ_METATABLE);
 	*mqp = (mqd_t)-1;
 
 	name = luaL_checkstring(L, 1);
@@ -131,18 +130,14 @@ l_mq_getattr(lua_State *L)
 	}
 
 	lua_newtable(L);
-	lua_pushstring(L, "flags");
-	lua_pushnumber(L, attr.mq_flags);
-	lua_settable(L, -3);
-	lua_pushstring(L, "maxmsg");
-	lua_pushnumber(L, attr.mq_maxmsg);
-	lua_settable(L, -3);
-	lua_pushstring(L, "msgsize");
-	lua_pushnumber(L, attr.mq_msgsize);
-	lua_settable(L, -3);
-	lua_pushstring(L, "curmsgs");
-	lua_pushnumber(L, attr.mq_curmsgs);
-	lua_settable(L, -3);
+	lua_pushinteger(L, attr.mq_flags);
+	lua_setfield(L, -2, "flags");
+	lua_pushinteger(L, attr.mq_maxmsg);
+	lua_setfield(L, -2, "maxmsg");
+	lua_pushinteger(L, attr.mq_msgsize);
+	lua_setfield(L, -2, "msgsize");
+	lua_pushinteger(L, attr.mq_curmsgs);
+	lua_setfield(L, -2, "curmsgs");
 	return (1);
 }
 
@@ -281,26 +276,21 @@ static const struct luaL_Reg l_mq_meta[] = {
 int
 luaopen_mq(lua_State *L)
 {
-	lua_newtable(L);
-
 	luaL_newmetatable(L, MQ_METATABLE);
 
-	lua_pushstring(L, "__index");
-	lua_pushvalue(L, -2);
-	lua_settable(L, -3);
+	lua_pushvalue(L, -1);
+	lua_setfield(L, -2, "__index");
 
-	lua_pushstring(L, "__gc");
 	lua_pushcfunction(L, l_mq_gc);
-	lua_settable(L, -3);
+	lua_setfield(L, -2, "__gc");
 
 	luaL_setfuncs(L, l_mq_meta, 0);
 
-	luaL_setfuncs(L, l_mq_funcs, 0);
+	luaL_newlib(L, l_mq_funcs);
 
 #define SETCONST(ident) ({ \
-	lua_pushstring(L, #ident); \
-	lua_pushnumber(L, ident); \
-	lua_settable(L, -3); \
+	lua_pushinteger(L, ident); \
+	lua_setfield(L, -2, #ident); \
 })
 	SETCONST(O_RDONLY);
 	SETCONST(O_WRONLY);
