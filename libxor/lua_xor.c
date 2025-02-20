@@ -84,9 +84,6 @@ static const struct luaL_Reg l_xor_funcs[] = {
 int
 luaopen_xor(lua_State *L)
 {
-	lua_newtable(L);
-
-	luaL_setfuncs(L, l_xor_funcs, 0);
-
+	luaL_newlib(L, l_xor_funcs);
 	return (1);
 }
