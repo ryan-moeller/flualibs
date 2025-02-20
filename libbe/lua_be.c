@@ -60,8 +60,7 @@ l_be_init(lua_State *L)
 		luaL_error(L, "libbe_init");
 	}
 	hdlp = (libbe_handle_t **)lua_newuserdata(L, sizeof *hdlp);
-	luaL_getmetatable(L, LIBBE_METATABLE);
-	lua_setmetatable(L, -2);
+	luaL_setmetatable(L, LIBBE_METATABLE);
 	*hdlp = hdl;
 	return (1);
 }
@@ -942,26 +941,21 @@ static const struct luaL_Reg l_be_meta[] = {
 int
 luaopen_be(lua_State *L)
 {
-	lua_newtable(L);
-
 	luaL_newmetatable(L, LIBBE_METATABLE);
 
-	lua_pushstring(L, "__index");
-	lua_pushvalue(L, -2);
-	lua_settable(L, -3);
+	lua_pushvalue(L, -1);
+	lua_setfield(L, -2, "__index");
 
-	lua_pushstring(L, "__gc");
 	lua_pushcfunction(L, l_be_close);
-	lua_settable(L, -3);
+	lua_setfield(L, -2, "__gc");
 
 	luaL_setfuncs(L, l_be_meta, 0);
 
-	luaL_setfuncs(L, l_be_funcs, 0);
+	luaL_newlib(L, l_be_funcs);
 
 #define SETCONST(ident) ({ \
-	lua_pushstring(L, #ident); \
-	lua_pushnumber(L, BE_ ## ident); \
-	lua_settable(L, -3); \
+	lua_pushinteger(L, BE_ ## ident); \
+	lua_setfield(L, -2, #ident); \
 })
 	SETCONST(MAXPATHLEN);
 	SETCONST(ERR_SUCCESS);
