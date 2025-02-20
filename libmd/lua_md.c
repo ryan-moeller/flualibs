@@ -118,17 +118,14 @@ static const struct luaL_Reg l_sha_ctx_meta[] = {
 int
 luaopen_md(lua_State *L)
 {
-	lua_newtable(L);
-
 	luaL_newmetatable(L, SHA_CTX_METATABLE);
 
-	lua_pushstring(L, "__index");
-	lua_pushvalue(L, -2);
-	lua_settable(L, -3);
+	lua_pushvalue(L, -1);
+	lua_setfield(L, -2, "__index");
 
 	luaL_setfuncs(L, l_sha_ctx_meta, 0);
 
-	luaL_setfuncs(L, l_md_funcs, 0);
+	luaL_newlib(L, l_md_funcs);
 
 	return (1);
 }
