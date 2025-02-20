@@ -48,8 +48,7 @@ l_kqueue(lua_State *L)
 	int kq, *kqp;
 
 	kqp = (int *)lua_newuserdata(L, sizeof (int));
-	luaL_getmetatable(L, KQUEUE_METATABLE);
-	lua_setmetatable(L, -2);
+	luaL_setmetatable(L, KQUEUE_METATABLE);
 	*kqp = -1;
 
 	kq = kqueuex(KQUEUE_CLOEXEC);
@@ -216,26 +215,21 @@ static const struct  luaL_Reg l_kqueue_meta[] = {
 int
 luaopen_kqueue(lua_State *L)
 {
-	lua_newtable(L);
-
 	luaL_newmetatable(L, KQUEUE_METATABLE);
 
-	lua_pushstring(L, "__index");
-	lua_pushvalue(L, -2);
-	lua_settable(L, -3);
+	lua_pushvalue(L, -1);
+	lua_setfield(L, -2, "__index");
 
-	lua_pushstring(L, "__gc");
 	lua_pushcfunction(L, l_gc);
-	lua_settable(L, -3);
+	lua_setfield(L, -2, "__gc");
 
 	luaL_setfuncs(L, l_kqueue_meta, 0);
 
-	luaL_setfuncs(L, l_kqueue_funcs, 0);
+	luaL_newlib(L, l_kqueue_funcs);
 
 #define SETCONST(ident) ({ \
-	lua_pushstring(L, #ident); \
 	lua_pushinteger(L, ident); \
-	lua_settable(L, -3); \
+	lua_setfield(L, -2, #ident); \
 })
 	SETCONST(EV_ADD);
 	SETCONST(EV_ENABLE);
