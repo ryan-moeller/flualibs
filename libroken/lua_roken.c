@@ -46,7 +46,6 @@ l_base64_encode(lua_State *L)
 	int res;
 
 	data = luaL_checklstring(L, 1, &len);
-	luaL_argcheck(L, data != NULL, 1, "`data' expected");
 
 	res = base64_encode(data, len, &str);
 	if (res == -1) {
@@ -70,7 +69,6 @@ l_base64_decode(lua_State *L)
 	int res;
 
 	str = luaL_checklstring(L, 1, &len);
-	luaL_argcheck(L, str != NULL, 1, "`str' expected");
 
 	/* each char represents 6 bits, so the data is 3/4 * len bytes long */
 	len = 3 * len / 4;

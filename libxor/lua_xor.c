@@ -47,7 +47,6 @@ l_xor_apply(lua_State *L)
 	char *output;
 
 	input = luaL_checklstring(L, 1, &len);
-	luaL_argcheck(L, input != NULL, 1, "`input' expected");
 
 	luaL_checktype(L, 2, LUA_TTABLE);
 	luaL_argcheck(L, luaL_len(L, 2) == keylen, 2, "`key' with length 4 expected");

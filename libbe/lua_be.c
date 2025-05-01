@@ -86,7 +86,6 @@ l_be_active_name(lua_State *L)
 	const char *name;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 
 	name = be_active_name(*hdlp);
 	lua_pushstring(L, name);
@@ -100,7 +99,6 @@ l_be_active_path(lua_State *L)
 	const char *path;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 
 	path = be_active_path(*hdlp);
 	lua_pushstring(L, path);
@@ -114,7 +112,6 @@ l_be_nextboot_name(lua_State *L)
 	const char *name;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 
 	name = be_nextboot_name(*hdlp);
 	lua_pushstring(L, name);
@@ -128,7 +125,6 @@ l_be_nextboot_path(lua_State *L)
 	const char *path;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 
 	path = be_nextboot_path(*hdlp);
 	lua_pushstring(L, path);
@@ -142,7 +138,6 @@ l_be_root_path(lua_State *L)
 	const char *path;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 
 	path = be_root_path(*hdlp);
 	lua_pushstring(L, path);
@@ -413,7 +408,6 @@ l_be_get_bootenv_props(lua_State *L)
 	nvlist_t *props;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 
 	if (be_prop_list_alloc(&props) != 0) {
 		luaL_error(L, "be_prop_list_alloc");
@@ -435,7 +429,6 @@ l_be_get_dataset_props(lua_State *L)
 	nvlist_t *props;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 
 	if (be_prop_list_alloc(&props) != 0) {
@@ -458,7 +451,6 @@ l_be_get_dataset_snapshots(lua_State *L)
 	nvlist_t *snaps;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 
 	if (be_prop_list_alloc(&snaps) != 0) {
@@ -481,7 +473,6 @@ l_be_activate(lua_State *L)
 	bool temp;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 	temp = lua_toboolean(L, 3);
 
@@ -500,7 +491,6 @@ l_be_deactivate(lua_State *L)
 	bool temp;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 	temp = lua_toboolean(L, 3);
 
@@ -519,7 +509,6 @@ l_be_is_auto_snapshot_name(lua_State *L)
 	bool isauto;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 
 	isauto = be_is_auto_snapshot_name(*hdlp, name);
@@ -534,7 +523,6 @@ l_be_create(lua_State *L)
 	const char *name;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 
 	if (be_create(*hdlp, name) != 0) {
@@ -552,7 +540,6 @@ l_be_create_depth(lua_State *L)
 	int depth;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 	snap = luaL_checkstring(L, 3);
 	depth = luaL_checkinteger(L, 4);
@@ -571,7 +558,6 @@ l_be_create_from_existing(lua_State *L)
 	const char *name, *existing;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 	existing = luaL_checkstring(L, 3);
 
@@ -589,7 +575,6 @@ l_be_create_from_existing_snap(lua_State *L)
 	const char *name, *snap;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 	snap = luaL_checkstring(L, 3);
 
@@ -609,7 +594,6 @@ l_be_snapshot(lua_State *L)
 	bool recursive;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	source = luaL_checkstring(L, 2);
 	snap = lua_tostring(L, 3);
 	recursive = lua_toboolean(L, 4);
@@ -629,7 +613,6 @@ l_be_rename(lua_State *L)
 	const char *oldname, *newname;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	oldname = luaL_checkstring(L, 2);
 	newname = luaL_checkstring(L, 3);
 
@@ -648,7 +631,6 @@ l_be_destroy(lua_State *L)
 	int options;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 	options = luaL_checkinteger(L, 3);
 
@@ -668,7 +650,6 @@ l_be_mount(lua_State *L)
 	int options;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 	mountpoint = lua_tostring(L, 3);
 	options = luaL_checkinteger(L, 4);
@@ -689,7 +670,6 @@ l_be_unmount(lua_State *L)
 	int options;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 	options = luaL_checkinteger(L, 3);
 
@@ -710,7 +690,6 @@ l_be_mounted_at(lua_State *L)
 	int err;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	path = luaL_checkstring(L, 2);
 	get_details = lua_toboolean(L, 3);
 
@@ -743,7 +722,6 @@ l_be_errno(lua_State *L)
 	libbe_handle_t **hdlp;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 
 	lua_pushinteger(L, libbe_errno(*hdlp));
 	return (1);
@@ -755,7 +733,6 @@ l_be_error_description(lua_State *L)
 	libbe_handle_t **hdlp;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 
 	lua_pushstring(L, libbe_error_description(*hdlp));
 	return (1);
@@ -768,7 +745,6 @@ l_be_print_on_error(lua_State *L)
 	bool value;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	value = lua_toboolean(L, 2);
 
 	libbe_print_on_error(*hdlp, value);
@@ -783,7 +759,6 @@ l_be_root_concat(lua_State *L)
 	const char *name;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 
 	if (be_root_concat(*hdlp, name, result) != 0) {
@@ -802,7 +777,6 @@ l_be_validate_name(lua_State *L)
 	int err;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 
 	err = be_validate_name(*hdlp, name);
@@ -818,7 +792,6 @@ l_be_validate_snap(lua_State *L)
 	int err;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	snap = luaL_checkstring(L, 2);
 
 	err = be_validate_snap(*hdlp, snap);
@@ -834,7 +807,6 @@ l_be_exists(lua_State *L)
 	int err;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 
 	err = be_exists(*hdlp, name);
@@ -854,7 +826,6 @@ l_be_export(lua_State *L)
 	int fd;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 	fd = luaL_checkinteger(L, 3);
 
@@ -873,7 +844,6 @@ l_be_import(lua_State *L)
 	int fd;
 
 	hdlp = (libbe_handle_t **)luaL_checkudata(L, 1, LIBBE_METATABLE);
-	luaL_argcheck(L, hdlp != NULL, 1, "`handle' expected");
 	name = luaL_checkstring(L, 2);
 	fd = luaL_checkinteger(L, 3);
 

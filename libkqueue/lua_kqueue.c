@@ -68,7 +68,6 @@ l_kevent(lua_State *L)
 	int nchanges, ret;
 
 	kqp = (int *)luaL_checkudata(L, 1, KQUEUE_METATABLE);
-	luaL_argcheck(L, kqp != NULL, 1, "`kq' expected");
 	kq = *kqp;
 
 	if (lua_gettop(L) == 1) {
@@ -174,7 +173,6 @@ l_close(struct lua_State *L)
 	int kq, *kqp;
 
 	kqp = (int *)luaL_checkudata(L, 1, KQUEUE_METATABLE);
-	luaL_argcheck(L, kqp != NULL, 1, "`kq' expected");
 	kq = *kqp;
 	luaL_argcheck(L, kq != -1, 1, "`kq' already closed");
 	close(kq);

@@ -93,7 +93,6 @@ l_mq_close(lua_State *L)
 	mqd_t mq, *mqp;
 
 	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
-	luaL_argcheck(L, mqp != NULL, 1, "`mqdes' expected");
 	mq = *mqp;
 	*mqp = (mqd_t)-1;
 	if (mq_close(mq) == -1) {
@@ -122,7 +121,6 @@ l_mq_getattr(lua_State *L)
 	struct mq_attr attr;
 
 	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
-	luaL_argcheck(L, mqp != NULL, 1, "`mqdes' expected");
 	mq = *mqp;
 
 	if (mq_getattr(mq, &attr) == -1) {
@@ -148,7 +146,6 @@ l_mq_setattr(lua_State *L)
 	struct mq_attr attr;
 
 	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
-	luaL_argcheck(L, mqp != NULL, 1, "`mqdes' expected");
 	mq = *mqp;
 	attr.mq_flags = luaL_checkinteger(L, 2);
 
@@ -167,7 +164,6 @@ l_mq_send(lua_State *L)
 	unsigned prio;
 
 	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
-	luaL_argcheck(L, mqp != NULL, 1, "`mqdes' expected");
 	mq = *mqp;
 	msg = luaL_checklstring(L, 2, &len);
 	prio = luaL_checkinteger(L, 3);
@@ -188,7 +184,6 @@ l_mq_receive(lua_State *L)
 	unsigned prio;
 
 	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
-	luaL_argcheck(L, mqp != NULL, 1, "`mqdes' expected");
 	mq = *mqp;
 	buflen = luaL_checkinteger(L, 2);
 	buf = malloc(buflen);
@@ -226,7 +221,6 @@ l_mq_getfd_np(lua_State *L)
 	int fd;
 
 	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
-	luaL_argcheck(L, mqp != NULL, 1, "`mqdes' expected");
 	mq = *mqp;
 	fd = mq_getfd_np(mq);
 	lua_pushinteger(L, fd);

@@ -61,10 +61,8 @@ l_sha1_update(lua_State *L)
 	size_t len;
 
 	ctx = (SHA_CTX *)luaL_checkudata(L, 1, SHA_CTX_METATABLE);
-	luaL_argcheck(L, ctx != NULL, 1, "`ctx' expected");
 
 	data = (const unsigned char *)luaL_checklstring(L, 2, &len);
-	luaL_argcheck(L, data != NULL, 2, "`data' expected");
 
 	SHA1_Update(ctx, data, len);
 
@@ -78,7 +76,6 @@ l_sha1_final(lua_State *L)
 	SHA_CTX *ctx;
 
 	ctx = (SHA_CTX *)luaL_checkudata(L, 1, SHA_CTX_METATABLE);
-	luaL_argcheck(L, ctx != NULL, 1, "`ctx' expected");
 
 	SHA1_Final(digest, ctx);
 
@@ -94,7 +91,6 @@ l_sha1_end(lua_State *L)
 	SHA_CTX *ctx;
 
 	ctx = (SHA_CTX *)luaL_checkudata(L, 1, SHA_CTX_METATABLE);
-	luaL_argcheck(L, ctx != NULL, 1, "`ctx' expected");
 
 	res = SHA1_End(ctx, buf);
 
