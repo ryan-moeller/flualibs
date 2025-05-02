@@ -4,6 +4,7 @@ SRCTOP?= /usr/src
 SUBDIR= \
 	fileno \
 	libbe \
+	libbsddialog \
 	libfetch \
 	libkldstat \
 	libkqueue \

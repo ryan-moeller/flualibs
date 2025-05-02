@@ -1,0 +1,421 @@
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.\" Copyright (c) 2025, Ryan Moeller <ryan-moeller@att.net>
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.Dd May 2, 2025
+.Dt BSDDIALOG 3lua
+.Os
+.Sh NAME
+.Nm init ,
+.Nm init_notheme ,
+.Nm inmode ,
+.Nm clear ,
+.Nm refresh ,
+.Nm _end ,
+.Nm initconf ,
+.Nm backtitle ,
+.Nm calendar ,
+.Nm checklist ,
+.Nm datebox ,
+.Nm form ,
+.Nm gauge ,
+.Nm infobox ,
+.Nm menu ,
+.Nm mixedgauge ,
+.Nm mixedlist ,
+.Nm msgbox ,
+.Nm pause ,
+.Nm radiolist ,
+.Nm rangebox ,
+.Nm textbox ,
+.Nm timebox ,
+.Nm yesno ,
+.Nm color ,
+.Nm color_attrs ,
+.Nm hascolors ,
+.Nm set_default_theme ,
+.Nm get_theme ,
+.Nm set_theme ,
+.Nm ERROR ,
+.Nm OK ,
+.Nm YES ,
+.Nm CANCEL ,
+.Nm NO ,
+.Nm HELP ,
+.Nm EXTRA ,
+.Nm TIMEOUT ,
+.Nm ESC ,
+.Nm LEFT1 ,
+.Nm LEFT2 ,
+.Nm LEFT3 ,
+.Nm RIGHT1 ,
+.Nm RIGHT2 ,
+.Nm RIGHT3 ,
+.Nm FULLSCREEN ,
+.Nm AUTOSIZE ,
+.Nm CENTER ,
+.Nm MG_SUCCEEDED ,
+.Nm MG_FAILED ,
+.Nm MG_PASSED ,
+.Nm MG_COMPLETED ,
+.Nm MG_CHECKED ,
+.Nm MG_DONE ,
+.Nm MG_SKIPPED ,
+.Nm MG_INPROGRESS ,
+.Nm MG_BLANK ,
+.Nm MG_NA ,
+.Nm MG_PENDING ,
+.Nm FIELDHIDDEN ,
+.Nm FIELDREADONLY ,
+.Nm FIELDNOCOLOR ,
+.Nm FIELDCURSOREND ,
+.Nm FIELDEXTEND ,
+.Nm FIELDSINGLEBYTE ,
+.Nm CHECKLIST ,
+.Nm RADIOLIST ,
+.Nm SEPARATOR
+.Pp
+.Nd Lua bindings for
+.Xr bsddialog 3 .
+.Sh SYNOPSIS
+.Bd -literal
+bsddialog = require('bsddialog')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv bsddialog.init()
+.It Dv bsddialog.init_notheme()
+.It Dv inmode = bsddialog.inmode()
+.It Dv bsddialog.clear(y)
+.It Dv bsddialog.refresh()
+.It Dv bsddialog._end()
+.It Dv conf = bsddialog.initconf()
+.It Dv bsddialog.backtitle(conf, backtitle)
+.It Dv rv, y, m, d = bsddialog.calendar(conf, text, rows, cols, y, m, d)
+.It Dv rv, i = bsddialog.checklist(conf, text, rows, cols, menurows, items, i)
+.It Dv rv, y, m, d = bsddialog.datebox(conf, text, rows, cols, y, m, d)
+.It Dv rv, items, i = bsddialog.form(conf, text, rows, cols, formrows, items, i)
+.It Dv rv = bsddialog.gauge(conf, text, rows, cols, perc[, f, sep, end])
+.It Dv rv = bsddialog.infobox(conf, text, rows, cols)
+.It Dv rv, i = bsddialog.menu(conf, text, rows, cols, menurows, items, i)
+.It Dv rv = bsddialog.mixedgauge(conf, text, rows, cols, mainperc, minibars)
+.It Dv rv, l, i = bsddialog.mixedlist(conf, text, rows, cols, menurows, groups, l, i)
+.It Dv rv = bsddialog.msgbox(conf, text, rows, cols)
+.It Dv rv, seconds = bsddialog.pause(conf, text, rows, cols, seconds)
+.It Dv rv, i = bsddialog.radiolist(conf, text, rows, cols, menurows, items, i)
+.It Dv rv, value = bsddialog.rangebox(conf, text, rows, cols, min, max, value)
+.It Dv rv = bsddialog.textbox(conf, file, rows, cols)
+.It Dv rv, h, m, s = bsddialog.timebox(conf, text, rows, cols, h, m, s)
+.It Dv rv = bsddialog.yesno(conf, text, rows, cols)
+.It Dv color = bsddialog.color(foreground, background, flags)
+.It Dv foreground, background, flags = bsddialog.color_attrs(color)
+.It Dv hascolors = bsddialog.hascolors()
+.It Dv bsddialog.set_default_theme(theme)
+.It Dv theme = bsddialog.get_theme()
+.It Dv bsddialog.set_theme(theme)
+.El
+.Sh DESCRIPTION
+The
+.Nm bsddialog
+module provides bindings for
+.Xr bsddialog 3
+functions and constants.
+See the C library documentation for details about its functionality.
+.Bl -tag -width XXXX
+.It Dv bsddialog.init()
+Initialize the
+.Xr bsddialog 3
+library.
+.It Dv bsddialog.init_notheme()
+Initialize the
+.Xr bsddialog 3
+library without setting a default theme.
+.It Dv inmode = bsddialog.inmode()
+Check if
+.Nm init
+or
+.Nm init_notheme
+has been called and
+.Nm _end
+has not.
+.It Dv bsddialog.clear(y)
+Clear the screen from
+.Fa y .
+.It Dv bsddialog.refresh()
+Refresh the screen after a terminal mode change.
+.It Dv bsddialog._end()
+Restore the screen to the state before
+.Nm init
+or
+.Nm init_notheme
+was called.
+The name is
+.Nm _end
+because
+.Nm end
+is a keyword in Lua.
+.It Dv conf = bsddialog.initconf()
+Initialize a
+.Nm struct bsddialog_conf *
+userdata value.
+The struct fields may be accessed as if the value is a table, for example:
+.Bd -literal -offset indent
+conf.title = "example"
+if conf.text.escape then
+	text = [[\\ZuUNDERLINED\\ZU]]
+else
+	text = "not underlined"
+end
+.Ed
+.Pp
+The following fields are not currently exposed:
+.Bl -tag -width XXXX -offset indent -compact
+.It Dv get_height
+.It Dv get_width
+.It Dv form.securembch
+.It Dv form.value_wchar
+.El
+.It Dv bsddialog.backtitle(conf, backtitle)
+Print
+.Fa backtitle
+on the top of the screen.
+.It Dv rv, y, m, d = bsddialog.calendar(conf, text, rows, cols, y, m, d)
+Build a dialog to select a date with
+.Fa y ,
+.Fa m ,
+.Fa d
+as the default year, month, and day.
+.It Dv rv, i = bsddialog.checklist(conf, text, rows, cols, menurows, items, i)
+Build a dialog to select an item from a list.
+.Fa items
+is a table of menuitems with the form:
+.Bd -literal -offset indent
+{
+	{
+		prefix = <string>,
+		on = <bool>,
+		depth = <integer>,
+		name = <string>,
+		desc = <string>,
+		bottomdesc = <string>,
+	},
+	...
+}
+.Ed
+.Pp
+.Fa i
+is the index of the selected menu item, using Lua-style 1-based indexing.
+.It Dv rv, y, m, d = bsddialog.datebox(conf, text, rows, cols, y, m, d)
+Build a dialog to select a date with
+.Fa y ,
+.Fa m ,
+.Fa d
+as the default year, month, and day.
+.It Dv rv, items, i = bsddialog.form(conf, text, rows, cols, formrows, items, i)
+Build a dialog to a list of input fields.
+.Fa items
+is a table of formitems with the form:
+.Bd -literal -offset indent
+{
+	{
+		label = <string>,
+		ylabel = <integer>,
+		xlabel = <integer>,
+
+		init = <string>,
+		yfield = <integer>,
+		xfield = <integer>,
+		fieldlen = <integer>,
+		maxvaluelen = <integer>,
+
+		flags = <integer>,
+
+		bottomdesc = <string>,
+	},
+	...
+}
+.Ed
+.Pp
+.Fa i
+is the Lua-style 1-based index of the focused form item.
+The returned
+.Fa items
+value is a table of strings corresponding to the form items:
+.Bd -literal -offset indent
+{
+	<string>,
+	...
+}
+.Ed
+.It Dv rv = bsddialog.gauge(conf, text, rows, cols, perc[, f, sep, end])
+Build a dialog with a bar to show
+.Fa perc .
+If given,
+.Fa f
+is a Lua file-object from which to read
+strings separated by
+.Fa sep
+to replace
+.Fa text
+until
+.Fa end
+is read.
+.It Dv rv = bsddialog.infobox(conf, text, rows, cols)
+Build a dialog without buttons.
+.It Dv rv, i = bsddialog.menu(conf, text, rows, cols, menurows, items, i)
+Build a dialog to select an item from a list.
+.Fa items
+is a table of menuitems with the form:
+.Bd -literal -offset indent
+{
+	{
+		prefix = <string>,
+		on = <bool>,
+		depth = <integer>,
+		name = <string>,
+		desc = <string>,
+		bottomdesc = <string>,
+	},
+	...
+}
+.Ed
+.Pp
+.Fa i
+is the index of the selected menu item, using Lua-style 1-based indexing.
+.It Dv rv = bsddialog.mixedgauge(conf, text, rows, cols, mainperc, minibars)
+Build a dialog with a main percentage bar and multiple mini bars.
+.Fa minibars
+is a table of labels and percentages for the mini bars, with the form:
+.Bd -literal -offset indent
+{
+	{
+		<string>,
+		<integer>,
+	},
+	...
+}
+.Ed
+.It Dv rv, l, i = bsddialog.mixedlist(conf, text, rows, cols, menurows, groups, l, i)
+Build a dialog with a collection of checklists, radiolists, and separators.
+.Fa groups
+is a table of menuitem groups with the form:
+.Bd -literal -offset indent
+{
+	{
+		type = <integer>,
+		items =
+		{
+			{
+				prefix = <string>,
+				on = <bool>,
+				depth = <integer>,
+				name = <string>,
+				desc = <string>,
+				bottomdesc = <string>,
+			},
+			...
+		},
+	},
+	...
+}
+.Ed
+.Pp
+.Fa l
+and
+.Fa i
+are the focused group list and menu item as a Lua-style 1-based index.
+.It Dv rv = bsddialog.msgbox(conf, text, rows, cols)
+Build a dialog with an OK button.
+.It Dv rv, seconds = bsddialog.pause(conf, text, rows, cols, seconds)
+Build a dialog waiting
+.Fa seconds
+or until a button is pressed, returning the remaining time.
+.It Dv rv, i = bsddialog.radiolist(conf, text, rows, cols, menurows, items, i)
+Build a dialog to select an item from a list.
+.Fa items
+is a table of menuitems with the form:
+.Bd -literal -offset indent
+{
+	{
+		prefix = <string>,
+		on = <bool>,
+		depth = <integer>,
+		name = <string>,
+		desc = <string>,
+		bottomdesc = <string>,
+	},
+	...
+}
+.Ed
+.Pp
+.Fa i
+is the index of the selected menu item, using Lua-style 1-based indexing.
+.It Dv rv, value = bsddialog.rangebox(conf, text, rows, cols, min, max, value)
+Build a dialog to select a value between
+.Fa min
+and
+.Fa max .
+.It Dv rv = bsddialog.textbox(conf, file, rows, cols)
+Build a dialog to open and display
+.Fa file .
+.It Dv rv, h, m, s = bsddialog.timebox(conf, text, rows, cols, h, m, s)
+Build a dialog to select a time.
+.Fa h ,
+.Fa m ,
+.Fa s
+are the default hour, minute, and second.
+.It Dv rv = bsddialog.yesno(conf, text, rows, cols)
+Build a dialog for a yes/no question.
+.It Dv color = bsddialog.color(foreground, background, flags)
+Generate a color value to set in a theme.
+.It Dv foreground, background, flags = bsddialog.color_attrs(color)
+Decode a color value from a theme.
+.It Dv hascolors = bsddialog.hascolors()
+Check whether the terminal provides colors.
+.It Dv bsddialog.set_default_theme(theme)
+Set the library default theme.
+.It Dv theme = bsddialog.get_theme()
+Get a table describing the current theme.
+.It Dv bsddialog.set_theme(theme)
+Set a new theme from a table.
+.El
+.Sh EXAMPLES
+Display a message dialog:
+.Bd -literal -offset indent
+bsddialog = require('bsddialog')
+
+bsddialog.init()
+conf = bsddialog.initconf()
+rv = bsddialog.msgbox(conf, "Example", 7, 20)
+bsddialog._end()
+if rv == bsddialog.OK then
+	print("OK!")
+end
+.Ed
+.Sh SEE ALSO
+.Xr flua 1
+.Xr bsddialog 3
+.Sh AUTHORS
+.An Ryan Moeller
