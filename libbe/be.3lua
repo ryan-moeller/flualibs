@@ -263,8 +263,9 @@ with the given name.
 Close the libbe handle.
 .It Dv strnum = be.nicenum(number)
 Format the given number in a traditional ZFS humanized format.
+.El
 .Sh EXAMPLES
-Print out boot environments:
+Print out boot environments as JSON:
 .Bd -literal -offset indent
 be = require('be')
 ucl = require('ucl')
