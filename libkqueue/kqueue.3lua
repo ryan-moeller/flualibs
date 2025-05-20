@@ -87,16 +87,16 @@
 .Nm NOTE_ABSTIME
 .Nd Lua bindings for
 .Xr kqueue 2 ,
-.Xr kevent 2 .
+.Xr kevent 2
 .Sh SYNOPSIS
 .Bd -literal
 local kqueue = require('kqueue')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv kq = kqueue.kqueue()
-.It Dv event = kq:kevent([changelist])
-.It Dv kq:close()
+.It Dv kq = kqueue.kqueue( )
+.It Dv event = kq:kevent([changelist ] )
+.It Dv kq:close( )
 .El
 .Sh DESCRIPTION
 The
@@ -107,16 +107,17 @@ and
 .Xr kevent 2
 system calls.
 .Bl -tag -width XXXX
-.It Dv kq = kqueue.kqueue()
+.It Dv kq = kqueue.kqueue( )
 Create a new kernel event queue and return a descriptor.
 This is implemented as kqueuex(KQUEUE_CLOEXEC) so the returned
 file descriptor is automatically closed on execve(2).
-.It Dv event = kq:kevent([changelist])
+.It Dv event = kq:kevent([changelist ] )
 Apply an optional
 .Fa changelist
 to the queue and wait for an event to return.
-.It Dv kq:close()
+.It Dv kq:close( )
 Close the kernel event queue descriptor.
+.El
 .Sh EXAMPLES
 Wait for stdin to be readable using kqueue:
 .Bd -literal -offset indent
@@ -152,7 +153,7 @@ until false
 kq:close()
 .Ed
 .Sh SEE ALSO
-.Xr fileno 3lua,
-.Xr kqueue 2
+.Xr kqueue 2 ,
+.Xr fileno 3lua Pq Pa https://github.com/ryan-moeller/flualibs
 .Sh AUTHORS
 .An Ryan Moeller

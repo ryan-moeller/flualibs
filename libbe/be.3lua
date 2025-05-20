@@ -88,46 +88,46 @@
 .Nm MNT_FORCE ,
 .Nm MNT_DEEP
 .Nd Lua bindings for
-.Xr libbe 3 .
+.Xr libbe 3
 .Sh SYNOPSIS
 .Bd -literal
 be = require('be')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv handle = be.init([be_root])
-.It Dv name = handle:active_name()
-.It Dv path = handle:active_path()
-.It Dv name = handle:nextboot_name()
-.It Dv path = handle:nextboot_path()
-.It Dv path = handle:root_path()
-.It Dv props = handle:get_bootenv_props()
-.It Dv props = handle:get_dataset_props(name)
-.It Dv snaps = handle:get_dataset_snapshots(name)
-.It Dv handle:activate(name, temporary)
-.It Dv handle:deactivate(name, temporary)
-.It Dv isauto = handle:is_auto_snapshot_name(name)
-.It Dv handle:create(name)
-.It Dv handle:create_depth(name, snapshot, depth)
-.It Dv handle:create_from_existing(name, existing)
-.It Dv handle:create_from_existing_snap(name, snapshot)
-.It Dv snapshot = handle:snapshot(source, snapshot, recursive)
-.It Dv handle:rename(oldname, newname)
-.It Dv handle:destroy(name, options)
-.It Dv mountpoint = handle:mount(name, mountpoint, options)
-.It Dv handle:unmount(name, options)
-.It Dv mounted, details = handle:mounted_at(path, get_details)
-.It Dv errno = handle:errno()
-.It Dv description = handle:error_description()
-.It Dv handle:print_on_error(doprint)
-.It Dv fullname = handle:root_concat(name)
-.It Dv err = handle:validate_name(name)
-.It Dv err = handle:validate_snap(snapshot)
-.It Dv exists = handle:exists(name)
-.It Dv handle:export(name, fd)
-.It Dv handle:import(name, fd)
-.It Dv handle:close()
-.It Dv strnum = be.nicenum(number)
+.It Dv handle = be.init([be_root ] )
+.It Dv name = handle:active_name( )
+.It Dv path = handle:active_path( )
+.It Dv name = handle:nextboot_name( )
+.It Dv path = handle:nextboot_path( )
+.It Dv path = handle:root_path( )
+.It Dv props = handle:get_bootenv_props( )
+.It Dv props = handle:get_dataset_props(name )
+.It Dv snaps = handle:get_dataset_snapshots(name )
+.It Dv handle:activate(name , temporary )
+.It Dv handle:deactivate(name , temporary )
+.It Dv isauto = handle:is_auto_snapshot_name(name )
+.It Dv handle:create(name )
+.It Dv handle:create_depth(name , snapshot , depth )
+.It Dv handle:create_from_existing(name , existing )
+.It Dv handle:create_from_existing_snap(name , snapshot )
+.It Dv snapshot = handle:snapshot(source , snapshot , recursive )
+.It Dv handle:rename(oldname , newname )
+.It Dv handle:destroy(name , options )
+.It Dv mountpoint = handle:mount(name , mountpoint , options )
+.It Dv handle:unmount(name , options )
+.It Dv mounted, details = handle:mounted_at(path , get_details )
+.It Dv errno = handle:errno( )
+.It Dv description = handle:error_description( )
+.It Dv handle:print_on_error(doprint )
+.It Dv fullname = handle:root_concat(name )
+.It Dv err = handle:validate_name(name )
+.It Dv err = handle:validate_snap(snapshot )
+.It Dv exists = handle:exists(name )
+.It Dv handle:export(name , fd )
+.It Dv handle:import(name , fd )
+.It Dv handle:close( )
+.It Dv strnum = be.nicenum(number )
 .El
 .Sh DESCRIPTION
 The
@@ -136,63 +136,63 @@ module provides bindings for Boot Environment Library
 .Pq libbe
 function calls.
 .Bl -tag -width XXXX
-.It Dv handle = be.init([be_root])
+.It Dv handle = be.init([be_root ] )
 Initialize a libbe handle.
 If
 .Fa be_root
 is specified, libbe will only operate out of that pool and BE root.
-.It Dv name = handle:active_name()
+.It Dv name = handle:active_name( )
 Get the name of the currently booted boot environment.
-.It Dv path = handle:active_path()
+.It Dv path = handle:active_path( )
 Get the full path of the currently booted boot environment.
-.It Dv name = handle:nextboot_name()
+.It Dv name = handle:nextboot_name( )
 Get the name of the boot environment that will be active on reboot.
-.It Dv path = handle:nextboot_path()
+.It Dv path = handle:nextboot_path( )
 Get the full path of the boot environment that will be active on reboot.
-.It Dv path = handle:root_path()
+.It Dv path = handle:root_path( )
 Get the boot environment root path.
-.It Dv props = handle:get_bootenv_props()
+.It Dv props = handle:get_bootenv_props( )
 Get a table of boot environment names paired with tables of their properties.
 The "dataset", "name", "active", and "nextboot" properties will always be
 present.
 Other properties may be included if available.
-.It Dv props = handle:get_dataset_props(name)
+.It Dv props = handle:get_dataset_props(name )
 Get a table of the properties of the given dataset as returned by
 .Nm :get_bootenv_props .
-.It Dv snaps = handle:get_dataset_snapshots(name)
+.It Dv snaps = handle:get_dataset_snapshots(name )
 Get a table of snapshots of the given dataset paired with tables of their
 properties as returned by
 .Nm :get_bootenv_props .
-.It Dv handle:activate(name, temporary)
+.It Dv handle:activate(name , temporary )
 Make a boot environment active on the next boot.
 If
 .Fa temporary
 is true, the boot environment will be active for the next boot only.
-.It Dv handle:deactivate(name, temporary)
+.It Dv handle:deactivate(name , temporary )
 Deactivate a boot environment.
 If
 .Fa temporary
 is true, the boot once configuration will be removed.
-.It Dv isauto = handle:is_auto_snapshot_name(name)
+.It Dv isauto = handle:is_auto_snapshot_name(name )
 Check if the given snapshot name matches the format used by
 .Nm :snapshot
 by default if a snapshot name is not given.
-.It Dv handle:create(name)
+.It Dv handle:create(name )
 Create a new boot environment with the given name from a recursive snapshot of
 the active boot environment.
-.It Dv handle:create_depth(name, snapshot, depth)
+.It Dv handle:create_depth(name , snapshot , depth )
 Create a new boot environment with the given name from an existing snapshot,
 with recursion limited to the given depth or unlimited if '-1'.
-.It Dv handle:create_from_existing(name, existing)
+.It Dv handle:create_from_existing(name , existing )
 Create a new boot environment with the given name from a recursive snapshot of
 the given existing boot environment.
-.It Dv handle:create_from_existing_snap(name, snapshot)
+.It Dv handle:create_from_existing_snap(name , snapshot )
 Create a new boot environment with the given name from the given existing
 recursive snapshot.
-.It Dv snapshot = handle:snapshot(source, snapshot, recursive)
-.It Dv handle:rename(oldname, newname)
+.It Dv snapshot = handle:snapshot(source , snapshot , recursive )
+.It Dv handle:rename(oldname , newname )
 Rename a boot environment without unmounting it.
-.It Dv handle:destroy(name, options)
+.It Dv handle:destroy(name , options )
 Recursively destroy the given boot environment.
 It will not destroy a mounted boot environment unless
 .Nm DESTROY_FORCE
@@ -203,7 +203,7 @@ If
 is set in
 .Fa options ,
 the origin snapshot is destroyed as well.
-.It Dv mountpoint = handle:mount(name, mountpoint, options)
+.It Dv mountpoint = handle:mount(name , mountpoint , options )
 Mount the given boot environment.
 If
 .Fa mountpoint
@@ -221,7 +221,7 @@ Passing
 in
 .Fa options
 will recursively mount child datasets of the boot environment.
-.It Dv handle:unmount(name, options)
+.It Dv handle:unmount(name , options )
 Unmount the given boot environment.
 Passing
 .Nm MNT_FORCE
@@ -230,38 +230,38 @@ in
 will pass MNT_FORCE to the underlying
 .Xr mount 2
 call.
-.It Dv mounted, details = handle:mounted_at(path, get_details)
+.It Dv mounted, details = handle:mounted_at(path , get_details )
 Check if there is a boot environment mounted at the given path.
 If
 .Fa get_details
 is true, a second result returns a table of the boot environment properties
 as would be returned by
 .Nm :get_dataset_props .
-.It Dv errno = handle:errno()
+.It Dv errno = handle:errno( )
 Get the last error on this handle.
-.It Dv description = handle:error_description()
+.It Dv description = handle:error_description( )
 Get a description of the last error on this handle.
-.It Dv handle:print_on_error(doprint)
+.It Dv handle:print_on_error(doprint )
 Change whether or not libbe prints the description of any error to stderr.
-.It Dv fullname = handle:root_concat(name)
+.It Dv fullname = handle:root_concat(name )
 Prepend the boot environment root to the given boot environment name.
-.It Dv err = handle:validate_name(name)
+.It Dv err = handle:validate_name(name )
 Validate the given boot environment name.
-.It Dv err = handle:validate_snap(snapshot)
+.It Dv err = handle:validate_snap(snapshot )
 Validate the given snapshot name.
-.It Dv exists = handle:exists(name)
+.It Dv exists = handle:exists(name )
 Check whether the given boot environment exists and has a mountpoint of '/'.
-.It Dv handle:export(name, fd)
+.It Dv handle:export(name , fd )
 Export the given boot environment to the file specified by
 .Fa fd .
 A snapshot of the boot environment will be created prior to export.
-.It Dv handle:import(name, fd)
+.It Dv handle:import(name , fd )
 Import a boot environment from the file specified by
 .Fa fd
 with the given name.
-.It Dv handle:close()
+.It Dv handle:close( )
 Close the libbe handle.
-.It Dv strnum = be.nicenum(number)
+.It Dv strnum = be.nicenum(number )
 Format the given number in a traditional ZFS humanized format.
 .El
 .Sh EXAMPLES

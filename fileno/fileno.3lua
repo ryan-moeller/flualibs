@@ -30,14 +30,14 @@
 .Sh NAME
 .Nm :fileno
 .Nd Lua binding for
-.Xr fileno 3 .
+.Xr fileno 3
 .Sh SYNOPSIS
 .Bd -literal
 require('fileno')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv fd = io.stdin:fileno()
+.It Dv fd = io.stdin:fileno( )
 .El
 .Sh DESCRIPTION
 The
@@ -46,10 +46,11 @@ module provides a binding for the
 .Xr fileno 3
 library routine as a method on file handle objects.
 .Bl -tag -width XXXX
-.It Dv fd = io.stdin:fileno()
+.It Dv fd = io.stdin:fileno( )
 Get the fileno of the
 .Fa stdin
 file handle.
+.El
 .Sh EXAMPLES
 Wait for stdin to be readable using kqueue:
 .Bd -literal -offset indent
@@ -85,7 +86,7 @@ until false
 kq:close()
 .Ed
 .Sh SEE ALSO
-.Xr kqueue 3lua ,
-.Xr fileno 3
+.Xr fileno 3 ,
+.Xr kqueue 3lua Pq Pa https://github.com/ryan-moeller/flualibs
 .Sh AUTHORS
 .An Ryan Moeller

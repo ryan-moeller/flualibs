@@ -32,15 +32,15 @@
 .Nm modstat
 .Nd Lua bindings for
 .Xr kldstat 2 ,
-.Xr modstat 2 .
+.Xr modstat 2
 .Sh SYNOPSIS
 .Bd -literal
 local kldstat = require('kldstat')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv for kld in kldstat.kldstat() do ... end
-.It Dv for mod in kldstat.modstat(kld.id) do ... end
+.It Dv for kld in kldstat.kldstat( ) do ... end
+.It Dv for mod in kldstat.modstat(kld.id ) do ... end
 .El
 .Sh DESCRIPTION
 The
@@ -51,9 +51,9 @@ and
 .Xr modstat 2
 system calls.
 .Bl -tag -width XXXX
-.It Dv for kld in kldstat.kldstat() do ... end
+.It Dv for kld in kldstat.kldstat( ) do ... end
 Iterate status of all kld files.
-.It Dv for mod in kldstat.modstat(kld.id) do ... end
+.It Dv for mod in kldstat.modstat(kld.id ) do ... end
 Iterate status of all mods in a kld file given by
 .Fa kld.id .
 .Pp
@@ -68,6 +68,7 @@ and
 respectively, without the
 .Fa version
 fields.
+.El
 .Sh EXAMPLES
 Describe all kld files and modules as JSON:
 .Bd -literal -offset indent

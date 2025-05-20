@@ -29,14 +29,14 @@
 .Os
 .Sh NAME
 .Nm xor
-.Nd Lua library for a simple XOR cipher.
+.Nd Lua library for a simple XOR cipher
 .Sh SYNOPSIS
 .Bd -literal
 xor = require('xor')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv output = xor.apply(input, key)
+.It Dv output = xor.apply(input , key )
 .El
 .Sh DESCRIPTION
 The
@@ -45,9 +45,10 @@ module provides a function for encrypting and decrypting strings using a simple
 XOR cipher.
 Both operations are achieved using the same function.
 .Bl -tag -width XXXX
-.It Dv output = xor.apply(input, key)
+.It Dv output = xor.apply(input , key )
 Apply the XOR cipher to an input string using a given key.
 The format of the key must be a table of four integers.
+.El
 .Sh EXAMPLES
 Encrypt and decrypt a string:
 .Bd -literal -offset indent
@@ -61,7 +62,7 @@ plaintext = xor.apply(ciphertext, key)
 assert(plaintext == input)
 .Ed
 .Sh SEE ALSO
-.Xr md 3lua
-.Xr roken 3lua
+.Xr md 3lua Pq Pa https://github.com/ryan-moeller/flualibs ,
+.Xr roken 3lua Pq Pa https://github.com/ryan-moeller/flualibs
 .Sh AUTHORS
 .An Ryan Moeller

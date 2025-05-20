@@ -36,17 +36,17 @@
 .Xr SHA1_Init 3 ,
 .Xr SHA1_Update 3 ,
 .Xr SHA1_Final 3 ,
-.Xr SHA1_End 3 .
+.Xr SHA1_End 3
 .Sh SYNOPSIS
 .Bd -literal
 md = require('md')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv sha1 = md.sha1_init()
-.It Dv sha1:update(data)
-.It Dv hash = sha1:final()
-.It Dv hex = sha1:digest()
+.It Dv sha1 = md.sha1_init( )
+.It Dv sha1:update(data )
+.It Dv hash = sha1:final( )
+.It Dv hex = sha1:digest( )
 .El
 .Sh DESCRIPTION
 The
@@ -55,15 +55,16 @@ module provides bindings for Message Digest Support Library
 .Pq libmd
 function calls.
 .Bl -tag -width XXXX
-.It Dv sha1 = md.sha1_init()
+.It Dv sha1 = md.sha1_init( )
 Initialize a SHA1 message digest context.
-.It Dv sha1:update(data)
+.It Dv sha1:update(data )
 Update the digest with a string of data.
 This may be called several times on the same context.
-.It Dv hash = sha1:final()
+.It Dv hash = sha1:final( )
 Finalize the SHA1 context, returning the raw hash data as a byte string.
-.It Dv hex = sha1:digest()
+.It Dv hex = sha1:digest( )
 Finalize the SHA1 context, returning a hexadecimal ASCII string of the digest.
+.El
 .Sh EXAMPLES
 Compute the SHA1 hash of a string:
 .Bd -literal -offset indent
@@ -74,7 +75,7 @@ sha1:update("Hello, FreeBSD!")
 hash = sha1:final()
 .Ed
 .Sh SEE ALSO
-.Xr roken 3lua
-.Xr xor 3lua
+.Xr roken 3lua Pq Pa https://github.com/ryan-moeller/flualibs ,
+.Xr xor 3lua Pq Pa https://github.com/ryan-moeller/flualibs
 .Sh AUTHORS
 .An Ryan Moeller

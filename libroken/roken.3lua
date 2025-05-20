@@ -29,29 +29,30 @@
 .Os
 .Sh NAME
 .Nm roken
-.Nd Lua bindings for base64_encode and base64_decode.
+.Nd Lua bindings for base64_encode and base64_decode
 .Sh SYNOPSIS
 .Bd -literal
 base64 = require('roken')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv str = base64.encode(data)
-.It Dv data = base64.decode(str)
+.It Dv str = base64.encode(data )
+.It Dv data = base64.decode(str )
 .El
 .Sh DESCRIPTION
 The
 .Nm roken
 module provides bindings for the libroken base64 encode and decode functions.
 .Bl -tag -width XXXX
-.It Dv str = base64.encode(data)
+.It Dv str = base64.encode(data )
 Encode the given
 .Pq data
 string to a base64 string.
-.It Dv data = base64.decode(str)
+.It Dv data = base64.decode(str )
 Decode the given base64-encoded string
 .Pq str
 to the original plain data string.
+.El
 .Sh EXAMPLES
 Encode and decode a string as base64:
 .Bd -literal -offset indent
@@ -63,7 +64,7 @@ output = base64.decode(encoded)
 assert(output == input)
 .Ed
 .Sh SEE ALSO
-.Xr md 3lua
-.Xr xor 3lua
+.Xr md 3lua Pq Pa https://github.com/ryan-moeller/flualibs ,
+.Xr xor 3lua Pq Pa https://github.com/ryan-moeller/flualibs
 .Sh AUTHORS
 .An Ryan Moeller

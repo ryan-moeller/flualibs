@@ -13,4 +13,6 @@ SUBDIR= \
 	libroken \
 	libxor \
 
+MANDOC_CMD=	sh ../manlint.sh
+
 .include <bsd.subdir.mk>

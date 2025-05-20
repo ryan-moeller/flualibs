@@ -25,7 +25,7 @@
 .\" SUCH DAMAGE.
 .\"
 .Dd February 19, 2025
-.Dt fetch 3lua
+.Dt FETCH 3lua
 .Os
 .Sh NAME
 .Nm get ,
@@ -52,18 +52,18 @@
 .Nm UNKNOWN ,
 .Nm URL
 .Nd Lua bindings for
-.Xr fetch 3 .
+.Xr fetch 3
 .Sh SYNOPSIS
 .Bd -literal
 fetch = require('fetch')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv f, errmsg, errcode = fetch.get(URL[, flags])
-.It Dv f, errmsg, errcode = fetch.put(URL[, flags])
-.It Dv f, stat_or_errmsg, errcode = fetch.xget(URL[, flags])
-.It Dv stat, errmsg, errcode = fetch.stat(URL[, flags])
-.It Dv ents, errmsg, errcode = fetch.list(URL[, flags])
+.It Dv f, errmsg, errcode = fetch.get(URL[ , flags ] )
+.It Dv f, errmsg, errcode = fetch.put(URL[ , flags ] )
+.It Dv f, stat_or_errmsg, errcode = fetch.xget(URL[ , flags ] )
+.It Dv stat, errmsg, errcode = fetch.stat(URL[ , flags ] )
+.It Dv ents, errmsg, errcode = fetch.list(URL[ , flags ] )
 .El
 .Sh DESCRIPTION
 The
@@ -72,16 +72,17 @@ module provides bindings for File Transfer Library
 .Pq libfetch
 function calls.
 .Bl -tag -width XXXX
-.It Dv f, errmsg, errcode = fetch.get(URL[, flags])
+.It Dv f, errmsg, errcode = fetch.get(URL[ , flags ] )
 Wraps fetchGetURL.
-.It Dv f, errmsg, errcode = fetch.put(URL[, flags])
+.It Dv f, errmsg, errcode = fetch.put(URL[ , flags ] )
 Wraps fetchPutURL.
-.It Dv f, stat_or_errmsg, errcode = fetch.xget(URL[, flags])
+.It Dv f, stat_or_errmsg, errcode = fetch.xget(URL[ , flags ] )
 Wraps fetchXGetURL.
-.It Dv stat, errmsg, errcode = fetch.stat(URL[, flags])
+.It Dv stat, errmsg, errcode = fetch.stat(URL[ , flags ] )
 Wraps fetchStatURL.
-.It Dv ents, errmsg, errcode = fetch.list(URL[, flags])
+.It Dv ents, errmsg, errcode = fetch.list(URL[ , flags ] )
 Wraps fetchListURL.
+.El
 .Sh EXAMPLES
 Get the contents of a URL:
 .Bd -literal -offset indent
