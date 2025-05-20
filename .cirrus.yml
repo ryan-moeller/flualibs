@@ -1,0 +1,35 @@
+freebsd_instance:
+  cpu: 1
+  memory: 1G
+
+task:
+  matrix:
+    - freebsd_instance:
+        image_family: freebsd-13-5
+      env:
+        ARCHIVES_PATH: releases/amd64/13.5-RELEASE
+    - freebsd_instance:
+        image_family: freebsd-14-2
+      env:
+        ARCHIVES_PATH: releases/amd64/14.2-RELEASE
+    - freebsd_instance:
+        image_family: freebsd-15-0-snap
+      env:
+        ARCHIVES_PATH: snapshots/amd64/15.0-CURRENT
+  name: ${ARCHIVES_PATH}
+  stateful: false
+  env:
+    WD: /tmp/wd
+    ARCHIVES_BASE: https://download.freebsd.org/${ARCHIVES_PATH}
+  build_setup_script:
+    - mkdir ${WD}
+    - cd ${WD} && fetch -q ${ARCHIVES_BASE}/src.txz
+    - tar xf ${WD}/src.txz -C / && rm ${WD}/src.txz
+  build_script:
+    - make -j${CIRRUS_CPU}
+    - make install
+  manlint_script:
+    - makewhatis /usr/share/man
+    # XXX: too many xrefs to manpages that don't exist in releases
+    - test $(freebsd-version) '!=' 15.0-CURRENT || make manlint
+  # TODO: tests
