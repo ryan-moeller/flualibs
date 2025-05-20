@@ -3,7 +3,6 @@ SRCTOP?= /usr/src
 
 SUBDIR= \
 	fileno \
-	libbe \
 	libbsddialog \
 	libfetch \
 	libkldstat \
@@ -12,6 +11,10 @@ SUBDIR= \
 	libmq \
 	libroken \
 	libxor \
+
+.if exists(/usr/include/libnvpair.h)
+SUBDIR+=libbe
+.endif
 
 MANDOC_CMD=	sh ../manlint.sh
 
