@@ -67,7 +67,7 @@ local mq = require('mq')
 The
 .Nm mq
 module provides bindings for the
-.Xr mqueuefs 5
+.Xr mqueuefs 4
 system calls.
 .Bl -tag -width XXXX
 .It Dv q = mq.open(name , oflags[ , mode[ , attr ] ] )
