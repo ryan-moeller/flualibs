@@ -62,6 +62,7 @@ l_bsddialog_init_notheme(lua_State *L)
 	return (0);
 }
 
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 static int
 l_bsddialog_inmode(lua_State *L)
 {
@@ -86,6 +87,7 @@ l_bsddialog_refresh(lua_State *L __unused)
 	bsddialog_refresh();
 	return (0);
 }
+#endif
 
 static int
 l_bsddialog_end(lua_State *L)
@@ -374,7 +376,9 @@ l_bsddialog_form(lua_State *L)
 	int rows, cols;
 	unsigned int formrows, nitems;
 	struct bsddialog_formitem *items;
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	int focusitem;
+#endif
 	int rv;
 
 	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
@@ -384,10 +388,16 @@ l_bsddialog_form(lua_State *L)
 	cols = luaL_checkinteger(L, 4);
 	formrows = luaL_checkinteger(L, 5);
 	items = checkformitems(L, 6, &nitems);
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	focusitem = luaL_checkinteger(L, 7) - 1;
+#endif
 
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	rv = bsddialog_form(conf, text, rows, cols, formrows, nitems, items,
 	    &focusitem);
+#else
+	rv = bsddialog_form(conf, text, rows, cols, formrows, nitems, items);
+#endif
 	if (rv == BSDDIALOG_ERROR) {
 		freeformitems(items, nitems);
 		luaL_error(L, "bsddialog_form: %s", bsddialog_geterror());
@@ -395,8 +405,12 @@ l_bsddialog_form(lua_State *L)
 	lua_pushinteger(L, rv);
 	pushformitems(L, items, nitems);
 	freeformitems(items, nitems);
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	lua_pushinteger(L, focusitem + 1);
 	return (3);
+#else
+	return (2);
+#endif
 }
 
 static int
@@ -407,7 +421,10 @@ l_bsddialog_gauge(lua_State *L)
 	int rows, cols;
 	unsigned int perc;
 	int fd;
-	const char *sep, *end;
+	const char *sep;
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
+	const char *end;
+#endif
 	int rv;
 
 	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
@@ -418,17 +435,26 @@ l_bsddialog_gauge(lua_State *L)
 	perc = luaL_checkinteger(L, 5);
 	if (lua_gettop(L) == 5) {
 		fd = -1;
-		sep = end = NULL;
+		sep = NULL;
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
+		end = NULL;
+#endif
 	} else {
 		luaL_Stream *stream;
 
 		stream = (luaL_Stream *)luaL_checkudata(L, 6, LUA_FILEHANDLE);
 		fd = fileno(stream->f);
 		sep = luaL_checkstring(L, 7);
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 		end = luaL_checkstring(L, 8);
+#endif
 	}
 
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	rv = bsddialog_gauge(conf, text, rows, cols, perc, fd, sep, end);
+#else
+	rv = bsddialog_gauge(conf, text, rows, cols, perc, fd, sep);
+#endif
 	if (rv == BSDDIALOG_ERROR) {
 		luaL_error(L, "bsddialog_gauge: %s", bsddialog_geterror());
 	}
@@ -675,13 +701,21 @@ l_bsddialog_pause(lua_State *L)
 	cols = luaL_checkinteger(L, 4);
 	seconds = luaL_checkinteger(L, 5);
 
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	rv = bsddialog_pause(conf, text, rows, cols, &seconds);
+#else
+	rv = bsddialog_pause(conf, text, rows, cols, seconds);
+#endif
 	if (rv == BSDDIALOG_ERROR) {
 		luaL_error(L, "bsddialog_pause: %s", bsddialog_geterror());
 	}
 	lua_pushinteger(L, rv);
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	lua_pushinteger(L, seconds);
 	return (2);
+#else
+	return (1);
+#endif
 }
 
 static int
@@ -947,10 +981,12 @@ l_bsddialog_conf_index(lua_State *L)
 		lua_pushinteger(L, conf->text.cols_per_row);
 		return (1);
 	}
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	if (strcmp(key, "text.escape") == 0) {
 		lua_pushboolean(L, conf->text.escape);
 		return (1);
 	}
+#endif
 	if (strcmp(key, "text.tablen") == 0) {
 		lua_pushinteger(L, conf->text.tablen);
 		return (1);
@@ -985,6 +1021,7 @@ l_bsddialog_conf_index(lua_State *L)
 		return (1);
 	}
 	/* TODO: form.securembch, form.value_wchar */
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	if (strcmp(key, "date") == 0) {
 		pushconfproxy(L);
 		return (1);
@@ -993,6 +1030,7 @@ l_bsddialog_conf_index(lua_State *L)
 		lua_pushstring(L, conf->date.format);
 		return (1);
 	}
+#endif
 	if (strcmp(key, "button") == 0) {
 		pushconfproxy(L);
 		return (1);
@@ -1001,6 +1039,7 @@ l_bsddialog_conf_index(lua_State *L)
 		lua_pushboolean(L, conf->button.always_active);
 		return (1);
 	}
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	if (strcmp(key, "button.left1_label") == 0) {
 		lua_pushstring(L, conf->button.left1_label);
 		return (1);
@@ -1013,6 +1052,7 @@ l_bsddialog_conf_index(lua_State *L)
 		lua_pushstring(L, conf->button.left3_label);
 		return (1);
 	}
+#endif
 	if (strcmp(key, "button.without_ok") == 0) {
 		lua_pushboolean(L, conf->button.without_ok);
 		return (1);
@@ -1049,6 +1089,7 @@ l_bsddialog_conf_index(lua_State *L)
 		lua_pushstring(L, conf->button.help_label);
 		return (1);
 	}
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	if (strcmp(key, "button.right1_label") == 0) {
 		lua_pushstring(L, conf->button.right1_label);
 		return (1);
@@ -1061,6 +1102,16 @@ l_bsddialog_conf_index(lua_State *L)
 		lua_pushstring(L, conf->button.right3_label);
 		return (1);
 	}
+#else
+	if (strcmp(key, "button.generic1_label") == 0) {
+		lua_pushstring(L, conf->button.generic1_label);
+		return (1);
+	}
+	if (strcmp(key, "button.generic2_label") == 0) {
+		lua_pushstring(L, conf->button.generic2_label);
+		return (1);
+	}
+#endif
 	if (strcmp(key, "button.default_label") == 0) {
 		lua_pushstring(L, conf->button.default_label);
 		return (1);
@@ -1124,7 +1175,9 @@ l_bsddialog_conf_newindex(lua_State *L)
 	S(key.f1_file);
 	S(key.f1_message);
 	I(text.cols_per_row);
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	B(text.escape);
+#endif
 	I(text.tablen);
 	B(menu.align_left);
 	B(menu.no_desc);
@@ -1135,11 +1188,15 @@ l_bsddialog_conf_newindex(lua_State *L)
 		conf->form.securech = s[0];
 		return (0);
 	}
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	S(date.format);
+#endif
 	B(button.always_active);
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	S(button.left1_label);
 	S(button.left2_label);
 	S(button.left3_label);
+#endif
 	B(button.without_ok);
 	S(button.ok_label);
 	B(button.with_extra);
@@ -1149,9 +1206,14 @@ l_bsddialog_conf_newindex(lua_State *L)
 	B(button.default_cancel);
 	B(button.with_help);
 	S(button.help_label);
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	S(button.right1_label);
 	S(button.right2_label);
 	S(button.right3_label);
+#else
+	S(button.generic1_label);
+	S(button.generic2_label);
+#endif
 	S(button.default_label);
 
 #undef S
@@ -1173,17 +1235,24 @@ l_bsddialog_conf_gc(lua_State *L)
 	free(__DECONST(char *, conf->title));
 	free(__DECONST(char *, conf->key.f1_file));
 	free(__DECONST(char *, conf->key.f1_message));
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	free(__DECONST(char *, conf->date.format));
 	free(__DECONST(char *, conf->button.left1_label));
 	free(__DECONST(char *, conf->button.left2_label));
 	free(__DECONST(char *, conf->button.left3_label));
+#endif
 	free(__DECONST(char *, conf->button.ok_label));
 	free(__DECONST(char *, conf->button.extra_label));
 	free(__DECONST(char *, conf->button.cancel_label));
 	free(__DECONST(char *, conf->button.help_label));
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	free(__DECONST(char *, conf->button.right1_label));
 	free(__DECONST(char *, conf->button.right2_label));
 	free(__DECONST(char *, conf->button.right3_label));
+#else
+	free(__DECONST(char *, conf->button.generic1_label));
+	free(__DECONST(char *, conf->button.generic2_label));
+#endif
 	free(__DECONST(char *, conf->button.default_label));
 	return (0);
 }
@@ -1289,10 +1358,12 @@ pushtheme(lua_State *L, struct bsddialog_theme *theme)
 	lua_setfield(L, -2, "dialog");
 
 	lua_createtable(L, 0, 13);
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	lua_pushinteger(L, theme->menu.f_prefixcolor);
 	lua_setfield(L, -2, "f_prefixcolor");
 	lua_pushinteger(L, theme->menu.prefixcolor);
 	lua_setfield(L, -2, "prefixcolor");
+#endif
 	lua_pushinteger(L, theme->menu.f_selectorcolor);
 	lua_setfield(L, -2, "f_selectorcolor");
 	lua_pushinteger(L, theme->menu.selectorcolor);
@@ -1311,10 +1382,12 @@ pushtheme(lua_State *L, struct bsddialog_theme *theme)
 	lua_setfield(L, -2, "shortcutcolor");
 	lua_pushinteger(L, theme->menu.bottomdesccolor);
 	lua_setfield(L, -2, "bottomdesccolor");
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	lua_pushinteger(L, theme->menu.sepnamecolor);
 	lua_setfield(L, -2, "sepnamecolor");
 	lua_pushinteger(L, theme->menu.sepdesccolor);
 	lua_setfield(L, -2, "sepdesccolor");
+#endif
 	lua_setfield(L, -2, "menu");
 
 	lua_createtable(L, 0, 4);
@@ -1425,12 +1498,14 @@ checktheme(lua_State *L, int index, struct bsddialog_theme *theme)
 	lua_pop(L, 1); /* dialog */
 
 	luaL_getsubtable(L, index, "menu");
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	lua_getfield(L, -1, "f_prefixcolor");
 	theme->menu.f_prefixcolor = lua_tointeger(L, -1);
 	lua_pop(L, 1);
 	lua_getfield(L, -1, "prefixcolor");
 	theme->menu.prefixcolor = lua_tointeger(L, -1);
 	lua_pop(L, 1);
+#endif
 	lua_getfield(L, -1, "f_selectorcolor");
 	theme->menu.f_selectorcolor = lua_tointeger(L, -1);
 	lua_pop(L, 1);
@@ -1458,12 +1533,14 @@ checktheme(lua_State *L, int index, struct bsddialog_theme *theme)
 	lua_getfield(L, -1, "bottomdesccolor");
 	theme->menu.bottomdesccolor = lua_tointeger(L, -1);
 	lua_pop(L, 1);
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	lua_getfield(L, -1, "sepnamecolor");
 	theme->menu.sepnamecolor = lua_tointeger(L, -1);
 	lua_pop(L, 1);
 	lua_getfield(L, -1, "sepdesccolor");
 	theme->menu.sepdesccolor = lua_tointeger(L, -1);
 	lua_pop(L, 1);
+#endif
 	lua_pop(L, 1); /* menu */
 
 	luaL_getsubtable(L, index, "form");
@@ -1543,9 +1620,11 @@ l_bsddialog_set_theme(lua_State *L)
 static const struct luaL_Reg l_bsddialog_funcs[] = {
 	{"init", l_bsddialog_init},
 	{"init_notheme", l_bsddialog_init_notheme},
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	{"inmode", l_bsddialog_inmode},
 	{"clear", l_bsddialog_clear},
 	{"refresh", l_bsddialog_refresh},
+#endif
 	{"_end", l_bsddialog_end},
 	{"initconf", l_bsddialog_initconf},
 	{"backtitle", l_bsddialog_backtitle},
@@ -1606,12 +1685,17 @@ luaopen_bsddialog(lua_State *L)
 	SETCONST(EXTRA);
 	SETCONST(TIMEOUT);
 	SETCONST(ESC);
+#if LIBBSDDIALOG_VERSION_MAJOR > 0
 	SETCONST(LEFT1);
 	SETCONST(LEFT2);
 	SETCONST(LEFT3);
 	SETCONST(RIGHT1);
 	SETCONST(RIGHT2);
 	SETCONST(RIGHT3);
+#else
+	SETCONST(GENERIC1);
+	SETCONST(GENERIC2);
+#endif
 	SETCONST(FULLSCREEN);
 	SETCONST(AUTOSIZE);
 	SETCONST(CENTER);
