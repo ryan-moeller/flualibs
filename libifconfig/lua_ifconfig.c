@@ -1087,14 +1087,93 @@ l_ifconfig_get_media(lua_State *L)
 	return (1);
 }
 
+#if __FreeBSD_version > 1400083
+/*
+ * Push a string describing an AF_INET address.
+ */
+static void
+push_inet4_addr(lua_State *L, struct in_addr *addr)
+{
+	char addr_buf[INET_ADDRSTRLEN];
+
+	(void)inet_ntop(AF_INET, addr, addr_buf, sizeof(addr_buf));
+	lua_pushstring(L, addr_buf);
+}
+
+/*
+ * Push a string describing an AF_INET6 address.
+ */
+static void
+push_inet6_addr(lua_State *L, struct in6_addr *addr)
+{
+	char addr_buf[INET6_ADDRSTRLEN];
+
+	(void)inet_ntop(AF_INET6, addr, addr_buf, sizeof(addr_buf));
+	lua_pushstring(L, addr_buf);
+}
+#endif
+
+/*
+ * Push a table describing a struct ifconfig_carp.
+ */
+static void
+push_carp(lua_State *L,
+#if __FreeBSD_version > 1400083
+    struct ifconfig_carp *carpr
+#else
+    struct carpreq *carpr
+#endif
+    )
+{
+	lua_newtable(L);
+
+	lua_pushstring(L, carp_states[carpr->carpr_state]);
+	lua_setfield(L, -2, "state");
+
+	lua_pushinteger(L, carpr->carpr_vhid);
+	lua_setfield(L, -2, "vhid");
+
+	lua_pushinteger(L, carpr->carpr_advbase);
+	lua_setfield(L, -2, "advbase");
+
+	lua_pushinteger(L, carpr->carpr_advskew);
+	lua_setfield(L, -2, "advskew");
+
+#if __FreeBSD_version > 1400083
+	lua_pushlstring(L, (const char *)carpr->carpr_key, CARP_KEY_LEN);
+	lua_setfield(L, -2, "key");
+
+	push_inet4_addr(L, &carpr->carpr_addr);
+	lua_setfield(L, -2, "addr");
+
+	push_inet6_addr(L, &carpr->carpr_addr6);
+	lua_setfield(L, -2, "addr6");
+#endif
+
+#if __FreeBSD_version > 1500018
+	lua_pushinteger(L, carpr->carpr_version);
+	lua_setfield(L, -2, "version");
+
+	lua_pushinteger(L, carpr->carpr_vrrp_prio);
+	lua_setfield(L, -2, "vrrp_prio");
+
+	lua_pushinteger(L, carpr->carpr_vrrp_adv_inter);
+	lua_setfield(L, -2, "vrrp_adv_inter");
+#endif
+}
+
 /** Get interface carp info
- * @param name
+ * @param name	The name of an interface
  * @return	A table describing the interface carp vhids or nil if error
  */
 static int
 l_ifconfig_get_carp(lua_State *L)
 {
+#if __FreeBSD_version > 1400083
 	struct ifconfig_carp carpr[CARP_MAXVHID];
+#else
+	struct carpreq carpr[CARP_MAXVHID];
+#endif
 	ifconfig_handle_t *h;
 	const char *name;
 
@@ -1110,25 +1189,136 @@ l_ifconfig_get_carp(lua_State *L)
 	lua_newtable(L);
 
 	for (int i = 0; i < carpr[0].carpr_count; ++i) {
-		lua_newtable(L);
-
-		lua_pushstring(L, carp_states[carpr[i].carpr_state]);
-		lua_setfield(L, 4, "state");
-
-		lua_pushinteger(L, carpr[i].carpr_vhid);
-		lua_setfield(L, 4, "vhid");
-
-		lua_pushinteger(L, carpr[i].carpr_advbase);
-		lua_setfield(L, 4, "advbase");
-
-		lua_pushinteger(L, carpr[i].carpr_advskew);
-		lua_setfield(L, 4, "advskew");
-
+		push_carp(L, &carpr[i]);
 		lua_rawseti(L, 3, lua_rawlen(L, 3) + 1);
 	}
 
 	return (1);
 }
+
+#if __FreeBSD_version > 1400083
+/** Get interface carp info for specific vhid
+ * @param name	The name of an interface
+ * @param vhid	The vhid to describe
+ * @return	A table describing the interface carp vhid or nil if error
+ */
+static int
+l_ifconfig_get_carp_vhid(lua_State *L)
+{
+	struct ifconfig_carp carpr;
+	ifconfig_handle_t *h;
+	const char *name;
+	uint32_t vhid;
+
+	h = l_ifconfig_checkhandle(L, 1);
+	name = luaL_checkstring(L, 2);
+	vhid = luaL_checkinteger(L, 3);
+
+	if (ifconfig_carp_get_vhid(h, name, &carpr, vhid) != 0) {
+		lua_pushnil(L);
+		return (1);
+	}
+
+	push_carp(L, &carpr);
+
+	return (1);
+}
+
+/** Set interface carp info
+ * @param name	The name of a carp interface
+ * @param info	A table describing the carp configuration to set
+ * @return	true if success, false if error
+ */
+static int
+l_ifconfig_set_carp_info(lua_State *L)
+{
+	struct ifconfig_carp carpr;
+	struct addrinfo hints, *res;
+	ifconfig_handle_t *h;
+	const char *name, *state, *key, *addr;
+	size_t len;
+
+	h = l_ifconfig_checkhandle(L, 1);
+	name = luaL_checkstring(L, 2);
+	luaL_checktype(L, 3, LUA_TTABLE);
+
+	lua_getfield(L, 3, "vhid");
+	carpr.carpr_vhid = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+
+	lua_getfield(L, 3, "state");
+	state = lua_tostring(L, -1);
+	if (state == NULL)
+		return luaL_error(L, "invalid state");
+	for (int i = 0; i < nitems(carp_states); i++) {
+		if (strcmp(state, carp_states[i]) == 0) {
+			carpr.carpr_state = i;
+			state = NULL;
+			break;
+		}
+	}
+	if (state != NULL)
+		return luaL_error(L, "unknown state %s", state);
+	lua_pop(L, 1);
+
+	lua_getfield(L, 3, "advbase");
+	carpr.carpr_advbase = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+
+	lua_getfield(L, 3, "advskew");
+	carpr.carpr_advskew = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+
+	lua_getfield(L, 3, "key");
+	key = lua_tolstring(L, -1, &len);
+	if (key == NULL || len != sizeof(carpr.carpr_key))
+		return luaL_error(L, "invalid key");
+	memcpy(carpr.carpr_key, key, sizeof(carpr.carpr_key));
+	lua_pop(L, 1);
+
+	lua_getfield(L, 3, "addr");
+	addr = lua_tostring(L, -1);
+	if (addr == NULL)
+		return luaL_error(L, "invalid addr");
+	carpr.carpr_addr.s_addr = inet_addr(addr);
+	lua_pop(L, 1);
+
+	lua_getfield(L, 3, "addr6");
+	addr = lua_tostring(L, -1);
+	if (addr == NULL)
+		return luaL_error(L, "invalid addr6");
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET6;
+	hints.ai_flags = AI_NUMERICHOST;
+	if (getaddrinfo(addr, NULL, &hints, &res) == 1)
+		return luaL_error(L, "invalid addr6");
+	memcpy(&carpr.carpr_addr6,
+	    &((struct sockaddr_in6 *)res->ai_addr)->sin6_addr,
+	    sizeof(carpr.carpr_addr6));
+	lua_pop(L, 1);
+
+#if __FreeBSD_version > 1500018
+	lua_getfield(L, 3, "version");
+	carpr.carpr_version = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+
+	lua_getfield(L, 3, "vrrp_prio");
+	carpr.carpr_vrrp_prio = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+
+	lua_getfield(L, 3, "vrrp_adv_inter");
+	carpr.carpr_vrrp_adv_inter = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+#endif
+
+	if (ifconfig_carp_set_info(h, name, &carpr) != 0)
+		lua_pushboolean(L, false);
+	else
+		lua_pushboolean(L, true);
+
+	return (1);
+}
+#endif
 
 /** Get address info
  * @param addr	An ifaddrs userdata object

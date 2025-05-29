@@ -29,6 +29,8 @@
 .Nm get_status ,
 .Nm get_media ,
 .Nm get_carp ,
+.Nm get_carp_vhid ,
+.Nm set_carp ,
 .Nm addr_info ,
 .Nm get_bridge_status ,
 .Nm get_lagg_status ,
@@ -71,6 +73,8 @@ local ifconfig = require('ifconfig')
 .It Dv status = ifcfg:get_status(name )
 .It Dv media = ifcfg:get_media(name )
 .It Dv carp = ifcfg:get_carp(name )
+.It Dv carp = ifcfg:get_carp_vhid(name , vhid )
+.It Dv res = ifcfg:set_carp(name , carp )
 .It Dv ai = ifcfg:addr_info(addr )
 .It Dv status = ifcfg:get_bridge_status(name )
 .It Dv status = ifcfg:get_lagg_status(name )
@@ -299,12 +303,62 @@ of an interface, returns a list of tables of the form
 	state = "",
 	vhid = #,
 	advbase = #,
-	advskew = #
+	advskew = #,
+	key = "",
+	addr = "",
+	addr6 = "",
+	version = #,
+	vrrp_prio = #,
+	vrrp_adv_inter = #
 }
 .Ed
 describing the interface
 .Xr carp 4
 VHIDs.
+.It Dv carp = ifcfg:get_carp_vhid(name , vhid )
+Given the
+.Fa name
+of an interface and a
+.Fa vhid
+to describe, returns a single table of the form
+.Bd -literal -compact
+{
+	state = "",
+	vhid = #,
+	advbase = #,
+	advskew = #,
+	key = "",
+	addr = "",
+	addr6 = "",
+	version = #,
+	vrrp_prio = #,
+	vrrp_adv_inter = #
+}
+.Ed
+describing the interface
+.Xr carp 4
+VHID.
+.It Dv res = ifcfg:set_carp(name , carp )
+Given the
+.Fa name
+of an interface and a table of the form
+.Bd -literal -compact
+{
+	state = "",
+	vhid = #,
+	advbase = #,
+	advskew = #,
+	key = "",
+	addr = "",
+	addr6 = "",
+	version = #,
+	vrrp_prio = #,
+	vrrp_adv_inter = #
+}
+.Ed
+describing the interface
+.Xr carp 4
+VHID settings, apply the given configuration.
 .It Dv ai = ifcfg:addr_info(addr )
 Given a
 .Vt struct ifaddrs *
