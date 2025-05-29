@@ -1,0 +1,763 @@
+.\"
+.\" Copyright (c) 2020-2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause-FreeBSD
+.\"
+.Dd May 29, 2025
+.Dt IFCONFIG 3lua
+.Os
+.Sh NAME
+.Nm open ,
+.Nm close ,
+.Nm error ,
+.Nm foreach_iface ,
+.Nm foreach_ifaddr ,
+.Nm get_description ,
+.Nm set_description ,
+.Nm unset_description ,
+.Nm set_name ,
+.Nm get_orig_name ,
+.Nm get_fib ,
+.Nm set_mtu ,
+.Nm get_mtu ,
+.Nm get_nd6 ,
+.Nm set_metric ,
+.Nm get_metric ,
+.Nm set_capabilities ,
+.Nm get_capabilities ,
+.Nm get_groups ,
+.Nm get_status ,
+.Nm get_media ,
+.Nm get_carp ,
+.Nm addr_info ,
+.Nm get_bridge_status ,
+.Nm get_lagg_status ,
+.Nm get_laggport_laggdev ,
+.Nm destroy ,
+.Nm create ,
+.Nm create_vlan ,
+.Nm set_vlantag ,
+.Nm list_cloners ,
+.Nm get_sfp_info ,
+.Nm get_sfp_vendor_info ,
+.Nm get_sfp_status ,
+.Nm get_sfp_dump
+.Nd Lua binding to libifconfig
+.Sh SYNOPSIS
+.Bd -literal
+local ifconfig = require('ifconfig')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv ifcfg = ifconfig.open( )
+.It Dv ifcfg:close( )
+.It Dv errtype, errno, ioctlname = ifcfg:error( )
+.It Dv udata = ifcfg:foreach_iface(cb , udata )
+.It Dv udata = ifcfg:foreach_ifaddr(iface , cb , udata )
+.It Dv desc = ifcfg:get_description(name )
+.It Dv res = ifcfg:set_description(name , desc )
+.It Dv res = ifcfg:unset_description(name )
+.It Dv res = ifcfg:set_name(name , newname )
+.It Dv name = ifcfg:get_orig_name(name )
+.It Dv fib = ifcfg:get_fib(name )
+.It Dv res = ifcfg:set_mtu(name , mtu )
+.It Dv mtu = ifcfg:get_mtu(name )
+.It Dv nd6 = ifcfg:get_nd6(name )
+.It Dv res = ifcfg:set_metric(name , metric )
+.It Dv metric = ifcfg:get_metric(name )
+.It Dv res = ifcfg:set_capabilities(name , caps )
+.It Dv caps = ifcfg:get_capabilities(name )
+.It Dv groups = ifcfg:get_groups(name )
+.It Dv status = ifcfg:get_status(name )
+.It Dv media = ifcfg:get_media(name )
+.It Dv carp = ifcfg:get_carp(name )
+.It Dv ai = ifcfg:addr_info(addr )
+.It Dv status = ifcfg:get_bridge_status(name )
+.It Dv status = ifcfg:get_lagg_status(name )
+.It Dv lagg = ifcfg:get_laggport_laggdev(name )
+.It Dv res = ifcfg:destroy(name )
+.It Dv name = ifcfg:create(name )
+.It Dv name = ifcfg:create_vlan(name , vlandev , vlantag )
+.It Dv res = ifcfg:set_vlantag(name , vlandev , vlantag )
+.It Dv cloners = ifcfg:list_cloners( )
+.It Dv info = ifcfg:get_sfp_info(name )
+.It Dv vendor_info = ifcfg:get_sfp_vendor_info(name )
+.It Dv status = ifcfg:get_sfp_status(name )
+.It Dv dump = ifcfg:get_sfp_dump(name )
+.It Vt struct ifaddrs *
+.El
+.Sh DESCRIPTION
+The
+.Nm ifconfig
+module is a binding to the libifconfig
+library.
+It provides a high-level interface for many socket ioctls that query and
+control network interface configuration and status information.
+.Bl -tag -width XXXX
+.It Dv ifcfg = ifconfig.open( )
+Open a libifconfig handle.
+The handle is a userdata object used to perform the various socket operations
+underlying most libifconfig functionality.
+An open handle will be closed when garbage collected, or it can be explicitly
+closed with
+.Fn close .
+.It Dv ifcfg:close( )
+Explicitly close a handle opened by
+.Fn open .
+.It Dv errtype, errno, ioctlname = ifcfg:error( )
+Get information about the last error.
+If the last operation was succcessful,
+.Dv nil
+is returned.
+Otherwise, returns the error type, errno, and if applicable the name of the
+ioctl that failed.
+The error type is one of "OTHER", "IOCTL", or "SOCKET".
+.It Dv udata = ifcfg:foreach_iface(cb , udata )
+Iterate over interfaces.
+This is a higher-order fold operation, where
+.Fa cb
+is a callback function of the form
+.Dl (handle, iface, udata) -> udata
+which is called for each interface in succession.
+.Pp
+The
+.Fa handle
+passed to the callback is the handle that was used to invoke
+.Fn foreach_iface .
+.Pp
+The
+.Fa iface
+passed to the callback is a
+.Vt struct ifaddrs *
+userdata object that is only valid until the callback function returns.
+It must not be retained outside the scope of the callback.
+.Pp
+The
+.Fa udata
+parameter is an accumulator.
+The initial value passed to
+.Fn foreach_iface
+is forwarded to the callback function on the first iteration.
+The return value of the callback function is passed to the callback as
+.Fa udata
+on the next iteration.
+The value returned from the callback function on the final iteration is
+returned from
+.Fn foreach_iface
+on success.
+.Pp
+An error may be raised if iteration fails due to an internal error.
+.It Dv udata = ifcfg:foreach_ifaddr(iface , cb , udata )
+Iterate over interface addresses.
+This is a higher-order fold operation, where
+.Fa cb
+is a callback function of the form
+.Dl (handle, ifaddr, udata) -> udata
+which is called for each interface address in succession.
+.Pp
+The interface
+.Fa iface
+is the
+.Vt struct ifaddrs *
+userdata object passed to the callback function for
+.Fn foreach_iface .
+.Pp
+The
+.Fa handle
+passed to the callback is the handle that was used to invoke
+.Fn foreach_ifaddr .
+.Pp
+The
+.Fa udata
+parameter is an accumulator.
+The initial value passed to
+.Fn foreach_ifaddr
+is forwarded to the callback function on the first iteration.
+The return value of the callback function is passed to the callback as
+.Fa udata
+on the next iteration.
+The value returned from the callback function on the final iteration is
+returned from
+.Fn foreach_ifaddr .
+.It Dv desc = ifcfg:get_description(name )
+Given the
+.Fa name
+of an interface, returns the description string if set, otherwise
+.Dv nil .
+.It Dv res = ifcfg:set_description(name , desc )
+Given the
+.Fa name
+of an interface, sets the description string to
+.Fa desc .
+.It Dv res = ifcfg:unset_description(name )
+Given the
+.Fa name
+of an interface, unsets the description string if set.
+.It Dv res = ifcfg:set_name(name , newname )
+Given the
+.Fa name
+of an interface, changes the interface name to
+.Fa newname .
+.It Dv name = ifcfg:get_orig_name(name )
+Given the
+.Fa name
+of an interface, returns the original name string of the interface.
+.It Dv fib = ifcfg:get_fib(name )
+Given the
+.Fa name
+of an interface, returns the interface FIB number.
+.It Dv res = ifcfg:set_mtu(name , mtu )
+Given the
+.Fa name
+of an interface, sets the interface MTU to
+.Fa mtu .
+.It Dv mtu = ifcfg:get_mtu(name )
+Given the
+.Fa name
+of an interface, returns the interface MTU.
+.It Dv nd6 = ifcfg:get_nd6(name )
+Given the
+.Fa name
+of an interface, returns a list of the enabled ICMPv6 Neighbor Discovery
+Protocol options.
+.It Dv res = ifcfg:set_metric(name , metric )
+Given the
+.Fa name
+of an interface, sets the interface metric to
+.Fa metric .
+.It Dv metric = ifcfg:get_metric(name )
+Given the
+.Fa name
+of an interface, returns the interface metric.
+.It Dv res = ifcfg:set_capabilities(name , caps )
+Given the
+.Fa name
+of an interface, enables the list of capabilities given as strings in the list
+.Fa caps
+and disables the capabilities not in the list, returning true if successful or
+false if an error occurs.
+.It Dv caps = ifcfg:get_capabilities(name )
+Given the
+.Fa name
+of an interface, returns a table of the form
+.Bd -literal -compact
+{
+	enabled = { "", ... },
+	supported = { "", ... }
+}
+.Ed
+where
+.Nm enabled
+and
+.Nm supported
+are the lists of enabled and supported capabilities with each capability
+represented by a string.
+.It Dv groups = ifcfg:get_groups(name )
+Given the
+.Fa name
+of an interface, returns a list of the names of the groups containing the
+interface.
+.It Dv status = ifcfg:get_status(name )
+Given the
+.Fa name
+of an interface, returns the interface status as a string.
+.It Dv media = ifcfg:get_media(name )
+Given the
+.Fa name
+of an interface, returns a table of the form
+.Bd -literal -compact
+{
+	current = {},
+	active = {},
+	supported = { {}, ... },
+	status = "",
+	[ down_reason = ""|# ]
+}
+.Ed
+where
+.Nm current
+and
+.Nm active
+are tables of the form
+.Bd -literal -compact
+{
+	[ type = "",]
+	[ subtype = "",]
+	[ mode = "",]
+	options = { "", ... }
+}
+.Ed
+and
+.Nm supported
+is a list of the same form of tables.
+.It Dv carp = ifcfg:get_carp(name )
+Given the
+.Fa name
+of an interface, returns a list of tables of the form
+.Bd -literal -compact
+{
+	state = "",
+	vhid = #,
+	advbase = #,
+	advskew = #
+}
+.Ed
+describing the interface
+.Xr carp 4
+VHIDs.
+.It Dv ai = ifcfg:addr_info(addr )
+Given a
+.Vt struct ifaddrs *
+userdata object as
+.Fa addr ,
+returns a table describing the address.
+The format of the table depends on the type of address.
+.Bl -inset
+.It Nm AF_INET
+addresses are described by a table of the form
+.Bd -literal -compact
+{
+	inet = "",
+	netmask = "",
+	[ destination = "",]
+	[ broadcast = "",]
+	[ vhid = # ]
+}
+.Ed
+.It Nm AF_INET6
+addresses are described by a table of the form
+.Bd -literal -compact
+{
+	inet6 = "",
+	prefixlen = #,
+	flags = { "", ... },
+	[ destination = "",]
+	[ scopeid = #,]
+	[ preferred_lifetime = #, valid_lifetime = #,]
+	[ vhid = # ]
+}
+.Ed
+.It Nm AF_LINK
+addresses are described by a table of the form
+.Bd -literal -compact
+{
+	ether = ""
+}
+.Ed
+for link types
+.Nm IFT_ETHER ,
+.Nm IFT_L2VLAN ,
+and
+.Nm IFT_BRIDGE
+or
+.Bd -literal -compact
+{
+	lladdr = ""
+}
+.Ed
+for other link types.
+.It Nm AF_LOCAL
+addresses are described by a table of the form
+.Bd -literal -compact
+{
+	path = ""
+}
+.Ed
+.El
+.It Dv status = ifcfg:get_bridge_status(name )
+Given the
+.Fa name
+of a
+.Xr bridge 4
+interface, returns a table of the form
+.Bd -literal -compact
+{
+	address_cache_size = #,
+	address_cache_lifetime = #,
+	priority = #,
+	protocol = ""|#,
+	hello_time = #,
+	forward_delay = #,
+	hold_count = #,
+	max_age = #,
+	id = "",
+	root_id = "",
+	root_priority = #,
+	root_path_cost = #,
+	root_port = #,
+	members = { {}, ... }
+}
+.Ed
+where
+.Nm members
+is a list of tables of the form
+.Bd -literal -compact
+{
+	flags = { "", ... },
+	ifmaxaddr = #,
+	port = #,
+	priority = #,
+	[ protocol = ""|#, role = ""|#, state = ""|#]
+}
+.Ed
+.It Dv status = ifcfg:get_lagg_status(name )
+Given the
+.Fa name
+of a
+.Xr lagg 4
+interface, returns a table of the form
+.Bd -literal -compact
+{
+	options = {},
+	stats = {},
+	ports = {}
+}
+.Ed
+where
+.Nm options
+is a table of the form
+.Bd -literal -compact
+{
+	laggproto = "",
+	lagghash = { "", ... },
+	flags = { "", ... },
+	flowid_shift = #,
+	[ rr_limit = # ]
+}
+.Ed
+.Nm stats
+is a table of the form
+.Bd -literal -compact
+{
+	active = #,
+	flapping = #
+}
+.Ed
+and
+.Nm ports
+is a table where the keys are the names of the laggports and the values are
+tables of the form
+.Bd -literal -compact
+{
+	flags = { "", ... },
+	[ lacp_state = { "", ... } ]
+}
+.Ed
+.It Dv lagg = ifcfg:get_laggport_laggdev(name )
+Given the
+.Fa name
+of an interface, returns the parent lagg device name.
+error occurs.
+.It Dv res = ifcfg:destroy(name )
+Given the
+.Fa name
+of an interface, destroys the interface.
+.It Dv name = ifcfg:create(name )
+Given the
+.Fa name
+of in interface, creates the interface and returns the name of the created
+interface.
+.It Dv name = ifcfg:create_vlan(name , vlandev , vlantag )
+Creates a
+.Xr vlan 4 interface with the given
+.Fa name
+attached to
+.Fa vlandev
+and using the vlan number specified by
+.Fa vlantag ,
+returning the name of the create interface.
+occurs.
+.It Dv res = ifcfg:set_vlantag(name , vlandev , vlantag )
+Given the
+.Fa name
+of an existing
+.Xr vlan 4
+interface, sets the specified
+.Fa vlandev
+and
+.Fa vlantag .
+.It Dv cloners = ifcfg:list_cloners( )
+Returns a list of the names of all the interface cloners available on the
+system.
+.It Dv info = ifcfg:get_sfp_info(name )
+Given the
+.Fa name
+of an interface, returns SFP module information as a table of the form
+.Bd -literal -compact
+{
+	[ sfp_id = {},]
+	[ sfp_conn = {},]
+	[ sfp_eth_10g = {},]
+	[ sfp_eth = {},]
+	[ sfp_fc_len = {},]
+	[ sfp_cab_tech = {},]
+	[ sfp_fc_media = {},]
+	[ sfp_eth_1040g = {},]
+	[ sfp_eth_ext = {},]
+	[ sfp_rev = {}]
+}
+.Ed
+where each field, if present, is a table of the form
+.Bd -literal -compact
+{
+	description = "",
+	string = "",
+	value = #
+}
+.Ed
+or
+.Dv nil
+if no SFP module is present.
+.It Dv vendor_info = ifcfg:get_sfp_vendor_info(name )
+Given the
+.Fa name
+of an interface, returns SFP module vendor information as a table of the form
+.Bd -literal -compact
+{
+	name = "",
+	part_number = "",
+	serial_number = "",
+	date = ""
+}
+.Ed
+or
+.Dv nil
+if no SFP module is present.
+.It Dv status = ifcfg:get_sfp_status(name )
+Given the
+.Fa name
+of an interface, returns SFP module status as a table of the form
+.Bd -literal -compact
+{
+	voltage = #,
+	channels = { {}, ... },
+	[ temperature = #,]
+	[ bitrate = #]
+}
+.Ed
+where
+.Nm channels
+is a list of tables of the form
+.Bd -literal -compact
+{
+	rx_power = {},
+	tx_bias = {}
+}
+.Ed
+.Nm rx_power
+is a table of the form
+.Bd -literal -compact
+{
+	value = #,
+	mW = #,
+	dBm = #
+}
+.Ed
+.Nm tx_bias
+is a table of the form
+.Bd -literal -compact
+{
+	raw = #,
+	mA = #
+}
+.Ed
+or
+.Dv nil
+if no SFP module is present.
+.It Dv dump = ifcfg:get_sfp_dump(name )
+Given the
+.Fa name
+of an interface, returns a userdata blob containing a dump of the SFP module's
+I2C memory or
+.Dv nil
+if no SFP module is present.
+The userdata blob coerces to a string formatted as a hex dump similar to
+.Xr ifconfig 8
+with
+.Fl vv .
+.It Vt struct ifaddrs *
+The
+.Vt struct ifaddrs *
+userdata type describes an interface and various address types associated with
+it.
+An object of this type provides two address-agnostic methods:
+.Bl -tag -width XXXX
+.It Dv name = ifaddr:name( )
+Get the name of the interface to which this address is assigned.
+.It Dv flags = ifaddr:flags( )
+Get the flags set on the interface to which this address is assigned.
+.El
+Address-specific information is obtained by passing a
+.Vt struct ifaddrs *
+userdata object to the
+.Fn addr_info
+function.
+.El
+.Sh RETURN VALUES
+The
+.Fn open
+function returns an open
+.Vt ifconfig_handle_t
+userdata object on success, or
+.Dv nil
+on error.
+.Pp
+The
+.Fn error
+function returns multiple values on success, or
+.Dv nil
+on error.
+The values returned are the error type, errno, and the ioctl name if the error
+type is "IOCTL".
+The
+.Fn foreach_iface
+and
+.Fn foreach_ifaddr
+functions return the value returned by the
+.Fa cb
+function on the final iteration, or the initial
+.Fa udata
+argument if
+.Fa cb
+was not invoked.
+.Pp
+The functions
+.Fn get_description ,
+.Fn get_orig_name ,
+.Fn get_status ,
+.Fn get_laggport_laggdev ,
+.Fn create ,
+and
+.Fn create_vlan
+return a string on success, or
+.Dv nil
+on error.
+The string returned by
+.Fn create
+and
+.Fn create_vlan
+is the name of the created interface.
+.Pp
+The functions
+.Fn get_fib ,
+.Fn get_mtu ,
+and
+.Fn get_metric
+return an integer on success, or
+.Dv nil
+on error.
+.Pp
+The functions
+.Fn get_nd6 ,
+.Fn get_groups ,
+and
+.Fn list_cloners
+return a list of strings on success, or
+.Dv nil
+on error.
+.Pp
+The functions
+.Fn get_capabilities ,
+.Fn get_media ,
+.Fn get_carp ,
+.Fn addr_info ,
+.Fn get_bridge_status ,
+.Fn get_lagg_status ,
+.Fn get_sfp_info ,
+.Fn get_sfp_vendor_info ,
+.Fn get_sfp_status ,
+and
+.Fn get_sfp_dump
+return a table described for each function in the
+.Sx DESCRIPTION
+section, or
+.Dv nil
+on error.
+.Pp
+The functions
+.Fn set_description ,
+.Fn unset_description ,
+.Fn set_name ,
+.Fn set_mtu ,
+.Fn set_metric ,
+.Fn set_capabilities ,
+.Fn set_vlantag ,
+and
+.Fn destroy
+return
+.Dv true
+on success, or
+.Dv false
+on error.
+.Pp
+The
+.Fn ifaddr:name
+method returns a string and the
+.Fn ifaddr:flags
+method returns a list of strings.
+.Sh EXAMPLES
+Get a list of the names of all interfaces:
+.Bd -literal -offset indent
+local ifcfg = require('ifconfig').open()
+local ucl = require('ucl')
+
+local ifnames = ifcfg:foreach_iface(function(ifcfg, iface, ifnames)
+	table.insert(ifnames, iface:name())
+	return ifnames
+end, {})
+
+print(ucl.to_json(ifnames))
+.Ed
+.Pp
+Retrieve information about all SFP modules:
+.Bd -literal -offset indent
+local ifcfg = require('ifconfig').open()
+local ucl = require('ucl')
+
+local modules = ifcfg:foreach_iface(function(ifcfg, iface, modules)
+	local name = iface:name()
+	local sfp = ifcfg:get_sfp_info(name)
+	if sfp then
+		modules[name] = {
+			info = sfp,
+			vendor_info = ifcfg:get_sfp_vendor_info(name),
+			status = ifcfg:get_sfp_status(name),
+			-- Not generally interesting,
+			-- but for completeness:
+			-- dump = tostring(ifcfg:get_sfp_dump(name)),
+		}
+	end
+	return modules
+end, {})
+
+print(ucl.to_json(modules))
+.Ed
+.Pp
+Get error information:
+.Bd -literal -offset indent
+local ifcfg = require('ifconfig').open()
+
+local status = ifcfg:get_status('usb')
+if not status then
+	print(ifcfg:error())
+	-- Prints:
+	-- IOCTL	6	SIOCGIFSTATUS
+end
+
+local dump = ifcfg:get_sfp_dump('usb')
+if not dump then
+	local errtype, errno, ioctlname = ifcfg:error()
+	assert(errno == 6) -- ENXIO
+	print(errtype .. ':' .. ioctlname .. ' failed')
+	-- Prints:
+	-- IOCTL:SIOCGI2C failed
+end
+.Ed
+.Sh SEE ALSO
+.Xr ifconfig 8
+.Sh AUTHORS
+.An Ryan Moeller ,
+with inspiration from
+.Nx
+gpio(3lua), by
+.An Mark Balmer .
