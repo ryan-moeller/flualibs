@@ -1,0 +1,113 @@
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.Dd August 23, 2025
+.Dt SYSCTL 3lua
+.Os
+.Sh NAME
+.Nm sysctl ,
+.Nm :oid ,
+.Nm :name ,
+.Nm :format ,
+.Nm :description ,
+.Nm :value ,
+.Nm :iter ,
+.Nm :iter_noskip
+.Nd Lua binding for
+.Xr sysctl 3
+.Sh SYNOPSIS
+.Bd -literal
+sysctl = require('sysctl')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv allmibs = sysctl( )
+.It Dv mib = sysctl(name )
+.It Dv oid = mib:oid( )
+.It Dv name = mib:name( )
+.It Dv kind, format = mib:format( )
+.It Dv description = mib:description( )
+.It Dv value = mib:value( )
+.It Dv mib:value(value )
+.It Dv for descendant in mib:iter( ) do ... end
+.It Dv for descendant in mib:iter_noskip( ) do ... end
+.El
+.Sh DESCRIPTION
+The
+.Nm sysctl
+module provides a binding for the
+.Xr sysctl 3
+library routine.
+.Bl -tag -width XXXX
+.It Dv allmibs = sysctl( )
+Get a special MIB userdata object for iterating all sysctl MIBs.
+.It Dv mib = sysctl(name )
+Get a MIB userdata object for the given sysctl MIB name.
+.It Dv oid = mib:oid( )
+Get the OID of a MIB as a table of integers.
+.It Dv name = mib:name( )
+Get the name of a MIB as a string of dotted components.
+.It Dv kind, format = mib:format( )
+Get the kind and format of a MIB as an integer and a string, respectively.
+.It Dv description = mib:description( )
+Get the description of a MIB as a string, or
+.Dv nil
+if a description does not exist.
+.It Dv value = mib:value( )
+Get the value of a MIB as either a string or an integer, depending on the kind
+of the sysctl MIB.
+.It Dv mib:value(value )
+Set a new value for a MIB.
+The value must be either a string or an integer, according to the kind of the
+sysctl MIB.
+.It Dv for descendant in mib:iter( ) do ... end
+Iterate all descendants of a node MIB, except those flagged with
+.Dv CTLFLAG_SKIP .
+.It Dv for descendant in mib:iter_noskip( ) do ... end
+Iterate all descendants of a node MIB, including those flagged with
+.Dv CTLFLAG_SKIP .
+.El
+.Sh EXAMPLES
+Print all sysctl names and descriptions:
+.Bd -literal -offset indent
+local sysctl = require('sysctl')
+
+for mib in sysctl():iter() do
+	print(mib:name(), mib:description())
+end
+.Ed
+Print all kstat.zfs sysctl values, including ones usually skipped:
+.Bd -literal -offset indent
+local sysctl = require('sysctl')
+
+for mib in sysctl('kstat.zfs'):iter_noskip() do
+	print(mib:name(), mib:value())
+end
+.Ed
+.Sh SEE ALSO
+.Xr sysctl 3
+.Sh AUTHORS
+.An Ryan Moeller

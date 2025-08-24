@@ -11,6 +11,7 @@ SUBDIR= \
 	libmq \
 	libroken \
 	libxor \
+	sysctl \
 
 .if exists(${SRCTOP}/contrib/bsddialog/lib/bsddialog.h)
 SUBDIR+=libbsddialog
