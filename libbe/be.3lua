@@ -207,7 +207,9 @@ the origin snapshot is destroyed as well.
 Mount the given boot environment.
 If
 .Fa mountpoint
-is nil, a mountpoint will be created in /tmp.
+is
+.Dv nil ,
+a mountpoint will be created in /tmp.
 The final mouintpoint is returned.
 Passing
 .Nm MNT_FORCE
