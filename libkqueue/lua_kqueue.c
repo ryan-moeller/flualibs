@@ -70,7 +70,7 @@ l_kevent(lua_State *L)
 	kqp = (int *)luaL_checkudata(L, 1, KQUEUE_METATABLE);
 	kq = *kqp;
 
-	if (lua_gettop(L) == 1) {
+	if (lua_gettop(L) == 1 || lua_type(L, 2) == LUA_TNIL) {
 		changelist = NULL;
 		nchanges = 0;
 	} else {
