@@ -122,6 +122,11 @@ l_kevent(lua_State *L)
 			lua_pushstring(L, "udata");
 			type = lua_rawget(L, -2);
 			luaL_argcheck(L, type == LUA_TTHREAD, 2, "`changelist' invalid udata");
+			/*
+			 * XXX: This pointer has to outlive the event in the kqueue, but the
+			 * kernel doesn't tell us when the event is removed.  Dealing with this
+			 * is up to the user...
+			 */
 			udata = lua_tothread(L, -1);
 			lua_pop(L, 1);
 
