@@ -59,6 +59,7 @@ l_sysctl(lua_State *L)
 	const char *name;
 	int error;
 
+	lua_remove(L, 1); /* func table from the __call metamethod */
 	name = luaL_optstring(L, 1, NULL);
 	mib = (struct mib *)lua_newuserdatauv(L, sizeof *mib, 0);
 	luaL_setmetatable(L, MIB_METATABLE);
@@ -469,12 +470,66 @@ int
 luaopen_sysctl(lua_State *L)
 {
 	luaL_newmetatable(L, MIB_METATABLE);
-
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
 	luaL_setfuncs(L, l_mib_meta, 0);
 
+	lua_newtable(L);
+	/* Set up the library in a metatable so we can call it. */
+	lua_newtable(L);
 	lua_pushcfunction(L, l_sysctl);
-	/* TODO: constants (on the function?) */
-	return (1);
+	lua_setfield(L, -2, "__call");
+#define SETCONST(ident) ({ \
+	lua_pushinteger(L, ident); \
+	lua_setfield(L, -2, #ident); \
+})
+	SETCONST(CTL_MAXNAME);
+	SETCONST(CTLTYPE);
+	SETCONST(CTLTYPE_NODE);
+	SETCONST(CTLTYPE_INT);
+	SETCONST(CTLTYPE_STRING);
+	SETCONST(CTLTYPE_S64);
+	SETCONST(CTLTYPE_OPAQUE);
+	SETCONST(CTLTYPE_STRUCT);
+	SETCONST(CTLTYPE_UINT);
+	SETCONST(CTLTYPE_LONG);
+	SETCONST(CTLTYPE_ULONG);
+	SETCONST(CTLTYPE_U64);
+	SETCONST(CTLTYPE_U8);
+	SETCONST(CTLTYPE_U16);
+	SETCONST(CTLTYPE_S8);
+	SETCONST(CTLTYPE_S16);
+	SETCONST(CTLTYPE_S32);
+	SETCONST(CTLTYPE_U32);
+	SETCONST(CTLFLAG_RD);
+	SETCONST(CTLFLAG_WR);
+	SETCONST(CTLFLAG_RW);
+	SETCONST(CTLFLAG_DORMANT);
+	SETCONST(CTLFLAG_ANYBODY);
+	SETCONST(CTLFLAG_SECURE);
+	SETCONST(CTLFLAG_PRISON);
+	SETCONST(CTLFLAG_DYN);
+	SETCONST(CTLFLAG_SKIP);
+	SETCONST(CTLMASK_SECURE);
+	SETCONST(CTLFLAG_TUN);
+	SETCONST(CTLFLAG_RDTUN);
+	SETCONST(CTLFLAG_RWTUN);
+	SETCONST(CTLFLAG_MPSAFE);
+	SETCONST(CTLFLAG_VNET);
+	SETCONST(CTLFLAG_DYING);
+	SETCONST(CTLFLAG_CAPRD);
+	SETCONST(CTLFLAG_CAPWR);
+	SETCONST(CTLFLAG_STATS);
+	SETCONST(CTLFLAG_NOFETCH);
+	SETCONST(CTLFLAG_CAPRW);
+	SETCONST(CTLFLAG_NEEDGIANT);
+	SETCONST(CTLSHIFT_SECURE);
+	SETCONST(CTLFLAG_SECURE1);
+	SETCONST(CTLFLAG_SECURE2);
+	SETCONST(CTLFLAG_SECURE3);
+	/* XXX: not defining identifiers here, we don't use them */
+#undef SETCONST
+	lua_pushvalue(L, -1);
+	lua_setfield(L, -2, "__index");
+	return (lua_setmetatable(L, -2));
 }
