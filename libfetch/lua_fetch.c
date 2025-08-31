@@ -184,12 +184,38 @@ l_fetch_list(lua_State *L)
 	return (1);
 }
 
+static int
+l_fetch_request(lua_State *L)
+{
+	const char *URL, *method, *flags, *content_type, *body;
+	struct url *u;
+	FILE *f;
+
+	URL = luaL_checkstring(L, 1);
+	method = luaL_checkstring(L, 2);
+	flags = luaL_checkstring(L, 3);
+	content_type = luaL_checkstring(L, 4);
+	body = luaL_checkstring(L, 5);
+	u = fetchParseURL(URL);
+	if (u == NULL) {
+		return (fetcherr(L));
+	}
+	f = fetchReqHTTP(u, method, flags, content_type, body);
+	fetchFreeURL(u);
+	if (f == NULL) {
+		return (fetcherr(L));
+	}
+	newstream(L, f);
+	return (1);
+}
+
 static const struct luaL_Reg l_fetch_funcs[] = {
 	{"get", l_fetch_get},
 	{"put", l_fetch_put},
 	{"xget", l_fetch_xget},
 	{"stat", l_fetch_stat},
 	{"list", l_fetch_list},
+	{"request", l_fetch_request},
 	{NULL, NULL}
 };
 
