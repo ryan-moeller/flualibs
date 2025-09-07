@@ -2,6 +2,7 @@ SRCTOP?= /usr/src
 .export SRCTOP
 
 SUBDIR= \
+	b64 \
 	fileno \
 	libfetch \
 	libifconfig \
@@ -9,7 +10,6 @@ SUBDIR= \
 	libkqueue \
 	libmd \
 	libmq \
-	libroken \
 	libxor \
 	sendfile \
 	sysctl \

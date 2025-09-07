@@ -24,7 +24,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.Dd March 30, 2024
+.Dd September 6, 2025
 .Dt MD 3lua
 .Os
 .Sh NAME
@@ -75,7 +75,7 @@ sha1:update("Hello, FreeBSD!")
 hash = sha1:final()
 .Ed
 .Sh SEE ALSO
-.Xr roken 3lua Pq Pa https://github.com/ryan-moeller/flualibs ,
+.Xr b64 3lua Pq Pa https://github.com/ryan-moeller/flualibs ,
 .Xr xor 3lua Pq Pa https://github.com/ryan-moeller/flualibs
 .Sh AUTHORS
 .An Ryan Moeller

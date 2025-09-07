@@ -1,15 +1,13 @@
 
-SHLIB_NAME=	roken.so
+SHLIB_NAME=	b64.so
 SHLIBDIR=	${LIBDIR}/flua
 
-SRCS+=		lua_roken.c
+SRCS+=		lua_b64.c
 
 CFLAGS+= \
 	-I${SRCTOP}/contrib/lua/src \
 	-I${SRCTOP}/lib/liblua \
 
-LDADD+=	-lroken
-
-MAN=	roken.3lua
+MAN=	b64.3lua
 
 .include <bsd.lib.mk>

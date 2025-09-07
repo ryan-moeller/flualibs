@@ -25,7 +25,7 @@
  * SUCH DAMAGE.
  */
 
-#include <base64.h>
+#include <resolv.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -35,28 +35,31 @@
 
 #include "../luaerror.h"
 
-int luaopen_roken(lua_State *);
+int luaopen_b64(lua_State *);
 
 static int
 l_base64_encode(lua_State *L)
 {
-	const char *data;
-	size_t len;
+	const u_char *data;
+	size_t len, strlen;
 	char *str;
 	int res;
 
-	data = luaL_checklstring(L, 1, &len);
+	data = (const u_char *)luaL_checklstring(L, 1, &len);
 
-	res = base64_encode(data, len, &str);
+	/* Base64 encodes 3 bytes into 4 characters. */
+	strlen = 4 * (len + 2) / 3 + 1; /* len + 2 to round up */
+	str = malloc(strlen);
+	if (str == NULL)
+		return (luaL_error(L, "malloc failed"));
+
+	res = b64_ntop(data, len, str, strlen);
 	if (res == -1) {
-		luaL_error(L, "base64_encode failed");
+		free(str);
+		return (luaL_error(L, "b64_ntop failed"));
 	}
-	len = res;
-
-	lua_pushlstring(L, str, len);
-
+	lua_pushlstring(L, str, res);
 	free(str);
-	
 	return (1);
 }
 
@@ -65,35 +68,36 @@ l_base64_decode(lua_State *L)
 {
 	const char *str;
 	size_t len;
-	char *data;
+	u_char *data;
 	int res;
 
 	str = luaL_checklstring(L, 1, &len);
 
-	/* each char represents 6 bits, so the data is 3/4 * len bytes long */
+	/* Each char represents 6 bits, so the data is 3/4 * len bytes long. */
 	len = 3 * len / 4;
-
 	data = malloc(len);
-	res = base64_decode(str, data);
+	if (data == NULL)
+		return (luaL_error(L, "malloc failed"));
+
+	res = b64_pton(str, data, len);
 	if (res == -1) {
 		free(data);
-		luaL_error(L, "base64_decode failed");
+		return (luaL_error(L, "b64_pton failed"));
 	}
-	lua_pushlstring(L, data, len);
+	lua_pushlstring(L, (char *)data, res);
 	free(data);
-	
 	return (1);
 }
 
-static const struct luaL_Reg l_roken_funcs[] = {
+static const struct luaL_Reg l_b64_funcs[] = {
 	{"encode", l_base64_encode},
 	{"decode", l_base64_decode},
 	{NULL, NULL}
 };
 
 int
-luaopen_roken(lua_State *L)
+luaopen_b64(lua_State *L)
 {
-	luaL_newlib(L, l_roken_funcs);
+	luaL_newlib(L, l_b64_funcs);
 	return (1);
 }
