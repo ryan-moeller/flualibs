@@ -10,9 +10,9 @@ task:
     - name: releases/amd64/14.3-RELEASE
       freebsd_instance:
         image_family: freebsd-14-3
-    - name: snapshots/amd64/15.0-PRERELEASE
+    - name: releases/amd64/15.0-ALPHA1
       freebsd_instance:
-        image_family: freebsd-15-0-snap
+        image_family: freebsd-15-0
   stateful: false
   env:
     WD: /tmp/wd
@@ -27,5 +27,5 @@ task:
   manlint_script:
     - makewhatis /usr/share/man
     # XXX: too many xrefs to manpages that don't exist in releases
-    - test $(freebsd-version) '!=' 15.0-PRERELEASE || make manlint
+    - test $(freebsd-version) '!=' 15.0-ALPHA1 || make manlint
   # TODO: tests
