@@ -1,7 +1,7 @@
 .\"
 .\" Copyright (c) 2020-2025 Ryan Moeller
 .\"
-.\" SPDX-License-Identifier: BSD-2-Clause-FreeBSD
+.\" SPDX-License-Identifier: BSD-2-Clause
 .\"
 .Dd May 29, 2025
 .Dt IFCONFIG 3lua
