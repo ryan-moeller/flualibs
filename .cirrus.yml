@@ -45,3 +45,76 @@ task:
     # XXX: too many xrefs to manpages that don't exist in previous releases
     - test $(sysctl -n kern.osreldate) -lt 1500000 || make manlint
   # TODO: tests
+
+task:
+  only_if: ${CIRRUS_TAG} != '' && ${CIRRUS_REPO_FULL_NAME} == 'ryan-moeller/flualibs'
+  name: release/draft
+  depends_on:
+    - releases/amd64/13.5-RELEASE
+    - releases/amd64/14.3-RELEASE
+    - releases/amd64/15.0-RC2
+  freebsd_instance:
+    image_family: freebsd-15-0-amd64-ufs
+  stateful: true
+  env:
+    GH_TOKEN: ENCRYPTED[4aec021ceb5b1be079e6c10201b7ec7b3cc29eb0b437c841d501b8cf4e0eee257ce5e8792a3bdd0348504c3f9761eb1f]
+  script:
+    - pkg install -y gh
+    - gh release create ${CIRRUS_TAG} --draft --prerelease
+
+task:
+  only_if: ${CIRRUS_TAG} != '' && ${CIRRUS_REPO_FULL_NAME} == 'ryan-moeller/flualibs'
+  depends_on: release/draft
+  matrix:
+    - name: pkg/releases/amd64/13.5-RELEASE
+      freebsd_instance:
+        image_family: freebsd-13-5
+    - name: pkg/releases/amd64/14.3-RELEASE
+      freebsd_instance:
+        image_family: freebsd-14-3
+    - name: pkg/releases/amd64/15.0-RC2
+      freebsd_instance:
+        image_family: freebsd-15-0-amd64-ufs
+  stateful: true
+  env:
+    ARCHIVES_BASE: https://download.freebsd.org/${CIRRUS_TASK_NAME#pkg/}
+    GH_TOKEN: ENCRYPTED[4aec021ceb5b1be079e6c10201b7ec7b3cc29eb0b437c841d501b8cf4e0eee257ce5e8792a3bdd0348504c3f9761eb1f]
+    PKG_FILE: nbd-client-${CIRRUS_TAG}.pkg
+  manifest_preamble_file:
+    path: MANIFEST
+    from_contents: |
+      name flualibs
+      origin ryan-moeller/flualibs
+      comment Various C modules for FreeBSD's Lua interpreter (flua)
+      desc <<EOD
+      A set of modules wrapping FreeBSD base system functionality for flua.
+
+      For most uses, the Lua packages in the ports tree are to be preferred.
+      But, sometimes you just want to make flua do a thing.
+      EOD
+      www https://github.com/ryan-moeller/flualibs
+      maintainer rmoeller.dev@gmail.com
+      licenses [ BSD2CLAUSE ]
+      prefix /
+  build_setup_script:
+    - test -e /usr/src/contrib/lua/src/lua.h || fetch -o - ${ARCHIVES_BASE}/src.txz | tar x -C /
+  package_script:
+    - make -j${CIRRUS_CPU}
+    - mkdir -p stage/usr/lib/flua stage/usr/lib/debug/usr/lib/flua stage/usr/share/man/man3lua
+    - make DESTDIR=../stage install
+    - echo "version ${CIRRUS_TAG}" >>MANIFEST
+    - echo "files {" >>MANIFEST
+    - find stage -type f -or -type l | sed 's/^stage\(.*\)$/\1 {}/' >>MANIFEST
+    - echo "}" >>MANIFEST
+    - cat MANIFEST
+    - pkg create -r stage -M MANIFEST -v
+  upload_script:
+    - pkg install -y gh
+    - | # to escape the ': ' in the headers below
+      gh api \
+      --method POST \
+      -H "Accept: application/vnd.github+json" \
+      -H "X-GitHub-Api-Version: 2022-11-28" \
+      /repos/${CIRRUS_REPO_FULL_NAME}/releases/${CIRRUS_RELEASE}/assets
+      --field name=${CIRRUS_TASK_NAME#pkg/}/${PKG_FILE} \
+      --input ${PKG_FILE} # docs saying -f '@example.zip' are wrong (github/docs#34086)
