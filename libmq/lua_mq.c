@@ -49,7 +49,7 @@ l_mq_open(lua_State *L)
 	int oflag;
 	mqd_t mq, *mqp;
 
-	mqp = (mqd_t *)lua_newuserdata(L, sizeof(*mqp));
+	mqp = lua_newuserdatauv(L, sizeof(*mqp), 0);
 	luaL_setmetatable(L, MQ_METATABLE);
 	*mqp = (mqd_t)-1;
 

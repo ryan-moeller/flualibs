@@ -59,7 +59,7 @@ l_be_init(lua_State *L)
 	if (hdl == NULL) {
 		luaL_error(L, "libbe_init");
 	}
-	hdlp = (libbe_handle_t **)lua_newuserdata(L, sizeof(*hdlp));
+	hdlp = lua_newuserdatauv(L, sizeof(*hdlp), 0);
 	luaL_setmetatable(L, LIBBE_METATABLE);
 	*hdlp = hdl;
 	return (1);

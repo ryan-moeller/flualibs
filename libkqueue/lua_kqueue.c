@@ -47,7 +47,7 @@ l_kqueue(lua_State *L)
 {
 	int kq, *kqp;
 
-	kqp = (int *)lua_newuserdata(L, sizeof(int));
+	kqp = lua_newuserdatauv(L, sizeof(int), 0);
 	luaL_setmetatable(L, KQUEUE_METATABLE);
 	*kqp = -1;
 

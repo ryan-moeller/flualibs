@@ -487,7 +487,7 @@ foreach_cb(ifconfig_handle_t *h __unused, struct ifaddrs *ifa, void *udata)
 	lua_insert(L, 4); /* -> h,cb,cb,h,acc */
 
 	/* Push the ifa userdata. */
-	ifap = lua_newuserdata(L, sizeof(*ifap)); /* -> h,cb,cb,h,acc,ifa */
+	ifap = lua_newuserdatauv(L, sizeof(*ifap), 0); /* -> h,cb,cb,h,acc,ifa */
 	assert(ifap != NULL);
 	*ifap = ifa;
 	luaL_getmetatable(L, STRUCT_IFADDRS_META);
@@ -1920,7 +1920,7 @@ l_ifconfig_get_sfp_dump(lua_State *L)
 	h = l_ifconfig_checkhandle(L, 1);
 	luaL_checkstring(L, 2);
 
-	dump = lua_newuserdata(L, sizeof(*dump));
+	dump = lua_newuserdatauv(L, sizeof(*dump), 0);
 	assert(dump != NULL);
 	luaL_getmetatable(L, SFP_DUMP_META);
 	lua_setmetatable(L, -2);
@@ -2125,7 +2125,7 @@ l_ifconfig_open(lua_State *L)
 		return (1);
 	}
 
-	hp = lua_newuserdata(L, sizeof(*hp));
+	hp = lua_newuserdatauv(L, sizeof(*hp), 0);
 	assert(hp != NULL);
 	*hp = h;
 	luaL_getmetatable(L, IFCONFIG_HANDLE_META);
