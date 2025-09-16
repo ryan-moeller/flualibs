@@ -285,9 +285,9 @@ and
 are tables of the form
 .Bd -literal -compact
 {
-	[ type = "",]
-	[ subtype = "",]
-	[ mode = "",]
+	[ type = "", ]
+	[ subtype = "", ]
+	[ mode = "", ]
 	options = { "", ... }
 }
 .Ed
@@ -373,8 +373,8 @@ addresses are described by a table of the form
 {
 	inet = "",
 	netmask = "",
-	[ destination = "",]
-	[ broadcast = "",]
+	[ destination = "", ]
+	[ broadcast = "", ]
 	[ vhid = # ]
 }
 .Ed
@@ -385,9 +385,9 @@ addresses are described by a table of the form
 	inet6 = "",
 	prefixlen = #,
 	flags = { "", ... },
-	[ destination = "",]
-	[ scopeid = #,]
-	[ preferred_lifetime = #, valid_lifetime = #,]
+	[ destination = "", ]
+	[ scopeid = #, ]
+	[ preferred_lifetime = #, valid_lifetime = #, ]
 	[ vhid = # ]
 }
 .Ed
@@ -451,7 +451,7 @@ is a list of tables of the form
 	ifmaxaddr = #,
 	port = #,
 	priority = #,
-	[ protocol = ""|#, role = ""|#, state = ""|#]
+	[ protocol = ""|#, role = ""|#, state = ""|# ]
 }
 .Ed
 .It Dv status = ifcfg:get_lagg_status(name )
@@ -539,16 +539,16 @@ Given the
 of an interface, returns SFP module information as a table of the form
 .Bd -literal -compact
 {
-	[ sfp_id = {},]
-	[ sfp_conn = {},]
-	[ sfp_eth_10g = {},]
-	[ sfp_eth = {},]
-	[ sfp_fc_len = {},]
-	[ sfp_cab_tech = {},]
-	[ sfp_fc_media = {},]
-	[ sfp_eth_1040g = {},]
-	[ sfp_eth_ext = {},]
-	[ sfp_rev = {}]
+	[ sfp_id = {}, ]
+	[ sfp_conn = {}, ]
+	[ sfp_eth_10g = {}, ]
+	[ sfp_eth = {}, ]
+	[ sfp_fc_len = {}, ]
+	[ sfp_cab_tech = {}, ]
+	[ sfp_fc_media = {}, ]
+	[ sfp_eth_1040g = {}, ]
+	[ sfp_eth_ext = {}, ]
+	[ sfp_rev = {} ]
 }
 .Ed
 where each field, if present, is a table of the form
@@ -585,8 +585,8 @@ of an interface, returns SFP module status as a table of the form
 {
 	voltage = #,
 	channels = { {}, ... },
-	[ temperature = #,]
-	[ bitrate = #]
+	[ temperature = #, ]
+	[ bitrate = # ]
 }
 .Ed
 where
