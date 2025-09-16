@@ -61,9 +61,9 @@ l_sysctl(lua_State *L)
 
 	lua_remove(L, 1); /* func table from the __call metamethod */
 	name = luaL_optstring(L, 1, NULL);
-	mib = (struct mib *)lua_newuserdatauv(L, sizeof *mib, 0);
+	mib = (struct mib *)lua_newuserdatauv(L, sizeof(*mib), 0);
 	luaL_setmetatable(L, MIB_METATABLE);
-	memset(mib, 0, sizeof *mib);
+	memset(mib, 0, sizeof(*mib));
 	if (name == NULL) {
 		mib->oid[0] = CTL_KERN;
 		mib->oidlen = 1;
@@ -91,7 +91,7 @@ l_mib_gc(lua_State *L)
 	free(mib->name);
 	free(mib->description);
 	free(mib->format);
-	memset(mib, 0, sizeof *mib);
+	memset(mib, 0, sizeof(*mib));
 	return (0);
 }
 
@@ -124,7 +124,7 @@ l_mib_format(lua_State *L)
 		qoid[0] = CTL_SYSCTL;
 		qoid[1] = CTL_SYSCTL_OIDFMT;
 		memcpy(qoid + 2, mib->oid, mib->oidlen * sizeof(int));
-		length = sizeof buf;
+		length = sizeof(buf);
 		memset(buf, 0, length);
 		error = sysctl(qoid, mib->oidlen + 2, buf, &length, NULL, 0);
 		if (error != 0) {
@@ -156,7 +156,7 @@ l_mib_name(lua_State *L)
 		qoid[0] = CTL_SYSCTL;
 		qoid[1] = CTL_SYSCTL_NAME;
 		memcpy(qoid + 2, mib->oid, mib->oidlen * sizeof(int));
-		length = sizeof buf;
+		length = sizeof(buf);
 		memset(buf, 0, length);
 		error = sysctl(qoid, mib->oidlen + 2, buf, &length, NULL, 0);
 		if (error != 0) {
@@ -186,7 +186,7 @@ l_mib_description(lua_State *L)
 		qoid[0] = CTL_SYSCTL;
 		qoid[1] = CTL_SYSCTL_OIDDESCR;
 		memcpy(qoid + 2, mib->oid, mib->oidlen * sizeof(int));
-		length = sizeof buf;
+		length = sizeof(buf);
 		memset(buf, 0, length);
 		error = sysctl(qoid, mib->oidlen + 2, buf, &length, NULL, 0);
 		if (error != 0) {
@@ -310,73 +310,73 @@ l_mib_value(lua_State *L)
 	case CTLTYPE_INT: {
 		int value = luaL_checkinteger(L, 2);
 		error = sysctl(mib->oid, mib->oidlen, NULL, NULL, &value,
-		    sizeof value);
+		    sizeof(value));
 		break;
 	}
 	case CTLTYPE_UINT: {
 		u_int value = luaL_checkinteger(L, 2);
 		error = sysctl(mib->oid, mib->oidlen, NULL, NULL, &value,
-		    sizeof value);
+		    sizeof(value));
 		break;
 	}
 	case CTLTYPE_LONG: {
 		long value = luaL_checkinteger(L, 2);
 		error = sysctl(mib->oid, mib->oidlen, NULL, NULL, &value,
-		    sizeof value);
+		    sizeof(value));
 		break;
 	}
 	case CTLTYPE_ULONG: {
 		u_long value = luaL_checkinteger(L, 2);
 		error = sysctl(mib->oid, mib->oidlen, NULL, NULL, &value,
-		    sizeof value);
+		    sizeof(value));
 		break;
 	}
 	case CTLTYPE_S8: {
 		int8_t value = luaL_checkinteger(L, 2);
 		error = sysctl(mib->oid, mib->oidlen, NULL, NULL, &value,
-		    sizeof value);
+		    sizeof(value));
 		break;
 	}
 	case CTLTYPE_U8: {
 		uint8_t value = luaL_checkinteger(L, 2);
 		error = sysctl(mib->oid, mib->oidlen, NULL, NULL, &value,
-		    sizeof value);
+		    sizeof(value));
 		break;
 	}
 	case CTLTYPE_S16: {
 		int16_t value = luaL_checkinteger(L, 2);
 		error = sysctl(mib->oid, mib->oidlen, NULL, NULL, &value,
-		    sizeof value);
+		    sizeof(value));
 		break;
 	}
 	case CTLTYPE_U16: {
 		uint16_t value = luaL_checkinteger(L, 2);
 		error = sysctl(mib->oid, mib->oidlen, NULL, NULL, &value,
-		    sizeof value);
+		    sizeof(value));
 		break;
 	}
 	case CTLTYPE_S32: {
 		int32_t value = luaL_checkinteger(L, 2);
 		error = sysctl(mib->oid, mib->oidlen, NULL, NULL, &value,
-		    sizeof value);
+		    sizeof(value));
 		break;
 	}
 	case CTLTYPE_U32: {
 		uint32_t value = luaL_checkinteger(L, 2);
 		error = sysctl(mib->oid, mib->oidlen, NULL, NULL, &value,
-		    sizeof value);
+		    sizeof(value));
 		break;
 	}
 	case CTLTYPE_S64: {
 		int64_t value = luaL_checkinteger(L, 2);
 		error = sysctl(mib->oid, mib->oidlen, NULL, NULL, &value,
-		    sizeof value);
+		    sizeof(value));
 		break;
 	}
 	case CTLTYPE_U64: {
 		uint64_t value = luaL_checkinteger(L, 2);
 		error = sysctl(mib->oid, mib->oidlen, NULL, NULL, &value,
-		    sizeof value);
+		    sizeof(value));
 		break;
 	}
 	case CTLTYPE_STRING: {
@@ -410,14 +410,14 @@ l_mib_iter_next(lua_State *L)
 	int error;
 
 	prev = (struct mib *)luaL_checkudata(L, 2, MIB_METATABLE);
-	next = (struct mib *)lua_newuserdatauv(L, sizeof *next, 0);
+	next = (struct mib *)lua_newuserdatauv(L, sizeof(*next), 0);
 	luaL_setmetatable(L, MIB_METATABLE);
-	memset(next, 0, sizeof *next);
+	memset(next, 0, sizeof(*next));
 	next->all = prev->all;
 	qoid[0] = CTL_SYSCTL;
 	qoid[1] = luaL_checkinteger(L, lua_upvalueindex(1));
 	memcpy(qoid + 2, prev->oid, prev->oidlen * sizeof(int));
-	size = sizeof next->oid;
+	size = sizeof(next->oid);
 	error = sysctl(qoid, prev->oidlen + 2, next->oid, &size, NULL, 0);
 	if (error != 0) {
 		if (errno == ENOENT) {

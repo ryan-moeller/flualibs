@@ -103,7 +103,7 @@ l_bsddialog_initconf(lua_State *L)
 {
 	struct bsddialog_conf *conf;
 
-	conf = (struct bsddialog_conf *)lua_newuserdata(L, sizeof *conf);
+	conf = (struct bsddialog_conf *)lua_newuserdata(L, sizeof(*conf));
 	luaL_setmetatable(L, BSDDIALOG_CONF_METATABLE);
 	if (bsddialog_initconf(conf) == BSDDIALOG_ERROR) {
 		luaL_error(L, "bsddialog_initconf: %s", bsddialog_geterror());

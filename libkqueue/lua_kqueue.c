@@ -47,7 +47,7 @@ l_kqueue(lua_State *L)
 {
 	int kq, *kqp;
 
-	kqp = (int *)lua_newuserdata(L, sizeof (int));
+	kqp = (int *)lua_newuserdata(L, sizeof(int));
 	luaL_setmetatable(L, KQUEUE_METATABLE);
 	*kqp = -1;
 
@@ -76,7 +76,7 @@ l_kevent(lua_State *L)
 	} else {
 		luaL_argcheck(L, lua_type(L, 2) == LUA_TTABLE, 2, "`changelist' expected");
 		nchanges = lua_rawlen(L, 2);
-		changelist = (struct kevent *)malloc(nchanges * sizeof (struct kevent));
+		changelist = (struct kevent *)malloc(nchanges * sizeof(struct kevent));
 		for (size_t i = 1; i <= nchanges; ++i) {
 			uintptr_t ident;
 			short filter;

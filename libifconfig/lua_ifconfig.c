@@ -253,23 +253,23 @@ push_inet4_addrinfo(lua_State *L, ifconfig_handle_t *h, struct ifaddrs *ifa)
 	lua_newtable(L);
 
 	/* TODO: can this just be inet_ntoa? */
-	inet_ntop(AF_INET, &addr.sin->sin_addr, addr_buf, sizeof addr_buf);
+	inet_ntop(AF_INET, &addr.sin->sin_addr, addr_buf, sizeof(addr_buf));
 	lua_pushstring(L, addr_buf);
 	lua_setfield(L, -2, "inet");
 
 	if (addr.dst != NULL) {
 		lua_pushstring(L, inet_ntoa_r(addr.dst->sin_addr, addr_buf,
-		    sizeof addr_buf));
+		    sizeof(addr_buf)));
 		lua_setfield(L, -2, "destination");
 	}
 
 	lua_pushstring(L, inet_ntoa_r(addr.netmask->sin_addr, addr_buf,
-	    sizeof addr_buf));
+	    sizeof(addr_buf)));
 	lua_setfield(L, -2, "netmask");
 
 	if (addr.broadcast != NULL) {
 		lua_pushstring(L, inet_ntoa_r(addr.broadcast->sin_addr,
-		    addr_buf, sizeof addr_buf));
+		    addr_buf, sizeof(addr_buf)));
 		lua_setfield(L, -2, "broadcast");
 	}
 
@@ -297,15 +297,15 @@ push_inet6_addrinfo(lua_State *L, ifconfig_handle_t *h, struct ifaddrs *ifa)
 	lua_newtable(L);
 
 	if (getnameinfo((struct sockaddr *)addr.sin6, addr.sin6->sin6_len,
-	    addr_buf, sizeof addr_buf, NULL, 0, NI_NUMERICHOST) != 0)
+	    addr_buf, sizeof(addr_buf), NULL, 0, NI_NUMERICHOST) != 0)
 		/* TODO: can this just be inet_ntoa? */
 		inet_ntop(AF_INET6, &addr.sin6->sin6_addr, addr_buf,
-		    sizeof addr_buf);
+		    sizeof(addr_buf));
 	lua_pushstring(L, addr_buf);
 	lua_setfield(L, -2, "inet6");
 
 	if (addr.dstin6 != NULL) {
-		inet_ntop(AF_INET6, addr.dstin6, addr_buf, sizeof addr_buf);
+		inet_ntop(AF_INET6, addr.dstin6, addr_buf, sizeof(addr_buf));
 		lua_pushstring(L, addr_buf);
 		lua_setfield(L, -2, "destination");
 	}
@@ -487,7 +487,7 @@ foreach_cb(ifconfig_handle_t *h __unused, struct ifaddrs *ifa, void *udata)
 	lua_insert(L, 4); /* -> h,cb,cb,h,acc */
 
 	/* Push the ifa userdata. */
-	ifap = lua_newuserdata(L, sizeof ifa); /* -> h,cb,cb,h,acc,ifa */
+	ifap = lua_newuserdata(L, sizeof(*ifap)); /* -> h,cb,cb,h,acc,ifa */
 	assert(ifap != NULL);
 	*ifap = ifa;
 	luaL_getmetatable(L, STRUCT_IFADDRS_META);
@@ -995,8 +995,8 @@ l_ifconfig_get_groups(lua_State *L)
 	lua_newtable(L);
 
 	for (ifg = ifgr.ifgr_groups;
-	    ifg != NULL && ifgr.ifgr_len >= sizeof *ifg;
-	    ++ifg, ifgr.ifgr_len -= sizeof *ifg) {
+	    ifg != NULL && ifgr.ifgr_len >= sizeof(*ifg);
+	    ++ifg, ifgr.ifgr_len -= sizeof(*ifg)) {
 		if (strcmp(ifg->ifgrq_group, "all") == 0)
 			continue;
 		lua_pushstring(L, ifg->ifgrq_group);
@@ -2125,7 +2125,7 @@ l_ifconfig_open(lua_State *L)
 		return (1);
 	}
 
-	hp = lua_newuserdata(L, sizeof h);
+	hp = lua_newuserdata(L, sizeof(*hp));
 	assert(hp != NULL);
 	*hp = h;
 	luaL_getmetatable(L, IFCONFIG_HANDLE_META);

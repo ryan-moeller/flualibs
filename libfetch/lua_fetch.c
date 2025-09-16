@@ -54,7 +54,7 @@ newstream(lua_State *L, FILE *f)
 {
 	luaL_Stream *stream;
 
-	stream = (luaL_Stream *)lua_newuserdatauv(L, sizeof *stream, 0);
+	stream = (luaL_Stream *)lua_newuserdatauv(L, sizeof(*stream), 0);
 	stream->f = f;
 	stream->closef = closestream;
 	luaL_setmetatable(L, LUA_FILEHANDLE);

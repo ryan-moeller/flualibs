@@ -45,7 +45,7 @@ l_sha1_init(lua_State *L)
 {
 	SHA_CTX *ctx;
 
-	ctx = (SHA_CTX *)lua_newuserdata(L, sizeof (SHA_CTX));
+	ctx = (SHA_CTX *)lua_newuserdata(L, sizeof(SHA_CTX));
 	luaL_getmetatable(L, SHA_CTX_METATABLE);
 	lua_setmetatable(L, -2);
 
@@ -79,7 +79,7 @@ l_sha1_final(lua_State *L)
 
 	SHA1_Final(digest, ctx);
 
-	lua_pushlstring(L, (const char *)digest, sizeof digest);
+	lua_pushlstring(L, (const char *)digest, sizeof(digest));
 
 	return (1);
 }

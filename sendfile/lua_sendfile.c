@@ -52,7 +52,7 @@ get_hdtr(lua_State *L, int arg, struct sf_hdtr *hdtr)
 			hdtr->headers = NULL;
 		} else {
 			hdtr->headers =
-			    malloc(hdtr->hdr_cnt * sizeof *hdtr->headers);
+			    malloc(hdtr->hdr_cnt * sizeof(*hdtr->headers));
 			if (hdtr->headers == NULL) {
 				return (luaL_error(L, "malloc: %s",
 				    strerror(errno)));
@@ -80,7 +80,7 @@ get_hdtr(lua_State *L, int arg, struct sf_hdtr *hdtr)
 			hdtr->trailers = NULL;
 		} else {
 			hdtr->trailers =
-			    malloc(hdtr->trl_cnt * sizeof *hdtr->trailers);
+			    malloc(hdtr->trl_cnt * sizeof(*hdtr->trailers));
 			if (hdtr->trailers == NULL) {
 				free(hdtr->headers);
 				return (luaL_error(L, "malloc: %s",

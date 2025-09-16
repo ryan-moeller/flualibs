@@ -59,7 +59,7 @@ l_be_init(lua_State *L)
 	if (hdl == NULL) {
 		luaL_error(L, "libbe_init");
 	}
-	hdlp = (libbe_handle_t **)lua_newuserdata(L, sizeof *hdlp);
+	hdlp = (libbe_handle_t **)lua_newuserdata(L, sizeof(*hdlp));
 	luaL_setmetatable(L, LIBBE_METATABLE);
 	*hdlp = hdl;
 	return (1);
@@ -862,7 +862,7 @@ l_be_nicenum(lua_State *L)
 
 	num = luaL_checkinteger(L, 1);
 
-	be_nicenum(num, result, sizeof result);
+	be_nicenum(num, result, sizeof(result));
 	lua_pushstring(L, result);
 	return (1);
 }

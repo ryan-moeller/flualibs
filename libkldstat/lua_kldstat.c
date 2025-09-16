@@ -51,7 +51,7 @@ l_kldstat_iter_next(lua_State *L)
 	if (nextid == 0) {
 		return (0);
 	}
-	stat.version = sizeof (stat);
+	stat.version = sizeof(stat);
 	if (kldstat(nextid, &stat) == -1) {
 		luaL_error(L, "cannot kldstat %d: %s", nextid, strerror(errno));
 	}
@@ -101,7 +101,7 @@ l_modstat_next(lua_State *L)
 	if (nextid == 0) {
 		return (0);
 	}
-	stat.version = sizeof (stat);
+	stat.version = sizeof(stat);
 	if (modstat(nextid, &stat) == -1) {
 		luaL_error(L, "cannot modstat %d: %s", nextid, strerror(errno));
 	}
