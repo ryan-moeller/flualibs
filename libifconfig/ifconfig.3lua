@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd May 29, 2025
+.Dd September 16, 2025
 .Dt IFCONFIG 3lua
 .Os
 .Sh NAME
@@ -439,7 +439,9 @@ interface, returns a table of the form
 	root_priority = #,
 	root_path_cost = #,
 	root_port = #,
-	members = { {}, ... }
+	members = { {}, ... },
+	flags = { "", ... },
+	[ default_pvid = # ]
 }
 .Ed
 where
@@ -451,6 +453,7 @@ is a list of tables of the form
 	ifmaxaddr = #,
 	port = #,
 	priority = #,
+	vlans = { [#] = true, ... },
 	[ protocol = ""|#, role = ""|#, state = ""|# ]
 }
 .Ed

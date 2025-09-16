@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#define _WANT_FREEBSD_BITSET
+
 #include <sys/param.h>
+#include <sys/bitset.h>
 #include <sys/errno.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -1473,10 +1476,33 @@ l_ifconfig_get_bridge_status(lua_State *L)
 			lua_setfield(L, -2, "state");
 		}
 
+#if __FreeBSD_version > 1500051
+		{
+			ifbvlan_set_t *vlans = bridge->member_vlans + i;
+			size_t bit;
+
+			lua_createtable(L, 0, BIT_COUNT(BRVLAN_SETSIZE, vlans));
+			BIT_FOREACH_ISSET(BRVLAN_SETSIZE, bit, vlans) {
+				lua_pushboolean(L, true);
+				lua_rawseti(L, -2, bit);
+			}
+			lua_setfield(L, -2, "vlans");
+		}
+#endif
+
 		lua_setfield(L, -2, member->ifbr_ifsname);
 	}
-
 	lua_setfield(L, -2, "members");
+
+#if __FreeBSD_version > 1500056
+	push_flags_array(L, bridge->flags, IFBRFBITS);
+	lua_setfield(L, -2, "flags");
+
+	if (bridge->defpvid) {
+		lua_pushinteger(L, bridge->defpvid);
+		lua_setfield(L, -2, "default_pvid");
+	}
+#endif
 
 	ifconfig_bridge_free_bridge_status(bridge);
 
