@@ -40,6 +40,7 @@
 .Nm create_vlan ,
 .Nm set_vlantag ,
 .Nm list_cloners ,
+.Nm set_up ,
 .Nm get_sfp_info ,
 .Nm get_sfp_vendor_info ,
 .Nm get_sfp_status ,
@@ -84,6 +85,7 @@ local ifconfig = require('ifconfig')
 .It Dv name = ifcfg:create_vlan(name , vlandev , vlantag )
 .It Dv res = ifcfg:set_vlantag(name , vlandev , vlantag )
 .It Dv cloners = ifcfg:list_cloners( )
+.It Dv res = ifcfg:set_up(name , up )
 .It Dv info = ifcfg:get_sfp_info(name )
 .It Dv vendor_info = ifcfg:get_sfp_vendor_info(name )
 .It Dv status = ifcfg:get_sfp_status(name )
@@ -536,6 +538,8 @@ and
 .It Dv cloners = ifcfg:list_cloners( )
 Returns a list of the names of all the interface cloners available on the
 system.
+.It Dv res = ifcfg:set_up(name , up )
+Set the given interface up or down.
 .It Dv info = ifcfg:get_sfp_info(name )
 Given the
 .Fa name

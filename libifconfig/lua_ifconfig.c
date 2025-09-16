@@ -1760,6 +1760,30 @@ l_ifconfig_list_cloners(lua_State *L)
 	return (1);
 }
 
+#if __FreeBSD_version > 1500062
+/** Set an interface up or down
+ * @param name	The name of an interface
+ * @param up	true to set the interface up, false to set it down
+ * @return	true if success, false if error
+ */
+static int
+l_ifconfig_set_up(lua_State *L)
+{
+	ifconfig_handle_t *h;
+	const char *name;
+	bool up;
+
+	h = l_ifconfig_checkhandle(L, 1);
+	name = luaL_checkstring(L, 2);
+	up = lua_toboolean(L, 3);
+	if (ifconfig_set_up(h, name, up) != 0)
+		lua_pushboolean(L, false);
+	else
+		lua_pushboolean(L, true);
+	return (1);
+}
+#endif
+
 /** Get SFP module information
  * @param name	The name of an interface
  * @return	Table describing available info about an SFP module if present,
@@ -1966,6 +1990,9 @@ static const struct luaL_Reg l_ifconfig_handle[] = {
 	{"create_vlan", l_ifconfig_create_vlan},
 	{"set_vlantag", l_ifconfig_set_vlantag},
 	{"list_cloners", l_ifconfig_list_cloners},
+#if __FreeBSD_version > 1500062
+	{"set_up", l_ifconfig_set_up},
+#endif
 	{"get_sfp_info", l_ifconfig_get_sfp_info},
 	{"get_sfp_vendor_info", l_ifconfig_get_sfp_vendor_info},
 	{"get_sfp_status", l_ifconfig_get_sfp_status},
