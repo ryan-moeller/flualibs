@@ -12,6 +12,7 @@ LDADD+=	-lsysdecode
 MAN=	ifconfig.3lua
 
 # XXX: libifconfig is an internal library, so we build it in as a workaround.
+# If this seems to be picking up files from the wrong SRCTOP, make cleandepend.
 .PATH:	${SRCTOP}/lib/libifconfig
 
 SRCS+=	\

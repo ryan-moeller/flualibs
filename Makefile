@@ -1,3 +1,4 @@
+# NOTE: Must make cleandepend when changing SRCTOP between builds.
 SRCTOP?= /usr/src
 .export SRCTOP
 
