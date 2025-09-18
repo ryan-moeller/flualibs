@@ -3,30 +3,35 @@ freebsd_instance:
   memory: 1G
 
 task:
+  freebsd_instance:
+    architecture: ${ARCH}
   matrix:
-    - name: snapshots/amd64/13.5-STABLE
+    - name: snapshots/${ARCH}/13.5-STABLE
       freebsd_instance:
         image_family: freebsd-13-5-snap
-    - name: snapshots/amd64/14.3-STABLE
+    - name: snapshots/${ARCH}/14.3-STABLE
       freebsd_instance:
         image_family: freebsd-14-3-snap
-    - name: snapshots/amd64/15.0-PRERELEASE
+    - name: snapshots/${ARCH}/15.0-PRERELEASE
       freebsd_instance:
         image_family: freebsd-15-0-snap
-    - name: releases/amd64/13.5-RELEASE
+    - name: releases/${ARCH}/13.5-RELEASE
       freebsd_instance:
         image_family: freebsd-13-5
       only_if: ${CIRRUS_TAG} != '' && ${CIRRUS_REPO_FULL_NAME} == 'ryan-moeller/flualibs'
-    - name: releases/amd64/14.3-RELEASE
+    - name: releases/${ARCH}/14.3-RELEASE
       freebsd_instance:
         image_family: freebsd-14-3
       only_if: ${CIRRUS_TAG} != '' && ${CIRRUS_REPO_FULL_NAME} == 'ryan-moeller/flualibs'
-    - name: releases/amd64/15.0-ALPHA1
+    - name: releases/${ARCH}/15.0-ALPHA1
       freebsd_instance:
         image_family: freebsd-15-0
       only_if: ${CIRRUS_TAG} != '' && ${CIRRUS_REPO_FULL_NAME} == 'ryan-moeller/flualibs'
   stateful: false
   env:
+    matrix:
+      ARCH: amd64
+      ARCH: arm64
     WD: /tmp/wd
     ARCHIVES_BASE: https://download.freebsd.org/${CIRRUS_TASK_NAME}
   build_setup_script:
@@ -49,6 +54,9 @@ task:
     - releases/amd64/13.5-RELEASE
     - releases/amd64/14.3-RELEASE
     - releases/amd64/15.0-ALPHA1
+    - releases/arm64/13.5-RELEASE
+    - releases/arm64/14.3-RELEASE
+    - releases/arm64/15.0-ALPHA1
   freebsd_instance:
     image_family: freebsd-14-3
   stateful: true
@@ -61,18 +69,23 @@ task:
 task:
   only_if: ${CIRRUS_TAG} != '' && ${CIRRUS_REPO_FULL_NAME} == 'ryan-moeller/flualibs'
   depends_on: release/draft
+  freebsd_instance:
+    architecture: ${ARCH}
   matrix:
-    - name: pkg/releases/amd64/13.5-RELEASE
+    - name: pkg/releases/${ARCH}/13.5-RELEASE
       freebsd_instance:
         image_family: freebsd-13-5
-    - name: pkg/releases/amd64/14.3-RELEASE
+    - name: pkg/releases/${ARCH}/14.3-RELEASE
       freebsd_instance:
         image_family: freebsd-14-3
-    - name: pkg/releases/amd64/15.0-ALPHA1
+    - name: pkg/releases/${ARCH}/15.0-ALPHA1
       freebsd_instance:
         image_family: freebsd-15-0
   stateful: true
   env:
+    matrix:
+      ARCH: amd64
+      ARCH: arm64
     WD: /tmp/wd
     ARCHIVES_BASE: https://download.freebsd.org/${CIRRUS_TASK_NAME#pkg/}
     GH_TOKEN: ENCRYPTED[4aec021ceb5b1be079e6c10201b7ec7b3cc29eb0b437c841d501b8cf4e0eee257ce5e8792a3bdd0348504c3f9761eb1f]
