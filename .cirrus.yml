@@ -4,15 +4,27 @@ freebsd_instance:
 
 task:
   matrix:
+    - name: snapshots/amd64/13.5-STABLE
+      freebsd_instance:
+        image_family: freebsd-13-5-snap
+    - name: snapshots/amd64/14.3-STABLE
+      freebsd_instance:
+        image_family: freebsd-14-3-snap
+    - name: snapshots/amd64/15.0-PRERELEASE
+      freebsd_instance:
+        image_family: freebsd-15-0-snap
     - name: releases/amd64/13.5-RELEASE
       freebsd_instance:
         image_family: freebsd-13-5
+      only_if: ${CIRRUS_TAG} != '' && ${CIRRUS_REPO_FULL_NAME} == 'ryan-moeller/flualibs'
     - name: releases/amd64/14.3-RELEASE
       freebsd_instance:
         image_family: freebsd-14-3
+      only_if: ${CIRRUS_TAG} != '' && ${CIRRUS_REPO_FULL_NAME} == 'ryan-moeller/flualibs'
     - name: releases/amd64/15.0-ALPHA1
       freebsd_instance:
         image_family: freebsd-15-0
+      only_if: ${CIRRUS_TAG} != '' && ${CIRRUS_REPO_FULL_NAME} == 'ryan-moeller/flualibs'
   stateful: false
   env:
     WD: /tmp/wd
