@@ -26,6 +26,6 @@ task:
     - make install
   manlint_script:
     - makewhatis /usr/share/man
-    # XXX: too many xrefs to manpages that don't exist in releases
+    # XXX: too many xrefs to manpages that don't exist in previous releases
     - test $(freebsd-version) '!=' 15.0-ALPHA1 || make manlint
   # TODO: tests
