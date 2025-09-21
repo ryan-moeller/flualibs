@@ -5,10 +5,10 @@ SRCTOP?= /usr/src
 SUBDIR= \
 	b64 \
 	fileno \
+	kldstat \
 	kqueue \
 	libfetch \
 	libifconfig \
-	libkldstat \
 	libmd \
 	libmq \
 	sendfile \
