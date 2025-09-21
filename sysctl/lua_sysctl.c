@@ -43,11 +43,11 @@
 struct mib {
 	int oid[CTL_MAXNAME];
 	size_t oidlen;
+	size_t prefix;
 	u_int kind;
 	char *format;
 	char *name;
 	char *description;
-	bool all;
 };
 
 int luaopen_sysctl(lua_State *);
@@ -67,13 +67,14 @@ l_sysctl(lua_State *L)
 	if (name == NULL) {
 		mib->oid[0] = CTL_KERN;
 		mib->oidlen = 1;
-		mib->all = true;
+		mib->prefix = 0;
 	} else {
 		mib->oidlen = nitems(mib->oid);
 		error = sysctlnametomib(name, mib->oid, &mib->oidlen);
 		if (error != 0) {
 			luaL_error(L, "sysctlnametomib: %s", strerror(errno));
 		}
+		mib->prefix = mib->oidlen * sizeof(int);
 		mib->name = strdup(name);
 		if (mib->name == NULL) {
 			luaL_error(L, "strdup: %s", strerror(errno));
@@ -413,7 +414,7 @@ l_mib_iter_next(lua_State *L)
 	next = (struct mib *)lua_newuserdatauv(L, sizeof(*next), 0);
 	luaL_setmetatable(L, MIB_METATABLE);
 	memset(next, 0, sizeof(*next));
-	next->all = prev->all;
+	next->prefix = prev->prefix;
 	qoid[0] = CTL_SYSCTL;
 	qoid[1] = luaL_checkinteger(L, lua_upvalueindex(1));
 	memcpy(qoid + 2, prev->oid, prev->oidlen * sizeof(int));
@@ -426,7 +427,7 @@ l_mib_iter_next(lua_State *L)
 		}
 		luaL_error(L, "sysctl: %s", strerror(errno));
 	}
-	if (!prev->all && memcmp(prev->oid, next->oid, prev->oidlen) != 0) {
+	if (memcmp(prev->oid, next->oid, prev->prefix) != 0) {
 		lua_pushnil(L);
 		return (1);
 	}
