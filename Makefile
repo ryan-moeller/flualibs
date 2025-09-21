@@ -11,9 +11,9 @@ SUBDIR= \
 	libkqueue \
 	libmd \
 	libmq \
-	libxor \
 	sendfile \
 	sysctl \
+	xor \
 
 .if exists(${SRCTOP}/contrib/bsddialog/lib/bsddialog.h)
 SUBDIR+=libbsddialog
