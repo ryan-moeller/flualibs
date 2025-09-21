@@ -60,12 +60,10 @@ l_sha1_update(lua_State *L)
 	const unsigned char *data;
 	size_t len;
 
-	ctx = (SHA_CTX *)luaL_checkudata(L, 1, SHA_CTX_METATABLE);
-
+	ctx = luaL_checkudata(L, 1, SHA_CTX_METATABLE);
 	data = (const unsigned char *)luaL_checklstring(L, 2, &len);
 
 	SHA1_Update(ctx, data, len);
-
 	return (0);
 }
 
@@ -75,12 +73,10 @@ l_sha1_final(lua_State *L)
 	unsigned char digest[20];
 	SHA_CTX *ctx;
 
-	ctx = (SHA_CTX *)luaL_checkudata(L, 1, SHA_CTX_METATABLE);
+	ctx = luaL_checkudata(L, 1, SHA_CTX_METATABLE);
 
 	SHA1_Final(digest, ctx);
-
 	lua_pushlstring(L, (const char *)digest, sizeof(digest));
-
 	return (1);
 }
 
@@ -90,12 +86,10 @@ l_sha1_end(lua_State *L)
 	char buf[41], *res;
 	SHA_CTX *ctx;
 
-	ctx = (SHA_CTX *)luaL_checkudata(L, 1, SHA_CTX_METATABLE);
+	ctx = luaL_checkudata(L, 1, SHA_CTX_METATABLE);
 
 	res = SHA1_End(ctx, buf);
-
 	lua_pushstring(L, res);
-
 	return (1);
 }
 

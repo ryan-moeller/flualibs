@@ -117,8 +117,7 @@ l_bsddialog_backtitle(lua_State *L)
 	struct bsddialog_conf *conf;
 	const char *backtitle;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	backtitle = luaL_checkstring(L, 2);
 
 	if (bsddialog_backtitle(conf, backtitle) == BSDDIALOG_ERROR) {
@@ -136,8 +135,7 @@ l_bsddialog_calendar(lua_State *L)
 	unsigned int year, month, day;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -228,8 +226,7 @@ l_bsddialog_checklist(lua_State *L)
 	int focusitem;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -257,8 +254,7 @@ l_bsddialog_datebox(lua_State *L)
 	unsigned int year, month, day;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -381,8 +377,7 @@ l_bsddialog_form(lua_State *L)
 #endif
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -427,8 +422,7 @@ l_bsddialog_gauge(lua_State *L)
 #endif
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -442,7 +436,7 @@ l_bsddialog_gauge(lua_State *L)
 	} else {
 		luaL_Stream *stream;
 
-		stream = (luaL_Stream *)luaL_checkudata(L, 6, LUA_FILEHANDLE);
+		stream = luaL_checkudata(L, 6, LUA_FILEHANDLE);
 		fd = fileno(stream->f);
 		sep = luaL_checkstring(L, 7);
 #if LIBBSDDIALOG_VERSION_MAJOR > 0
@@ -470,8 +464,7 @@ l_bsddialog_infobox(lua_State *L)
 	int rows, cols;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -495,8 +488,7 @@ l_bsddialog_menu(lua_State *L)
 	int focusitem;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -571,8 +563,7 @@ l_bsddialog_mixedgauge(lua_State *L)
 	int *minipercs;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -641,8 +632,7 @@ l_bsddialog_mixedlist(lua_State *L)
 	int focuslist, focusitem;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -671,8 +661,7 @@ l_bsddialog_msgbox(lua_State *L)
 	int rows, cols;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -694,8 +683,7 @@ l_bsddialog_pause(lua_State *L)
 	unsigned int seconds;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -729,8 +717,7 @@ l_bsddialog_radiolist(lua_State *L)
 	int focusitem;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -757,8 +744,7 @@ l_bsddialog_rangebox(lua_State *L)
 	int rows, cols, min, max, value;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -783,8 +769,7 @@ l_bsddialog_textbox(lua_State *L)
 	int rows, cols;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	file = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -806,8 +791,7 @@ l_bsddialog_timebox(lua_State *L)
 	unsigned int hh, mm, ss;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -834,8 +818,7 @@ l_bsddialog_yesno(lua_State *L)
 	int rows, cols;
 	int rv;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	text = luaL_checkstring(L, 2);
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
@@ -900,8 +883,7 @@ l_bsddialog_conf_index(lua_State *L)
 
 	memset(ch, 0, sizeof(ch));
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	key = luaL_checkstring(L, 2);
 
 	if (strcmp(key, "ascii_lines") == 0) {
@@ -1126,8 +1108,7 @@ l_bsddialog_conf_newindex(lua_State *L)
 	struct bsddialog_conf *conf;
 	const char *key, *s;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 	key = luaL_checkstring(L, 2);
 
 #define B(field) do {                              \
@@ -1228,8 +1209,7 @@ l_bsddialog_conf_gc(lua_State *L)
 {
 	struct bsddialog_conf *conf;
 
-	conf = (struct bsddialog_conf *)luaL_checkudata(L, 1,
-	    BSDDIALOG_CONF_METATABLE);
+	conf = luaL_checkudata(L, 1, BSDDIALOG_CONF_METATABLE);
 
 	free(__DECONST(char *, conf->bottomtitle));
 	free(__DECONST(char *, conf->title));

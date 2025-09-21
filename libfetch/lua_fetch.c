@@ -44,7 +44,7 @@ closestream(lua_State *L)
 	luaL_Stream *stream;
 	int res;
 
-	stream = (luaL_Stream *)luaL_checkudata(L, 1, LUA_FILEHANDLE);
+	stream = luaL_checkudata(L, 1, LUA_FILEHANDLE);
 	res = fclose(stream->f);
 	return (luaL_fileresult(L, res == 0, NULL));;
 }
@@ -54,7 +54,7 @@ newstream(lua_State *L, FILE *f)
 {
 	luaL_Stream *stream;
 
-	stream = (luaL_Stream *)lua_newuserdatauv(L, sizeof(*stream), 0);
+	stream = lua_newuserdatauv(L, sizeof(*stream), 0);
 	stream->f = f;
 	stream->closef = closestream;
 	luaL_setmetatable(L, LUA_FILEHANDLE);

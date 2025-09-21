@@ -92,7 +92,7 @@ l_mq_close(lua_State *L)
 {
 	mqd_t mq, *mqp;
 
-	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
+	mqp = luaL_checkudata(L, 1, MQ_METATABLE);
 	mq = *mqp;
 	*mqp = (mqd_t)-1;
 	if (mq_close(mq) == -1) {
@@ -117,13 +117,12 @@ l_mq_unlink(lua_State *L)
 static int
 l_mq_getattr(lua_State *L)
 {
-	mqd_t mq, *mqp;
+	mqd_t *mqp;
 	struct mq_attr attr;
 
-	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
-	mq = *mqp;
+	mqp = luaL_checkudata(L, 1, MQ_METATABLE);
 
-	if (mq_getattr(mq, &attr) == -1) {
+	if (mq_getattr(*mqp, &attr) == -1) {
 		luaL_error(L, "failed to getattr mq: %s", strerror(errno));
 	}
 
@@ -142,14 +141,13 @@ l_mq_getattr(lua_State *L)
 static int
 l_mq_setattr(lua_State *L)
 {
-	mqd_t mq, *mqp;
+	mqd_t *mqp;
 	struct mq_attr attr;
 
-	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
-	mq = *mqp;
+	mqp = luaL_checkudata(L, 1, MQ_METATABLE);
 	attr.mq_flags = luaL_checkinteger(L, 2);
 
-	if (mq_setattr(mq, &attr, NULL) == -1) {
+	if (mq_setattr(*mqp, &attr, NULL) == -1) {
 		luaL_error(L, "failed to setattr mq: %s", strerror(errno));
 	}
 	return (0);
@@ -158,17 +156,16 @@ l_mq_setattr(lua_State *L)
 static int
 l_mq_send(lua_State *L)
 {
-	mqd_t mq, *mqp;
+	mqd_t *mqp;
 	const char *msg;
 	size_t len;
 	unsigned prio;
 
-	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
-	mq = *mqp;
+	mqp = luaL_checkudata(L, 1, MQ_METATABLE);
 	msg = luaL_checklstring(L, 2, &len);
 	prio = luaL_checkinteger(L, 3);
 
-	if (mq_send(mq, msg, len, prio) == -1) {
+	if (mq_send(*mqp, msg, len, prio) == -1) {
 		luaL_error(L, "failed to send on mq: %s", strerror(errno));
 	}
 	return (0);
@@ -177,14 +174,13 @@ l_mq_send(lua_State *L)
 static int
 l_mq_receive(lua_State *L)
 {
-	mqd_t mq, *mqp;
+	mqd_t *mqp;
 	char *buf;
 	size_t buflen;
 	ssize_t len;
 	unsigned prio;
 
-	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
-	mq = *mqp;
+	mqp = luaL_checkudata(L, 1, MQ_METATABLE);
 	buflen = luaL_checkinteger(L, 2);
 	buf = malloc(buflen);
 	if (buf == NULL) {
@@ -192,7 +188,7 @@ l_mq_receive(lua_State *L)
 	}
 	prio = 0;
 
-	len = mq_receive(mq, buf, buflen, &prio);
+	len = mq_receive(*mqp, buf, buflen, &prio);
 	if (len == -1) {
 		free(buf);
 		luaL_error(L, "failed to receive on mq: %s", strerror(errno));
@@ -217,12 +213,11 @@ l_mq_timedreceive(lua_State *L)
 static int
 l_mq_getfd_np(lua_State *L)
 {
-	mqd_t mq, *mqp;
+	mqd_t *mqp;
 	int fd;
 
-	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
-	mq = *mqp;
-	fd = mq_getfd_np(mq);
+	mqp = luaL_checkudata(L, 1, MQ_METATABLE);
+	fd = mq_getfd_np(*mqp);
 	lua_pushinteger(L, fd);
 	return (1);
 }
@@ -232,7 +227,7 @@ l_mq_gc(lua_State *L)
 {
 	mqd_t mq, *mqp;
 
-	mqp = (mqd_t *)luaL_checkudata(L, 1, MQ_METATABLE);
+	mqp = luaL_checkudata(L, 1, MQ_METATABLE);
 	if (mqp == NULL) {
 		return (0);
 	}

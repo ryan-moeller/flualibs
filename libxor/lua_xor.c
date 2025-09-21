@@ -59,7 +59,7 @@ l_xor_apply(lua_State *L)
 	}
 	lua_pop(L, keylen);
 
-	output = (char *)malloc(len);
+	output = malloc(len);
 	if (output == NULL) {
 		luaL_error(L, "malloc failed: %s", strerror(errno));
 	}

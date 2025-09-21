@@ -63,12 +63,11 @@ l_kqueue(lua_State *L)
 static int
 l_kevent(lua_State *L)
 {
-	int kq, *kqp;
+	int *kqp;
 	struct kevent *changelist, event;
 	int nchanges, ret;
 
-	kqp = (int *)luaL_checkudata(L, 1, KQUEUE_METATABLE);
-	kq = *kqp;
+	kqp = luaL_checkudata(L, 1, KQUEUE_METATABLE);
 
 	if (lua_gettop(L) == 1 || lua_type(L, 2) == LUA_TNIL) {
 		changelist = NULL;
@@ -76,7 +75,7 @@ l_kevent(lua_State *L)
 	} else {
 		luaL_argcheck(L, lua_type(L, 2) == LUA_TTABLE, 2, "`changelist' expected");
 		nchanges = lua_rawlen(L, 2);
-		changelist = (struct kevent *)malloc(nchanges * sizeof(struct kevent));
+		changelist = malloc(nchanges * sizeof(struct kevent));
 		for (size_t i = 1; i <= nchanges; ++i) {
 			uintptr_t ident;
 			short filter;
@@ -135,7 +134,7 @@ l_kevent(lua_State *L)
 		}
 	}
 
-	ret = kevent(kq, changelist, nchanges, &event, 1, NULL);
+	ret = kevent(*kqp, changelist, nchanges, &event, 1, NULL);
 	if (ret == -1) {
 		luaL_error(L, "kevent failed: %s", strerror(errno));
 	} else if (ret != 1) {
@@ -177,7 +176,7 @@ l_close(struct lua_State *L)
 {
 	int kq, *kqp;
 
-	kqp = (int *)luaL_checkudata(L, 1, KQUEUE_METATABLE);
+	kqp = luaL_checkudata(L, 1, KQUEUE_METATABLE);
 	kq = *kqp;
 	luaL_argcheck(L, kq != -1, 1, "`kq' already closed");
 	close(kq);
@@ -190,10 +189,7 @@ l_gc(struct lua_State *L)
 {
 	int kq, *kqp;
 
-	kqp = (int *)luaL_checkudata(L, 1, KQUEUE_METATABLE);
-	if (kqp == NULL) {
-		return (0);
-	}
+	kqp = luaL_checkudata(L, 1, KQUEUE_METATABLE);
 	kq = *kqp;
 	if (kq == -1) {
 		return (0);

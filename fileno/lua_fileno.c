@@ -41,8 +41,8 @@ l_fileno(lua_State *L)
 	luaL_Stream *stream;
 	int fd;
 
-	stream = (luaL_Stream *)luaL_checkudata(L, 1, LUA_FILEHANDLE);
-	lua_assert(stream->f);
+	stream = luaL_checkudata(L, 1, LUA_FILEHANDLE);
+	lua_assert(stream->f != NULL);
 	fd = fileno(stream->f);
 	lua_pushinteger(L, fd);
 	return (1);

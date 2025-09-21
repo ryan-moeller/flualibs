@@ -61,7 +61,7 @@ l_sysctl(lua_State *L)
 
 	lua_remove(L, 1); /* func table from the __call metamethod */
 	name = luaL_optstring(L, 1, NULL);
-	mib = (struct mib *)lua_newuserdatauv(L, sizeof(*mib), 0);
+	mib = lua_newuserdatauv(L, sizeof(*mib), 0);
 	luaL_setmetatable(L, MIB_METATABLE);
 	memset(mib, 0, sizeof(*mib));
 	if (name == NULL) {
@@ -88,7 +88,7 @@ l_mib_gc(lua_State *L)
 {
 	struct mib *mib;
 
-	mib = (struct mib *)luaL_checkudata(L, 1, MIB_METATABLE);
+	mib = luaL_checkudata(L, 1, MIB_METATABLE);
 	free(mib->name);
 	free(mib->description);
 	free(mib->format);
@@ -101,7 +101,7 @@ l_mib_oid(lua_State *L)
 {
 	struct mib *mib;
 
-	mib = (struct mib *)luaL_checkudata(L, 1, MIB_METATABLE);
+	mib = luaL_checkudata(L, 1, MIB_METATABLE);
 	lua_createtable(L, mib->oidlen, 0);
 	for (u_int i = 0; i < mib->oidlen; i++) {
 		lua_pushinteger(L, mib->oid[i]);
@@ -115,7 +115,7 @@ l_mib_format(lua_State *L)
 {
 	struct mib *mib;
 
-	mib = (struct mib *)luaL_checkudata(L, 1, MIB_METATABLE);
+	mib = luaL_checkudata(L, 1, MIB_METATABLE);
 	if (mib->format == NULL) {
 		char buf[BUFSIZ];
 		int qoid[CTL_MAXNAME+2];
@@ -147,7 +147,7 @@ l_mib_name(lua_State *L)
 {
 	struct mib *mib;
 
-	mib = (struct mib *)luaL_checkudata(L, 1, MIB_METATABLE);
+	mib = luaL_checkudata(L, 1, MIB_METATABLE);
 	if (mib->name == NULL) {
 		char buf[BUFSIZ];
 		int qoid[CTL_MAXNAME+2];
@@ -177,7 +177,7 @@ l_mib_description(lua_State *L)
 {
 	struct mib *mib;
 
-	mib = (struct mib *)luaL_checkudata(L, 1, MIB_METATABLE);
+	mib = luaL_checkudata(L, 1, MIB_METATABLE);
 	if (mib->description == NULL) {
 		char buf[BUFSIZ];
 		int qoid[CTL_MAXNAME+2];
@@ -215,7 +215,7 @@ l_mib_value(lua_State *L)
 	int argc, ctltype, error;
 
 	argc = lua_gettop(L);
-	mib = (struct mib *)luaL_checkudata(L, 1, MIB_METATABLE);
+	mib = luaL_checkudata(L, 1, MIB_METATABLE);
 	if (mib->format == NULL) {
 		(void)l_mib_format(L);
 	}
@@ -410,8 +410,8 @@ l_mib_iter_next(lua_State *L)
 	size_t size;
 	int error;
 
-	prev = (struct mib *)luaL_checkudata(L, 2, MIB_METATABLE);
-	next = (struct mib *)lua_newuserdatauv(L, sizeof(*next), 0);
+	prev = luaL_checkudata(L, 2, MIB_METATABLE);
+	next = lua_newuserdatauv(L, sizeof(*next), 0);
 	luaL_setmetatable(L, MIB_METATABLE);
 	memset(next, 0, sizeof(*next));
 	next->prefix = prev->prefix;
