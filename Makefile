@@ -10,7 +10,7 @@ SUBDIR= \
 	libfetch \
 	libifconfig \
 	libmd \
-	libmq \
+	mq \
 	sendfile \
 	sysctl \
 	xor \

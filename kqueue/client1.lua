@@ -1,4 +1,4 @@
-package.cpath = "../libmq/?.so;" .. package.cpath
+package.cpath = "../mq/?.so;" .. package.cpath
 
 local mq = require("mq")
 
