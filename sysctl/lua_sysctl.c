@@ -410,7 +410,11 @@ l_mib_iter_next(lua_State *L)
 	size_t size;
 	int error;
 
-	prev = luaL_checkudata(L, 2, MIB_METATABLE);
+	prev = luaL_testudata(L, 2, MIB_METATABLE);
+	if (prev == NULL) {
+		lua_pushvalue(L, 1); /* the initial mib */
+		return (1);
+	}
 	next = lua_newuserdatauv(L, sizeof(*next), 0);
 	luaL_setmetatable(L, MIB_METATABLE);
 	memset(next, 0, sizeof(*next));
@@ -438,20 +442,36 @@ l_mib_iter_next(lua_State *L)
 static int
 l_mib_iter(lua_State *L)
 {
+	struct mib *mib;
+
+	mib = luaL_checkudata(L, 1, MIB_METATABLE);
 	lua_pushinteger(L, CTL_SYSCTL_NEXT);
 	lua_pushcclosure(L, l_mib_iter_next, 1);
-	lua_pushnil(L);
-	lua_pushvalue(L, 1);
+	if (mib->prefix == 0) {
+		lua_pushvalue(L, 1);
+		lua_pushnil(L);
+	} else {
+		lua_pushnil(L);
+		lua_pushvalue(L, 1);
+	}
 	return (3);
 }
 
 static int
 l_mib_iter_noskip(lua_State *L)
 {
+	struct mib *mib;
+
+	mib = luaL_checkudata(L, 1, MIB_METATABLE);
 	lua_pushinteger(L, CTL_SYSCTL_NEXTNOSKIP);
 	lua_pushcclosure(L, l_mib_iter_next, 1);
-	lua_pushnil(L);
-	lua_pushvalue(L, 1);
+	if (mib->prefix == 0) {
+		lua_pushvalue(L, 1);
+		lua_pushnil(L);
+	} else {
+		lua_pushnil(L);
+		lua_pushvalue(L, 1);
+	}
 	return (3);
 }
 
