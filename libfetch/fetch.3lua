@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd September 29, 2025
+.Dd October 7, 2025
 .Dt FETCH 3lua
 .Os
 .Sh NAME
@@ -45,6 +45,8 @@ fetch = require('fetch')
 .It Dv stat, errmsg, errcode = fetch.stat(URL[ , flags ] )
 .It Dv ents, errmsg, errcode = fetch.list(URL[ , flags ] )
 .It Dv f, errmsg, errcode = fetch.request(URL, method[ , flags[ , content_type[ , body ] ] ] )
+.It Dv f, stat_or_errmsg, res_headers_or_errcode, res_trailers = fetch.xrequest(URL, method[ , flags[ , req_headers[ , req_trailers[ , res_headers[ , res_trailers[ , body ] ] ] ] ] )
+.It Dv res_trailers = fetch.trailers(f )
 .El
 .Sh DESCRIPTION
 The
@@ -65,6 +67,84 @@ Wraps fetchStatURL.
 Wraps fetchListURL.
 .It Dv f, errmsg, errcode = fetch.request(URL, method[ , flags[ , content_type[ , body ] ] ] )
 Wraps fetchReqHTTP.
+.It Dv f, stat_or_errmsg, res_headers_or_errcode, res_trailers = fetch.xrequest(URL, method[ , flags[ , req_headers[ , req_trailers[ , res_headers[ , res_trailers[ , body ] ] ] ] ] )
+Wraps fetchXReqHTTP.
+.Pp
+.Fa req_headers ,
+.Fa req_trailers ,
+.Fa res_headers ,
+and
+.Fa res_trailers
+are tables constructed as a list of headers:
+.Bd -literal -offset indent
+{
+	{
+		name = "",
+		value = ""|#,
+	},
+	...
+}
+.Ed
+.Pp
+.Fa req_trailers
+may be appended to during the call to
+.Fn fetch.xrequest
+as a result of the
+.Fa body
+being read.
+.Pp
+.Fa res_headers
+and
+.Fa res_trailers
+are passed through as return values,
+and are modified in-place.
+.Pp
+.Fa res_trailers
+is not filled until the response body in
+.Dv f
+has been read completely and either closed or passed to
+.Fn fetch.trailers .
+.Pp
+.Fa body
+can be:
+.Bl -bullet -compact
+.It
+.Dv nil
+.It
+a string
+.It
+a Lua file object
+.It
+a table with a
+.Dv read
+method taking the number of bytes to read as a parameter and returning a string,
+and optionally a
+.Dv seek
+method taking a whence string and integer offset as parameters and returning the
+new position as an integer.
+.El
+.Pp
+A request
+.Fa body
+with a successful seek operation may be sent unchunked,
+while an unseekable
+.Fa body
+will be chunked.
+.It Dv res_trailers = fetch.trailers(f )
+Returns the argument passed as
+.Fa req_trailers
+for the call to
+.Fn fetch.xrequest
+that produced
+.Fa f ,
+filling the table with any trailers following the response body if present and
+not already done.
+.Pp
+This call always returns
+.Dv nil
+if
+.Fa f
+has been closed.
 .El
 .Sh EXAMPLES
 Get the contents of a URL:
