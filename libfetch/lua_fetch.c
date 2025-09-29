@@ -193,9 +193,9 @@ l_fetch_request(lua_State *L)
 
 	URL = luaL_checkstring(L, 1);
 	method = luaL_checkstring(L, 2);
-	flags = luaL_checkstring(L, 3);
-	content_type = luaL_checkstring(L, 4);
-	body = luaL_checkstring(L, 5);
+	flags = luaL_optstring(L, 3, NULL);
+	content_type = luaL_optstring(L, 4, NULL);
+	body = luaL_optstring(L, 5, NULL);
 	u = fetchParseURL(URL);
 	if (u == NULL) {
 		return (fetcherr(L));

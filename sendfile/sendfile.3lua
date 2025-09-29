@@ -24,7 +24,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.Dd August 30, 2025
+.Dd September 29, 2025
 .Dt SENDFILE 3lua
 .Os
 .Sh NAME
@@ -40,7 +40,8 @@ sendfile = require('sendfile')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv sbytes, error, code = sendfile(fd, s, offset, nbytes[, hdtr ][, flags[, readahead ] ] )
+.It Dv sbytes, error, code = sendfile(fd, s, offset, nbytes[ , flags[ , readahead ] ] )
+.It Dv sbytes, error, code = sendfile(fd, s, offset, nbytes, hdtr[ , flags[ , readahead ] ] )
 .It Dv sendfile.NODISKIO
 .It Dv sendfile.NOCACHE
 .It Dv sendfile.USER_READAHEAD
@@ -52,7 +53,8 @@ module provides a binding for the
 .Xr sendfile 2
 system call.
 .Bl -tag -width XXXX
-.It Dv sbytes, error, code = sendfile(fd, s, offset, nbytes[, hdtr ][, flags[, readahead ] ] )
+.It Dv sbytes, error, code = sendfile(fd, s, offset, nbytes[ , flags[ , readahead ] ] )
+.It Dv sbytes, error, code = sendfile(fd, s, offset, nbytes, hdtr[ , flags[ , readahead ] ] )
 Invoke
 .Xr sendfile 2 .
 Optional headers and trailers may be given as the fifth argument in a table of
