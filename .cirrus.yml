@@ -26,7 +26,12 @@ task:
   env:
     ARCHIVES_BASE: https://download.freebsd.org/${CIRRUS_TASK_NAME}
   build_setup_script:
-    - test -e /usr/src/contrib/lua/src/lua.h || fetch -o - ${ARCHIVES_BASE}/src.txz | tar x -C /
+    - test -e /usr/src/contrib/lua/src/lua.h ||
+      fetch -o - ${ARCHIVES_BASE}/src.txz | tar x -C /
+    - fetch -o - https://github.com/freebsd/freebsd-src/pull/1859.patch |
+      patch -d /usr/src -p1
+    - make -C /usr/src/lib/libfetch all install
+    - make -C /usr/src/usr.bin/fetch all install
   build_script:
     - make -j${CIRRUS_CPU}
     - make install
@@ -34,4 +39,10 @@ task:
     - makewhatis /usr/share/man
     # XXX: too many xrefs to manpages that don't exist in previous releases
     - test $(sysctl -n kern.osreldate) -lt 1500000 || make manlint
-  # TODO: tests
+  test_libfetch_setup_script:
+    - pkg install -y socat
+  test_server_background_script:
+    - libfetch/test-server.sh
+  libfetch_test_script:
+    - until [ -n "$(sockstat -l | awk '$2 == "socat" && $6 ~ /:8080$/')" ]; do sleep 1; done
+    - /usr/libexec/flua libfetch/test.lua
