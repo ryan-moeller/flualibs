@@ -4,7 +4,7 @@
 
 local httpd <const> = require('httpd')
 
-local server <const> = httpd.create_server('test-server.log')
+local server <const> = httpd.create_server()
 
 local function body_parts(req)
 	local parts <const> = {
