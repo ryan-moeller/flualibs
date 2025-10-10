@@ -91,13 +91,20 @@ server:add_route('POST', '^/post$', function(req)
 end)
 
 server:add_route('HEAD', '^/headers$', function(req)
+	local headers <const> = {
+		['Content-Type'] = 'text/plain',
+		['X-Test-Endpoint'] = req.path,
+	}
+	for name, values in pairs(req.params) do
+		-- Skip headers we're already using.
+		if not headers[name] then
+			headers[name] = values
+		end
+	end
 	return {
 		status = 200,
 		reason = 'OK',
-		headers = {
-			['Content-Type'] = 'text/plain',
-			['X-Test-Endpoint'] = req.path,
-		},
+		headers = headers,
 		-- no body
 	}
 end)
