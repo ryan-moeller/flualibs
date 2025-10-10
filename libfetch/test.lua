@@ -12,6 +12,27 @@ local function print_fields(prefix, fields)
 	end
 end
 
+local function expect_fields(expect_map, actual_list)
+	-- The order of fields with distinct names varies.
+	-- Make lookup easier by putting the list of {name=,value=} fields into
+	-- a map of name => {value, ...}
+	local actual_map = {}
+	for _, field in ipairs(actual_list) do
+		local name = field.name:lower() -- normalize names
+		actual_map[name] = actual_map[name] or {}
+		table.insert(actual_map[name], field.value)
+	end
+	for name, expect_values in pairs(expect_map) do
+		name = name:lower() -- normalize names
+		local actual_values = actual_map[name]
+		assert(#expect_values == #actual_values)
+		for i, expect_value in ipairs(expect_values) do
+			local actual_value = actual_values[i]
+			assert(expect_value == actual_value)
+		end
+	end
+end
+
 local function run_test_case(case)
 	local f, stat, res_headers, res_trailers = assert(fetch.xrequest(
 		server..case.path,
@@ -33,8 +54,10 @@ local function run_test_case(case)
 		print_fields('T', res_trailers)
 	end
 	print('Response body:', f, ('%s'):format(type(f)))
+	local lines = {}
 	for line in f:lines() do
 		io.write('>B ', line, '\n')
+		table.insert(lines, line)
 	end
 	if case.test_trailers_before then
 		print('Result of fetch.trailers(f) before f:close():')
@@ -61,6 +84,18 @@ local function run_test_case(case)
 		local t2 = fetch.trailers(f)
 		print('t2:', t2)
 		assert(not t2, 'fetch.trailers failed after (2)')
+	end
+	if case.expect_headers then
+		expect_fields(case.expect_headers, case.res_headers)
+	end
+	if case.expect_trailers then
+		expect_fields(case.expect_trailers, case.res_trailers)
+	end
+	if case.expect_body_content then
+		assert(case.expect_body_content == table.concat(lines, '\n'))
+	end
+	if case.expect then
+		case:expect()
 	end
 end
 
@@ -90,6 +125,10 @@ test_case {
 	res_trailers = {},
 	test_trailers_before = true,
 	test_trailers_after = true,
+	expect_trailers = {
+		['foo'] = {'bar'},
+		['baz'] = {'qux'},
+	},
 }
 test_case {
 	desc = 'GET with response trailers (response fields ignored)',
@@ -105,6 +144,10 @@ test_case {
 	res_trailers = {},
 	test_trailers_before = true,
 	test_trailers_after = true,
+	-- expect_trailers can't assert number of fields
+	expect = function(case)
+		assert(#case.res_trailers == 0)
+	end,
 }
 test_case {
 	desc = 'GET /get (no trailers, no res_trailers passed)',
@@ -143,6 +186,16 @@ test_case {
 	res_headers = {},
 	res_trailers = {},
 	test_trailers_after = true,
+}
+test_case {
+	desc = 'HEAD with response headers',
+	path = '/headers?foo=bar&baz=qux',
+	method = 'HEAD',
+	res_headers = {},
+	expect_headers = {
+		['foo'] = {'bar'},
+		['baz'] = {'qux'},
+	},
 }
 test_case {
 	desc = 'Function as streaming request body (plain function)',
