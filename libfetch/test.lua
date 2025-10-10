@@ -12,12 +12,7 @@ local function print_fields(prefix, fields)
 	end
 end
 
-local function skip_test_case(case)
-	print('=== SKIP:', case.desc)
-end
-
-local function test_case(case)
-	print('=== TEST:', case.desc)
+local function run_test_case(case)
 	local f, stat, res_headers, res_trailers = assert(fetch.xrequest(
 		server..case.path,
 		case.method,
@@ -67,11 +62,16 @@ local function test_case(case)
 		print('t2:', t2)
 		assert(not t2, 'fetch.trailers failed after (2)')
 	end
-	print('=== OK\n')
+end
+
+local test_cases = {}
+
+local function test_case(case)
+	table.insert(test_cases, case)
 end
 
 test_case {
-	desc = '1. Basic POST with headers and body, no trailers expected',
+	desc = 'Basic POST with headers and body, no trailers expected',
 	path = '/post',
 	method = 'POST',
 	req_headers = {
@@ -83,7 +83,7 @@ test_case {
 	req_body = 'Hello from Lua fetch.xrequest!',
 }
 test_case {
-	desc = '2. GET with response trailers',
+	desc = 'GET with response trailers',
 	path = '/trailers?foo=bar&baz=qux',
 	method = 'GET',
 	res_headers = {},
@@ -92,13 +92,13 @@ test_case {
 	test_trailers_after = true,
 }
 test_case {
-	desc = '3. GET with response trailers (response fields ignored)',
+	desc = 'GET with response trailers (response fields ignored)',
 	path = '/trailers?foo=bar&baz=qux',
 	method = 'GET',
 	test_trailers_before = true,
 }
 test_case {
-	desc = '4. GET /trailers with no query (empty trailers)',
+	desc = 'GET /trailers with no query (empty trailers)',
 	path = '/trailers',
 	method = 'GET',
 	res_headers = {},
@@ -107,14 +107,14 @@ test_case {
 	test_trailers_after = true,
 }
 test_case {
-	desc = '5. GET /get (no trailers, no res_trailers passed)',
+	desc = 'GET /get (no trailers, no res_trailers passed)',
 	path = '/get',
 	method = 'GET',
 	res_headers = {},
 	test_trailers_after = true,
 }
 test_case {
-	desc = '6. Streaming request body with trailers',
+	desc = 'Streaming request body with trailers',
 	path = '/post',
 	method = 'POST',
 	req_headers = {
@@ -137,7 +137,7 @@ test_case {
 	test_trailers_after = true,
 }
 test_case {
-	desc = '7. HEAD request, no body or trailers',
+	desc = 'HEAD request, no body or trailers',
 	path = '/headers',
 	method = 'HEAD',
 	res_headers = {},
@@ -145,7 +145,7 @@ test_case {
 	test_trailers_after = true,
 }
 test_case {
-	desc = '8. Function as streaming request body (plain function)',
+	desc = 'Function as streaming request body (plain function)',
 	path = '/post',
 	method = 'POST',
 	req_headers = {
@@ -168,7 +168,7 @@ test_case {
 	test_trailers_after = true,
 }
 test_case {
-	desc = '9. Request body as table with read and seek methods',
+	desc = 'Request body as table with read and seek methods',
 	path = '/post',
 	method = 'POST',
 	req_headers = {
@@ -210,3 +210,36 @@ test_case {
 	res_trailers = {},
 	test_trailers_after = true,
 }
+
+local pass, skip, fail = {}, {}, {}
+for i, case in ipairs(test_cases) do
+	if case.skip then
+		print(('=== SKIP %d: %s'):format(i, case.desc))
+		table.insert(skip, i)
+	else
+		print(('=== TEST %d: %s'):format(i, case.desc))
+		local ok, err = pcall(run_test_case, case)
+		if ok then
+			print('=== PASS\n')
+			table.insert(pass, i)
+		else
+			print(err)
+			print('=== FAIL\n')
+			table.insert(fail, i)
+		end
+	end
+end
+print('=== RESULTS:')
+print('passed: ', #pass)
+print('skipped:', #skip)
+print('failed: ', #fail)
+local function maybe_list(l, name)
+	if #l > 0 then
+		print(('\n%s test cases:'):format(name))
+		for _, i in ipairs(l) do
+			print(('  TEST %d:'):format(i), test_cases[i].desc)
+		end
+	end
+end
+maybe_list(skip, 'skipped')
+maybe_list(fail, 'failed')
