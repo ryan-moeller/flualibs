@@ -109,4 +109,4 @@ server:add_route('HEAD', '^/headers$', function(req)
 	}
 end)
 
-server:run(true)
+server:run(httpd.TRACE)
