@@ -106,7 +106,7 @@ local function test_case(case)
 end
 
 test_case {
-	desc = 'Basic POST with headers and body, no trailers expected',
+	desc = 'Request with headers and body',
 	path = '/post',
 	method = 'POST',
 	req_headers = {
@@ -122,7 +122,7 @@ test_case {
 	end,
 }
 test_case {
-	desc = 'GET with response trailers',
+	desc = 'Response with trailers collected',
 	path = '/trailers?foo=bar&baz=qux',
 	method = 'GET',
 	res_headers = {},
@@ -135,13 +135,13 @@ test_case {
 	},
 }
 test_case {
-	desc = 'GET with response trailers (response fields ignored)',
+	desc = 'Response with trailers, response fields ignored',
 	path = '/trailers?foo=bar&baz=qux',
 	method = 'GET',
 	test_trailers_before = true,
 }
 test_case {
-	desc = 'GET /trailers with no query (empty trailers)',
+	desc = 'Response with empty trailers',
 	path = '/trailers',
 	method = 'GET',
 	res_headers = {},
@@ -154,7 +154,7 @@ test_case {
 	end,
 }
 test_case {
-	desc = 'GET /get (no trailers, no res_trailers passed)',
+	desc = 'Request with no trailers, no res_trailers passed',
 	path = '/get',
 	method = 'GET',
 	res_headers = {},
@@ -184,7 +184,7 @@ test_case {
 	test_trailers_after = true,
 }
 test_case {
-	desc = 'HEAD request, no body or trailers',
+	desc = 'HEAD with no request body or trailers',
 	path = '/headers',
 	method = 'HEAD',
 	res_headers = {},
@@ -202,7 +202,7 @@ test_case {
 	},
 }
 test_case {
-	desc = 'Function as streaming request body (plain function)',
+	desc = 'Function as streaming request body',
 	path = '/post',
 	method = 'POST',
 	req_headers = {
