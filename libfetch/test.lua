@@ -267,6 +267,42 @@ test_case {
 	res_trailers = {},
 	test_trailers_after = true,
 }
+test_case {
+	desc = "Request with Accept override",
+	path = '/get',
+	method = 'GET',
+	req_headers = {
+		field('Accept', 'text/plain'),
+	},
+	expect = function(_case, lines)
+		local found = false
+		for _, line in ipairs(lines) do
+			assert(line ~= '\taccept: */*')
+			if line == '\taccept: text/plain' then
+				found = true
+			end
+		end
+		assert(found)
+	end,
+}
+test_case {
+	desc = "Request with User-Agent override",
+	path = '/get',
+	method = 'GET',
+	req_headers = {
+		field('User-Agent', 'libfetch test'),
+	},
+	expect = function(_case, lines)
+		local found = false
+		for _, line in ipairs(lines) do
+			assert(line ~= '\tuser-agent: flua libfetch/2.1')
+			if line == '\tuser-agent: libfetch test' then
+				found = true
+			end
+		end
+		assert(found)
+	end,
+}
 
 local pass, skip, fail = {}, {}, {}
 for i, case in ipairs(test_cases) do
