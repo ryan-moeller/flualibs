@@ -44,6 +44,8 @@ local function run_test_case(case)
 		case.res_trailers,
 		case.req_body
 	))
+	assert(res_headers == case.res_headers)
+	assert(res_trailers == case.res_trailers)
 	print('Response size:', stat.size)
 	print('Response headers:', res_headers)
 	if res_headers then
@@ -86,10 +88,10 @@ local function run_test_case(case)
 		assert(not t2, 'fetch.trailers failed after (2)')
 	end
 	if case.expect_headers then
-		expect_fields(case.expect_headers, case.res_headers)
+		expect_fields(case.expect_headers, res_headers)
 	end
 	if case.expect_trailers then
-		expect_fields(case.expect_trailers, case.res_trailers)
+		expect_fields(case.expect_trailers, res_trailers)
 	end
 	if case.expect_body_content then
 		assert(case.expect_body_content == table.concat(lines, '\n'))
