@@ -80,8 +80,8 @@ end)
 server:add_route('POST', '^/post$', function(req)
 	local parts <const> = body_parts(req)
 	return {
-		status = 200,
-		reason = 'OK',
+		status = 201,
+		reason = 'Created',
 		headers = {
 			['Content-Type'] = 'text/plain',
 			['X-Test-Endpoint'] = req.path,

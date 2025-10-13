@@ -95,7 +95,7 @@ local function run_test_case(case)
 		assert(case.expect_body_content == table.concat(lines, '\n'))
 	end
 	if case.expect then
-		case:expect()
+		case:expect(lines)
 	end
 end
 
@@ -116,6 +116,10 @@ test_case {
 	res_headers = {},
 	res_trailers = {},
 	req_body = 'Hello from Lua fetch.xrequest!',
+	expect = function(_case, lines)
+		assert(lines)
+		assert(#lines > 0)
+	end,
 }
 test_case {
 	desc = 'GET with response trailers',
