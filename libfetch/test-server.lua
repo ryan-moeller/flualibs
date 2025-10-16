@@ -4,7 +4,7 @@
 
 local httpd <const> = require('httpd')
 
-local server <const> = httpd.create_server()
+local server <const> = httpd.create_server(httpd.TRACE)
 
 local function body_parts(req)
 	local parts <const> = {
@@ -109,4 +109,4 @@ server:add_route('HEAD', '^/headers$', function(req)
 	}
 end)
 
-server:run(httpd.TRACE)
+server:run()
