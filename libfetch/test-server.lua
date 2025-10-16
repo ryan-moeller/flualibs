@@ -68,11 +68,11 @@ server:add_route('GET', '^/trailers$', function(req)
 			['Transfer-Encoding'] = 'chunked',
 			['Trailer'] = table.concat(trailer_names, ','),
 		},
-		body = function(sock)
+		body = function(conn)
 			for _, part in ipairs(parts) do
-				httpd.write_chunk(sock, part)
+				conn:write_chunk(part)
 			end
-			httpd.write_trailers(sock, req.params)
+			conn:last_chunk(req.params)
 		end,
 	}
 end)
