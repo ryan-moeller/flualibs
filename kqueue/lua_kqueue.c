@@ -73,8 +73,9 @@ l_kevent(lua_State *L)
 		changelist = NULL;
 		nchanges = 0;
 	} else {
-		luaL_argcheck(L, lua_type(L, 2) == LUA_TTABLE, 2, "`changelist' expected");
-		nchanges = lua_rawlen(L, 2);
+		luaL_argcheck(L, lua_type(L, 2) == LUA_TTABLE, 2,
+		    "`changelist' expected");
+		nchanges = luaL_len(L, 2);
 		changelist = malloc(nchanges * sizeof(struct kevent));
 		for (size_t i = 1; i <= nchanges; ++i) {
 			uintptr_t ident;
@@ -85,51 +86,60 @@ l_kevent(lua_State *L)
 			void *udata;
 			int type;
 
-			type = lua_rawgeti(L, 2, i);
-			luaL_argcheck(L, type == LUA_TTABLE, 2, "`changelist' invalid");
+			type = lua_geti(L, 2, i);
+			luaL_argcheck(L, type == LUA_TTABLE, 2,
+			    "`changelist' invalid");
 
-			lua_pushstring(L, "ident");
-			type = lua_rawget(L, -2);
-			luaL_argcheck(L, type == LUA_TNUMBER, 2, "`changelist' invalid ident");
+			type = lua_getfield(L, -1, "ident");
+			luaL_argcheck(L, type == LUA_TNUMBER, 2,
+			    "`changelist' invalid ident");
 			ident = lua_tointeger(L, -1);
 			lua_pop(L, 1);
 
-			lua_pushstring(L, "filter");
-			type = lua_rawget(L, -2);
-			luaL_argcheck(L, type == LUA_TNUMBER, 2, "`changelist' invalid filter");
+			type = lua_getfield(L, -1, "filter");
+			luaL_argcheck(L, type == LUA_TNUMBER, 2,
+			    "`changelist' invalid filter");
 			filter = lua_tointeger(L, -1);
 			lua_pop(L, 1);
 
-			lua_pushstring(L, "flags");
-			type = lua_rawget(L, -2);
-			luaL_argcheck(L, type == LUA_TNUMBER, 2, "`changelist' invalid flags");
+			type = lua_getfield(L, -1, "flags");
+			luaL_argcheck(L, type == LUA_TNUMBER, 2,
+			    "`changelist' invalid flags");
 			flags = lua_tointeger(L, -1);
 			lua_pop(L, 1);
 
-			lua_pushstring(L, "fflags");
-			type = lua_rawget(L, -2);
-			luaL_argcheck(L, type == LUA_TNUMBER, 2, "`changelist' invalid fflags");
-			fflags = lua_tointeger(L, -1);
+			type = lua_getfield(L, -1, "fflags");
+			luaL_argcheck(L,
+			    type == LUA_TNIL || type == LUA_TNUMBER, 2,
+			    "`changelist' invalid fflags");
+			fflags = luaL_optinteger(L, -1, 0);
 			lua_pop(L, 1);
 
-			lua_pushstring(L, "data");
-			type = lua_rawget(L, -2);
-			luaL_argcheck(L, type == LUA_TNUMBER, 2, "`changelist' invalid data");
-			data = lua_tointeger(L, -1);
+			type = lua_getfield(L, -1, "data");
+			luaL_argcheck(L,
+			    type == LUA_TNIL || type == LUA_TNUMBER, 2,
+			    "`changelist' invalid data");
+			data = luaL_optinteger(L, -1, 0);
 			lua_pop(L, 1);
 
-			lua_pushstring(L, "udata");
-			type = lua_rawget(L, -2);
-			luaL_argcheck(L, type == LUA_TTHREAD, 2, "`changelist' invalid udata");
-			/*
-			 * XXX: This pointer has to outlive the event in the kqueue, but the
-			 * kernel doesn't tell us when the event is removed.  Dealing with this
-			 * is up to the user...
-			 */
-			udata = lua_tothread(L, -1);
+			type = lua_getfield(L, -1, "udata");
+			if (type == LUA_TNIL) {
+				udata = NULL;
+			} else {
+				luaL_argcheck(L, type == LUA_TTHREAD, 2,
+				    "`changelist' invalid udata");
+				/*
+				 * XXX: This pointer has to outlive the event in
+				 * the kqueue, but the kernel doesn't tell us
+				 * when the event is removed.  Dealing with this
+				 * is up to the user...
+				 */
+				udata = lua_tothread(L, -1);
+			}
 			lua_pop(L, 1);
 
-			EV_SET(&changelist[i-1], ident, filter, flags, fflags, data, udata);
+			EV_SET(&changelist[i-1], ident, filter, flags, fflags,
+			    data, udata);
 			lua_pop(L, 1);
 		}
 	}
@@ -163,10 +173,12 @@ l_kevent(lua_State *L)
 	lua_pushinteger(L, event.data);
 	lua_rawset(L, -3);
 
-	lua_pushstring(L, "udata");
-	lua_pushthread(event.udata);
-	lua_xmove(event.udata, L, 1);
-	lua_rawset(L, -3);
+	if (event.udata != NULL) {
+		lua_pushstring(L, "udata");
+		lua_pushthread(event.udata);
+		lua_xmove(event.udata, L, 1);
+		lua_rawset(L, -3);
+	}
 
 	return (1);
 }
