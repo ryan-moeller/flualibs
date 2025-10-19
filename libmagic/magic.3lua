@@ -1,0 +1,201 @@
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.Dd October 19, 2025
+.Dt MAGIC 3lua
+.Os
+.Sh NAME
+.Nm open ,
+.Nm :close ,
+.Nm :descriptor ,
+.Nm :file ,
+.Nm :buffer ,
+.Nm :getflags ,
+.Nm :setflags ,
+.Nm :check ,
+.Nm :compile ,
+.Nm :list ,
+.Nm :load ,
+.Nm :getparam ,
+.Nm :setparam ,
+.Nm getpath ,
+.Nm NONE ,
+.Nm DEBUG ,
+.Nm SYMLINK ,
+.Nm COMPRESS ,
+.Nm DEVICES ,
+.Nm MIME_TYPE ,
+.Nm CONTINUE ,
+.Nm CHECK ,
+.Nm PRESERVE_ATIME ,
+.Nm RAW ,
+.Nm ERROR ,
+.Nm MIME_ENCODING ,
+.Nm MIME ,
+.Nm APPLE ,
+.Nm EXTENSION ,
+.Nm COMPRESS_TRANSP ,
+.Nm NO_COMPRESS_FORK ,
+.Nm NODESC ,
+.Nm NO_CHECK_COMPRESS ,
+.Nm NO_CHECK_TAR ,
+.Nm NO_CHECK_SOFT ,
+.Nm NO_CHECK_APPTYPE ,
+.Nm NO_CHECK_ELF ,
+.Nm NO_CHECK_TEXT ,
+.Nm NO_CHECK_CDF ,
+.Nm NO_CHECK_CSV ,
+.Nm NO_CHECK_TOKENS ,
+.Nm NO_CHECK_ENCODING ,
+.Nm NO_CHECK_JSON ,
+.Nm NO_CHECK_SIMH ,
+.Nm NO_CHECK_BUILTIN ,
+.Nm VERSION ,
+.Nm PARAM_INDIR_MAX ,
+.Nm PARAM_NAME_MAX ,
+.Nm PARAM_ELF_PHNUM_MAX ,
+.Nm PARAM_ELF_SHNUM_MAX ,
+.Nm PARAM_ELF_NOTES_MAX ,
+.Nm PARAM_REGEX_MAX ,
+.Nm PARAM_BYTES_MAX ,
+.Nm PARAM_ENCODING_MAX ,
+.Nm PARAM_ELF_SHSIZE_MAX ,
+.Nm PARAM_MAGWARN_MAX
+.Nd Lua bindings for
+.Xr libmagic 3
+.Sh SYNOPSIS
+.Bd -literal
+magic = require('magic')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv cookie = magic.open([flags ] )
+.It Dv ok, err, code = cookie:load([filename ] )
+.It Dv desc, err, code = cookie:descriptor(file )
+.It Dv desc, err, code = cookie:file([filename ] )
+.It Dv desc, err, code = cookie:buffer(string )
+.It Dv flags = cookie:getflags( )
+.It Dv cookie:setflags(flags )
+.It Dv ok, err, code = cookie:check([filename ] )
+.It Dv ok, err, code = cookie:compile([filename ] )
+.It Dv ok, err, code = cookie:list([filename ] )
+.It Dv limit = cookie:getparam(param )
+.It Dv cookie:setparam(param , limit )
+.It Dv cookie:close( )
+.It Dv path = magic.getpath([magicfile[ , action ] ] )
+.El
+.Sh DESCRIPTION
+The
+.Nm magic
+module provides bindings for Magic Number Recognition Library
+.Pq libmagic
+function calls.
+.Bl -tag -width XXXX
+.It Dv cookie = magic.open([flags ] )
+Wraps
+.Fn magic_open .
+.It Dv ok, err, code = cookie:load([filename ] )
+Wraps
+.Fn magic_load .
+.It Dv desc, err, code = cookie:descriptor(file )
+Wraps
+.Fn magic_descriptor .
+.It Dv desc, err, code = cookie:file([filename ] )
+Wraps
+.Fn magic_file .
+.It Dv desc, err, code = cookie:buffer(string )
+Wraps
+.Fn magic_buffer .
+.It Dv flags = cookie:getflags( )
+Wraps
+.Fn magic_getflags .
+.It Dv cookie:setflags(flags )
+Wraps
+.Fn magic_setflags .
+.It Dv ok, err, code = cookie:check([filename ] )
+Wraps
+.Fn magic_check .
+.It Dv ok, err, code = cookie:compile([filename ] )
+Wraps
+.Fn magic_compile .
+.It Dv ok, err, code = cookie:list([filename ] )
+Wraps
+.Fn magic_list .
+.It Dv limit = cookie:getparam(param )
+Wraps
+.Fn magic_getparam .
+.It Dv cookie:setparam(param , limit )
+Wraps
+.Fn magic_setparam .
+.It Dv cookie:close( )
+Wraps
+.Fn magic_close .
+.It Dv path = magic.getpath([magicfile[ , action ] ] )
+Wraps
+.Fn magic_getpath .
+.El
+.Sh EXAMPLES
+Print the MIME type and encoding of
+.Pa /etc/rc :
+.Bd -literal -offset indent
+magic = require('magic')
+
+cookie = assert(magic.open(magic.MIME))
+assert(cookie:load())
+mime = assert(cookie:file('/etc/rc'))
+cookie:close()
+print(mime)
+.Ed
+.Pp
+Print a textual description of the contents of an open file:
+.Bd -literal -offset indent
+magic = require('magic')
+
+cookie = assert(magic.open())
+assert(cookie:load())
+f = io.open('/var/db/services.db', 'r')
+desc = assert(cookie:descriptor(f))
+f:close()
+cookie:close()
+print(desc)
+.Ed
+.Pp
+Print the MIME encoding of an open file descriptor:
+.Bd -literal -offset indent
+magic = require('magic')
+
+cookie = assert(magic.open(magic.MIME_ENCODING))
+assert(cookie:load())
+fd = 0 -- read from stdin for this example
+encoding = assert(cookie:descriptor(fd))
+cookie:close()
+print(encoding)
+.Ed
+.Sh SEE ALSO
+.Xr file 1 ,
+.Xr libmagic 3
+.Sh AUTHORS
+.An Ryan Moeller

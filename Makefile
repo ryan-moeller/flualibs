@@ -9,6 +9,7 @@ SUBDIR= \
 	kqueue \
 	libfetch \
 	libifconfig \
+	libmagic \
 	libmd \
 	mq \
 	sendfile \
