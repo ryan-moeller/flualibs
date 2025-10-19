@@ -1,4 +1,3 @@
-
 SHLIB_NAME=	kldstat.so
 SHLIBDIR=	${LIBDIR}/flua
 

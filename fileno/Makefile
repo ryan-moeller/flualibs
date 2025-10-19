@@ -1,4 +1,3 @@
-
 SHLIB_NAME=	fileno.so
 SHLIBDIR=	${LIBDIR}/flua
 

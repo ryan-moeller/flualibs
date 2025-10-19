@@ -1,4 +1,3 @@
-
 SHLIB_NAME=	md.so
 SHLIBDIR=	${LIBDIR}/flua
 

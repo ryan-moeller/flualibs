@@ -1,4 +1,3 @@
-
 SHLIB_NAME=	kqueue.so
 SHLIBDIR=	${LIBDIR}/flua
 

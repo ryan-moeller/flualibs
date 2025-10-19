@@ -1,4 +1,3 @@
-
 SHLIB_NAME=	sysctl.so
 SHLIBDIR=	${LIBDIR}/flua
 

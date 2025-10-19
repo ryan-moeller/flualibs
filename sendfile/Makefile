@@ -1,4 +1,3 @@
-
 SHLIB_NAME=	sendfile.so
 SHLIBDIR=	${LIBDIR}/flua
 

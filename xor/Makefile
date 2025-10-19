@@ -1,4 +1,3 @@
-
 SHLIB_NAME=	xor.so
 SHLIBDIR=	${LIBDIR}/flua
 

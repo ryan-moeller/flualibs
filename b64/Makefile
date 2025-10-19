@@ -1,4 +1,3 @@
-
 SHLIB_NAME=	b64.so
 SHLIBDIR=	${LIBDIR}/flua
 

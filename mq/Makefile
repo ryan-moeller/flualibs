@@ -1,4 +1,3 @@
-
 SHLIB_NAME=	mq.so
 SHLIBDIR=	${LIBDIR}/flua
 
