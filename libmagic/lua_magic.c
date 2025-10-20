@@ -99,14 +99,11 @@ l_magic_descriptor(lua_State *L)
 		fd = lua_tointeger(L, 2);
 	} else {
 		stream = luaL_checkudata(L, 2, LUA_FILEHANDLE);
-		if (stream->f == NULL) {
-			return (luaL_error(L, "invalid file handle (closed)"));
-		}
+		luaL_argcheck(L, stream->f != NULL, 2,
+		    "invalid file handle (closed)");
 		fd = fileno(stream->f);
 	}
-	if (fd < 0) {
-		return (luaL_error(L, "invalid file descriptor"));
-	}
+	luaL_argcheck(L, fd >= 0, 2, "invalid file descriptor");
 
 	magic = magic_descriptor(*cookiep, fd);
 	if (magic == NULL) {
