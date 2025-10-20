@@ -434,10 +434,17 @@ l_bsddialog_gauge(lua_State *L)
 		end = NULL;
 #endif
 	} else {
-		luaL_Stream *stream;
+		if (lua_type(L, 6) == LUA_TNUMBER) {
+			fd = luaL_checkinteger(L, 6);
+		} else {
+			luaL_Stream *stream;
 
-		stream = luaL_checkudata(L, 6, LUA_FILEHANDLE);
-		fd = fileno(stream->f);
+			stream = luaL_checkudata(L, 6, LUA_FILEHANDLE);
+			luaL_argcheck(L, stream->f != NULL, 6,
+			    "invalid file handle (closed)");
+			fd = fileno(stream->f);
+		}
+		luaL_argcheck(L, fd >= 0, 6, "invalid file descriptor");
 		sep = luaL_checkstring(L, 7);
 #if LIBBSDDIALOG_VERSION_MAJOR > 0
 		end = luaL_checkstring(L, 8);
