@@ -48,15 +48,83 @@ fetcherr(lua_State *L)
 	return (3);
 }
 
+static struct url *
+checkurl(lua_State *L, int idx)
+{
+	const char *URL;
+	struct url *u;
+
+	if (lua_type(L, idx) == LUA_TSTRING) {
+		URL = lua_tostring(L, idx);
+		if (URL == NULL) {
+			return (NULL);
+		}
+		return (fetchParseURL(URL));
+	}
+
+	luaL_checktype(L, idx, LUA_TTABLE);
+
+	if (lua_getfield(L, idx, "url") == LUA_TSTRING) {
+		URL = lua_tostring(L, -1);
+		if (URL == NULL) {
+			return (NULL);
+		}
+		u = fetchParseURL(URL);
+	} else {
+		const char *scheme, *host, *doc, *user, *pwd;
+		int port;
+
+#define GET_STRING(name) ({ \
+		lua_getfield(L, idx, #name); \
+		if ((name = lua_tostring(L, -1)) == NULL) name = ""; \
+		lua_pop(L, 1); \
+})
+		GET_STRING(scheme);
+		GET_STRING(host);
+		GET_STRING(doc);
+		GET_STRING(user);
+		GET_STRING(pwd);
+#undef GET_STRING
+
+		lua_getfield(L, idx, "port");
+		port = lua_tonumber(L, -1);
+		lua_pop(L, 1);
+
+		u = fetchMakeURL(scheme, host, port, doc, user, pwd);
+	}
+	lua_pop(L, 1);
+	if (u == NULL) {
+		return (NULL);
+	}
+
+	lua_getfield(L, idx, "offset");
+	u->offset = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+
+	lua_getfield(L, idx, "length");
+	u->length = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+
+	lua_getfield(L, idx, "ims_time");
+	u->ims_time = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+
+	return (u);
+}
+
 static int
 l_fetch_get(lua_State *L)
 {
-	const char *URL, *flags;
+	const char *flags;
+	struct url *u;
 	FILE *f;
 
-	URL = luaL_checkstring(L, 1);
 	flags = luaL_optstring(L, 2, NULL);
-	f = fetchGetURL(URL, flags);
+	if ((u = checkurl(L, 1)) == NULL) {
+		return (fetcherr(L));
+	}
+	f = fetchGet(u, flags);
+	fetchFreeURL(u);
 	if (f == NULL) {
 		return (fetcherr(L));
 	}
@@ -67,12 +135,16 @@ l_fetch_get(lua_State *L)
 static int
 l_fetch_put(lua_State *L)
 {
-	const char *URL, *flags;
+	const char *flags;
+	struct url *u;
 	FILE *f;
 
-	URL = luaL_checkstring(L, 1);
 	flags = luaL_optstring(L, 2, NULL);
-	f = fetchPutURL(URL, flags);
+	if ((u = checkurl(L, 1)) == NULL) {
+		return (fetcherr(L));
+	}
+	f = fetchPut(u, flags);
+	fetchFreeURL(u);
 	if (f == NULL) {
 		return (fetcherr(L));
 	}
@@ -99,12 +171,16 @@ static int
 l_fetch_xget(lua_State *L)
 {
 	struct url_stat stat;
-	const char *URL, *flags;
+	const char *flags;
+	struct url *u;
 	FILE *f;
 
-	URL = luaL_checkstring(L, 1);
 	flags = luaL_optstring(L, 2, NULL);
-	f = fetchXGetURL(URL, &stat, flags);
+	if ((u = checkurl(L, 1)) == NULL) {
+		return (fetcherr(L));
+	}
+	f = fetchXGet(u, &stat, flags);
+	fetchFreeURL(u);
 	if (f == NULL) {
 		return (fetcherr(L));
 	}
@@ -117,12 +193,16 @@ static int
 l_fetch_stat(lua_State *L)
 {
 	struct url_stat stat;
-	const char *URL, *flags;
+	const char *flags;
+	struct url *u;
 	int res;
 
-	URL = luaL_checkstring(L, 1);
 	flags = luaL_optstring(L, 2, NULL);
-	res = fetchStatURL(URL, &stat, flags);
+	if ((u = checkurl(L, 1)) == NULL) {
+		return (fetcherr(L));
+	}
+	res = fetchStat(u, &stat, flags);
+	fetchFreeURL(u);
 	if (res == -1) {
 		return (fetcherr(L));
 	}
@@ -149,12 +229,16 @@ newentlist(lua_State *L, struct url_ent *ents)
 static int
 l_fetch_list(lua_State *L)
 {
-	const char *URL, *flags;
+	const char *flags;
+	struct url *u;
 	struct url_ent *ents;
 
-	URL = luaL_checkstring(L, 1);
 	flags = luaL_optstring(L, 2, NULL);
-	ents = fetchListURL(URL, flags);
+	if ((u = checkurl(L, 1)) == NULL) {
+		return (fetcherr(L));
+	}
+	ents = fetchList(u, flags);
+	fetchFreeURL(u);
 	if (ents == NULL) {
 		return (fetcherr(L));
 	}
@@ -166,17 +250,15 @@ l_fetch_list(lua_State *L)
 static int
 l_fetch_request(lua_State *L)
 {
-	const char *URL, *method, *flags, *content_type, *body;
+	const char *method, *flags, *content_type, *body;
 	struct url *u;
 	FILE *f;
 
-	URL = luaL_checkstring(L, 1);
 	method = luaL_checkstring(L, 2);
 	flags = luaL_optstring(L, 3, NULL);
 	content_type = luaL_optstring(L, 4, NULL);
 	body = luaL_optstring(L, 5, NULL);
-	u = fetchParseURL(URL);
-	if (u == NULL) {
+	if ((u = checkurl(L, 1)) == NULL) {
 		return (fetcherr(L));
 	}
 	f = fetchReqHTTP(u, method, flags, content_type, body);
@@ -441,7 +523,7 @@ l_fetch_xrequest(lua_State *L)
 	struct url_stat stat;
 	struct request_body req_body;
 	struct http_fields req_headers, res_headers;
-	const char *URL, *method, *flags, *s;
+	const char *method, *flags, *s;
 	struct url *u;
 	struct response_body *res_body;
 	luaL_Stream *stream;
@@ -455,7 +537,6 @@ l_fetch_xrequest(lua_State *L)
 	TAILQ_INIT(&res_headers);
 	TAILQ_INIT(&req_body.trailers);
 
-	URL = luaL_checkstring(L, 1);
 	method = luaL_checkstring(L, 2);
 	while (lua_gettop(L) < 8) {
 		/* Fill in missing parameters. */
@@ -547,9 +628,7 @@ l_fetch_xrequest(lua_State *L)
 		    "body must be a string, or a function, or a table with "
 		    "'read' and optional 'seek' methods, or nil"));
 	}
-
-	u = fetchParseURL(URL);
-	if (u == NULL) {
+	if ((u = checkurl(L, 1)) == NULL) {
 		if (stream == NULL && b != NULL) {
 			fclose(b);
 		}

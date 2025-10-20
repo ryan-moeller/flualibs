@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd October 7, 2025
+.Dd October 20, 2025
 .Dt FETCH 3lua
 .Os
 .Sh NAME
@@ -39,13 +39,13 @@ fetch = require('fetch')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv f, errmsg, errcode = fetch.get(URL[ , flags ] )
-.It Dv f, errmsg, errcode = fetch.put(URL[ , flags ] )
-.It Dv f, stat_or_errmsg, errcode = fetch.xget(URL[ , flags ] )
-.It Dv stat, errmsg, errcode = fetch.stat(URL[ , flags ] )
-.It Dv ents, errmsg, errcode = fetch.list(URL[ , flags ] )
-.It Dv f, errmsg, errcode = fetch.request(URL, method[ , flags[ , content_type[ , body ] ] ] )
-.It Dv f, stat_or_errmsg, res_headers_or_errcode, res_trailers = fetch.xrequest(URL, method[ , flags[ , req_headers[ , req_trailers[ , res_headers[ , res_trailers[ , body ] ] ] ] ] )
+.It Dv f, errmsg, errcode = fetch.get(url[ , flags ] )
+.It Dv f, errmsg, errcode = fetch.put(url[ , flags ] )
+.It Dv f, stat_or_errmsg, errcode = fetch.xget(url[ , flags ] )
+.It Dv stat, errmsg, errcode = fetch.stat(url[ , flags ] )
+.It Dv ents, errmsg, errcode = fetch.list(url[ , flags ] )
+.It Dv f, errmsg, errcode = fetch.request(url, method[ , flags[ , content_type[ , body ] ] ] )
+.It Dv f, stat_or_errmsg, res_headers_or_errcode, res_trailers = fetch.xrequest(url, method[ , flags[ , req_headers[ , req_trailers[ , res_headers[ , res_trailers[ , body ] ] ] ] ] )
 .It Dv res_trailers = fetch.trailers(f )
 .El
 .Sh DESCRIPTION
@@ -54,20 +54,55 @@ The
 module provides bindings for File Transfer Library
 .Pq libfetch
 function calls.
+.Pp
+Functions taking a
+.Fa url
+parameter accept either a string or a table with one of the following forms:
+.Bd -literal -offset indent
+{
+	scheme = "",
+	[ host = "", ]
+	[ port = #, ]
+	[ doc = "", ]
+	[ user = "", ]
+	[ pwd = "", ]
+	[ offset = #, ]
+	[ length = #, ]
+	[ ims_time = #, ]
+}
+
+{
+	url = "",
+	[ offset = #, ]
+	[ length = #, ]
+	[ ims_time = #, ]
+}
+.Ed
+.Pp
+At least one of
+.Va host
+or
+.Va doc
+must be supplied in the first form.
+Omitted strings default to
+.Li ""
+and omitted numbers
+default to
+.Li 0 .
 .Bl -tag -width XXXX
-.It Dv f, errmsg, errcode = fetch.get(URL[ , flags ] )
-Wraps fetchGetURL.
-.It Dv f, errmsg, errcode = fetch.put(URL[ , flags ] )
-Wraps fetchPutURL.
-.It Dv f, stat_or_errmsg, errcode = fetch.xget(URL[ , flags ] )
-Wraps fetchXGetURL.
-.It Dv stat, errmsg, errcode = fetch.stat(URL[ , flags ] )
-Wraps fetchStatURL.
-.It Dv ents, errmsg, errcode = fetch.list(URL[ , flags ] )
-Wraps fetchListURL.
-.It Dv f, errmsg, errcode = fetch.request(URL, method[ , flags[ , content_type[ , body ] ] ] )
+.It Dv f, errmsg, errcode = fetch.get(url[ , flags ] )
+Wraps fetchGet.
+.It Dv f, errmsg, errcode = fetch.put(url[ , flags ] )
+Wraps fetchPut.
+.It Dv f, stat_or_errmsg, errcode = fetch.xget(url[ , flags ] )
+Wraps fetchXGet.
+.It Dv stat, errmsg, errcode = fetch.stat(url[ , flags ] )
+Wraps fetchStat.
+.It Dv ents, errmsg, errcode = fetch.list(url[ , flags ] )
+Wraps fetchList.
+.It Dv f, errmsg, errcode = fetch.request(url, method[ , flags[ , content_type[ , body ] ] ] )
 Wraps fetchReqHTTP.
-.It Dv f, stat_or_errmsg, res_headers_or_errcode, res_trailers = fetch.xrequest(URL, method[ , flags[ , req_headers[ , req_trailers[ , res_headers[ , res_trailers[ , body ] ] ] ] ] )
+.It Dv f, stat_or_errmsg, res_headers_or_errcode, res_trailers = fetch.xrequest(url, method[ , flags[ , req_headers[ , req_trailers[ , res_headers[ , res_trailers[ , body ] ] ] ] ] )
 Wraps fetchXReqHTTP.
 .Pp
 .Fa req_headers ,
@@ -101,7 +136,7 @@ and are modified in-place.
 .Pp
 .Fa res_trailers
 is not filled until the response body in
-.Dv f
+.Va f
 has been read completely and either closed or passed to
 .Fn fetch.trailers .
 .Pp
@@ -116,10 +151,10 @@ a string
 a Lua file object
 .It
 a table with a
-.Dv read
+.Va read
 method taking the number of bytes to read as a parameter and returning a string,
 and optionally a
-.Dv seek
+.Va seek
 method taking a whence string and integer offset as parameters and returning the
 new position as an integer.
 .El
