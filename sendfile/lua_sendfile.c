@@ -106,6 +106,24 @@ get_hdtr(lua_State *L, int arg, struct sf_hdtr *hdtr)
 }
 
 static int
+check_fd(lua_State *L, int idx)
+{
+	luaL_Stream *stream;
+	int fd;
+
+	if (lua_type(L, idx) == LUA_TNUMBER) {
+		fd = luaL_checkinteger(L, idx);
+	} else {
+		stream = luaL_checkudata(L, idx, LUA_FILEHANDLE);
+		luaL_argcheck(L, stream->f != NULL, idx,
+		    "invalid file handle (closed)");
+		fd = fileno(stream->f);
+	}
+	luaL_argcheck(L, fd >= 0, idx, "invalid file descriptor");
+	return (fd);
+}
+
+static int
 l_sendfile(lua_State *L)
 {
 	struct sf_hdtr hdtr, *hdtrp;
@@ -114,8 +132,8 @@ l_sendfile(lua_State *L)
 	int fd, s, flags, readahead, error;
 
 	lua_remove(L, 1); /* func table from the __call metamethod */
-	fd = luaL_checkinteger(L, 1);
-	s =  luaL_checkinteger(L, 2);
+	fd = check_fd(L, 1);
+	s = check_fd(L, 2);
 	offset = luaL_checkinteger(L, 3);
 	nbytes = luaL_checkinteger(L, 4);
 	if (lua_istable(L, 5)) {
