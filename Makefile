@@ -11,6 +11,7 @@ SUBDIR= \
 	libifconfig \
 	libmagic \
 	libmd \
+	libpthread \
 	mq \
 	sendfile \
 	sysctl \

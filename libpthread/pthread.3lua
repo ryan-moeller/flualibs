@@ -1,0 +1,701 @@
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.Dd October 30, 2025
+.Dt PTHREAD 3lua
+.Os
+.Sh NAME
+.Nm pthread.create ,
+.Nm pthread.retain ,
+.Nm pthread.exit ,
+.Nm pthread.self ,
+.Nm pthread.setcancelstate ,
+.Nm pthread.setcanceltype ,
+.Nm pthread.testcancel ,
+.Nm pthread.yield ,
+.Nm pthread.getthreadid_np ,
+.Nm pthread.main_np ,
+.Nm pthread.multi_np ,
+.Nm pthread.resume_all_np ,
+.Nm pthread.signals_block_np ,
+.Nm pthread.signals_unblock_np ,
+.Nm pthread.single_np ,
+.Nm pthread.suspend_all_np ,
+.Nm pthread_t:cookie ,
+.Nm pthread_t:cancel ,
+.Nm pthread_t:detach ,
+.Nm pthread_t:equal ,
+.Nm pthread_t:join ,
+.Nm pthread_t:attr_get_np ,
+.Nm pthread_t:resume_np ,
+.Nm pthread_t:peekjoin_np ,
+.Nm pthread_t:suspend_np ,
+.Nm pthread_t:timedjoin_np ,
+.Nm pthread_t:getname_np ,
+.Nm pthread_t:setname_np ,
+.Nm pthread.once.new ,
+.Nm pthread.once.retain ,
+.Nm pthread_once_t:cookie ,
+.Nm pthread.mutex.new ,
+.Nm pthread.mutex.retain ,
+.Nm pthread_mutex_t:cookie ,
+.Nm pthread_mutex_t:lock ,
+.Nm pthread_mutex_t:timedlock ,
+.Nm pthread_mutex_t:trylock ,
+.Nm pthread_mutex_t:unlock ,
+.Nm pthread_mutex_t:getspinloops_np ,
+.Nm pthread_mutex_t:setspinloops_np ,
+.Nm pthread_mutex_t:getyieldloops_np ,
+.Nm pthread_mutex_t:setyieldloops_np ,
+.Nm pthread_mutex_t:isowned_np ,
+.Nm pthread.cond.new ,
+.Nm pthread.cond.retain ,
+.Nm pthread_cond_t:cookie ,
+.Nm pthread_cond_t:broadcast ,
+.Nm pthread_cond_t:signal ,
+.Nm pthread_cond_t:timedwait ,
+.Nm pthread_codn_t:wait ,
+.Nm pthread.rwlock.new ,
+.Nm pthread.rwlock.retain ,
+.Nm pthread_rwlock_t:cookie ,
+.Nm pthread_rwlock_t:rdlock ,
+.Nm pthread_rwlock_t:tryrdlock ,
+.Nm pthread_rwlock_t:trywrlock ,
+.Nm pthread_rwlock_t:unlock ,
+.Nm pthread_rwlock_t:wrlock ,
+.Nm pthread.key.create ,
+.Nm pthread.key.retain ,
+.Nm pthread_key_t:cookie ,
+.Nm pthread_key_t:getspecific ,
+.Nm pthread_key_t:setspecific ,
+.Nm pthread.cleanup.pop ,
+.Nm pthread.cleanup.push ,
+.Nm pthread.barrier.new ,
+.Nm pthread.barrier.retain ,
+.Nm pthread_barrier_t:cookie ,
+.Nm pthread_barrier_t:wait ,
+.Nm pthread.DESTRUCTOR_ITERATIONS ,
+.Nm pthread.KEYS_MAX ,
+.Nm pthread.STACK_MIN ,
+.Nm pthread.THREADS_MAX ,
+.Nm pthread.DETACHED ,
+.Nm pthread.SCOPE_SYSTEM ,
+.Nm pthread.INHERIT_SCHED ,
+.Nm pthread.NOFLOAT ,
+.Nm pthread.CREATE_DETACHED ,
+.Nm pthread.CREATE_JOINABLE ,
+.Nm pthread.SCOPE_PROCESS ,
+.Nm pthread.EXPLICIT_SCHED ,
+.Nm pthread.PROCESS_PRIVATE ,
+.Nm pthread.PROCESS_SHARED ,
+.Nm pthread.CANCEL_ENABLE ,
+.Nm pthread.CANCEL_DISABLE ,
+.Nm pthread.CANCEL_DEFERRED ,
+.Nm pthread.CANCEL_ASYNCHRONOUS ,
+.Nm pthread.PRIO_NONE ,
+.Nm pthread.PRIO_INHERIT ,
+.Nm pthread.PRIO_PROTECT ,
+.Nm pthread.mutex.ERRORCHECK ,
+.Nm pthread.mutex.RECURSIVE ,
+.Nm pthread.mutex.NORMAL ,
+.Nm pthread.mutex.ADAPTIVE_NP ,
+.Nm pthread.mutex.TYPE_MAX ,
+.Nm pthread.mutex.DEFAULT ,
+.Nm pthread.mutex.STALLED ,
+.Nm pthread.mutex.ROBUST ,
+.Nm pthread.barrier.SERIAL_THREAD
+.Nd Lua bindings for
+.Xr pthread 3
+and
+.Xr pthread_np 3
+.Sh SYNOPSIS
+.Bd -literal
+pthread = require('pthread')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv thread, err, code = pthread.create([attr , ] func[ , ... ] )
+.It Dv thread = pthread.retain(cookie )
+.It Dv pthread.exit(... )
+.It Dv thread = pthread.self( )
+.It Dv oldstate, err, code = pthread.setcancelstate(state )
+.It Dv oldtype, err, code = pthread.setcanceltype(type )
+.It Dv pthread.testcancel( )
+.It Dv pthread.yield( )
+.It Dv threadid = pthread.getthreadid_np( )
+.It Dv ismain, err = pthread.main_np( )
+.It Dv ok = pthread.multi_np( )
+.It Dv pthread.resume_all_np( )
+.It Dv pthread.signals_block_np( )
+.It Dv pthread.signals_unblock_np( )
+.It Dv ok = pthread.single_np( )
+.It Dv pthread.suspend_all_np( )
+.It Dv cookie = thread:cookie( )
+.It Dv ok, err, code = thread:cancel( )
+.It Dv ok, err, code = thread:detach( )
+.It Dv eq = thread:equal(other_thread )
+.It Dv status, ... = thread:join( )
+.It Dv attr, err, code = thread:attr_get_np( )
+.It Dv ok, err, code = thread:resume_np( )
+.It Dv status, ... = thread:peekjoin_np( )
+.It Dv ok, err, code = thread:suspend_np( )
+.It Dv status, ... = thread:timedjoin_np(abstime_sec[ , abstime_nsec ] )
+.It Dv name, err, code = thread:getname_np( )
+.It Dv ok, err, code = thread:setname_np(name )
+.It Dv once = pthread.once.new( )
+.It Dv once = pthread.once.retain(cookie )
+.It Dv status, ... = once(func[ , ... ] )
+.It Dv cookie = once:cookie( )
+.It Dv mutex, err, code = pthread.mutex.new([attr ] )
+.It Dv mutex = pthread.mutex.retain(cookie )
+.It Dv cookie = mutex:cookie( )
+.It Dv ok, err, code = mutex:lock( )
+.It Dv ok, err, code = mutex:timedlock(abstime_sec[ , abstime_nsec ] )
+.It Dv ok, err, code = mutex:trylock( )
+.It Dv ok, err, code = mutex:unlock( )
+.It Dv count, err, code = mutex:getspinloops_np( )
+.It Dv ok, err, code = mutex:setspinloops_np(count )
+.It Dv count, err, code = mutex:getyieldloops_np( )
+.It Dv ok, err, code = mutex:setyieldloops_np(count )
+.It Dv isowned, err = mutex:isowned_np( )
+.It Dv cond, err, code = pthread.cond.new([attr ] )
+.It Dv cond = pthread.cond.retain(cookie )
+.It Dv cookie = cond:cookie( )
+.It Dv ok, err, code = cond:broadcast( )
+.It Dv ok, err, code = cond:signal( )
+.It Dv ok, err, code = cond:timedwait(mutex , abstime_sec[ , abstime_nsec ] )
+.It Dv ok, err, code = cond:wait(mutex )
+.It Dv lock, err, code = pthread.rwlock.new([attr ] )
+.It Dv lock = pthread.rwlock.retain(cookie )
+.It Dv cookie = lock:cookie( )
+.It Dv ok, err, code = lock:rdlock( )
+.It Dv ok, err, code = lock:tryrdlock( )
+.It Dv ok, err, code = lock:trywrlock( )
+.It Dv ok, err, code = lock:unlock( )
+.It Dv ok, err, code = lock:wrlock( )
+.It Dv key, err, code = pthread.key.create([destructor ] )
+.It Dv key = pthread.key.retain(cookie )
+.It Dv cookie = key:cookie( )
+.It Dv value = key:getspecific( )
+.It Dv ok, err, code = key:setspecific(value )
+.It Dv status, ... = pthread.cleanup.pop([execute ] )
+.It Dv pthread.cleanup.push(func[ , ... ] )
+.It Dv barrier, err, code = pthread.barrier.new([attr ] , count )
+.It Dv barrier = pthread.barrier.retain(cookie )
+.It Dv cookie = barrier:cookie( )
+.It Dv ok, err, code = barrier:wait( )
+.El
+.Sh DESCRIPTION
+The
+.Nm pthread
+module provides bindings for POSIX Threads Library
+.Pq libpthread
+function calls.
+.Bl -tag -width XXXX
+.It Dv thread, err, code = pthread.create([attr , ] func[ , ... ] )
+Wraps
+.Xr pthread_create 3 .
+.Pp
+.Fa attr
+may be given as a table of the following form, where each field is optional:
+.Bd -literal -offset indent
+{
+	stack = {
+		addr = <lightuserdata>,
+		size = <integer>
+	},
+	stacksize = <integer>,
+	guardsize = <integer>,
+	detachstate = <integer>,
+	inheritsched = <integer>,
+	schedparam = <integer>,
+	schedpolicy = <integer>,
+	scope = <integer>,
+	createsuspend_np = <boolean>
+}
+.Ed
+.Pp
+The
+.Fa func
+parameter is a function to call in the new thread, followed by any arguments to
+be passed to the function.
+All upvalues and arguments to the thread function must be one of the following
+serializable types:
+.Pp
+.Bl -bullet -compact -offset indent
+.It
+.Vt nil
+.It
+.Vt boolean
+.It
+.Vt lightuserdata
+.It
+.Vt number
+.It
+.Vt string
+.It
+.Vt function Pq with only serializable upvalues
+.El
+.Pp
+Closures with
+.Dv _ENV
+as an upvalue will receive the
+.Dv _ENV
+of the new thread.
+.Pp
+The created thread is provided with a new Lua state in which to execute.
+Lua values are not shared between threads; threads that share resources must
+do so by external means, such as message passing or shared memory.
+These features are not provided by
+.Xr pthread 3lua ,
+except for the types provided by this library.
+.Pp
+Any values returned by
+.Fa func
+must be serializable.
+They are returned to to the caller of
+.Fn :join ,
+.Fn :peekjoin_np ,
+or
+.Fn :timedjoin_np .
+.It Dv thread = pthread.retain(cookie )
+Construct a
+.Vt pthread_t
+userdata object from an existing thread.
+.Pp
+The userdata types provided by this module, such as
+.Vt pthread_t ,
+are allocated on the heap rather than on the Lua stack, and use reference
+counting to manage lifetime.
+This enables sharing the objects between threads, which is generally the point
+of objects in this module.
+The
+.Fn retain
+constructor adds a reference to an existing object.
+References are released when garbage collected, with the final release freeing
+the object from the heap.
+.Pp
+It is the responsibility of the user to ensure that the source of a cookie is
+not garbage collected before the cookie is passed to
+.Fn retain .
+Using a cookie from a dead object constitutes use after free.
+.It Dv pthread.exit(... )
+Wraps
+.Xr pthread_exit 3 .
+.Pp
+Any values passed as arguments must be serializable.
+They are returned to to the caller of
+.Fn :join ,
+.Fn :peekjoin_np ,
+or
+.Fn :timedjoin_np .
+.It Dv thread = pthread.self( )
+Wraps
+.Xr pthread_self 3 .
+.It Dv oldstate, err, code = pthread.setcancelstate(state )
+Wraps
+.Xr pthread_setcancelstate 3 .
+.It Dv oldtype, err, code = pthread.setcanceltype(type )
+Wraps
+.Xr pthread_setcanceltype 3 .
+.It Dv pthread.testcancel( )
+Wraps
+.Xr pthread_testcancel 3 .
+.It Dv pthread.yield( )
+Wraps
+.Xr pthread_yield 3 .
+.It Dv threadid = pthread.getthreadid_np( )
+Wraps
+.Xr pthread_getthreadid_np 3 .
+.It Dv ismain, err = pthread.main_np( )
+Wraps
+.Xr pthread_main_np 3 .
+.It Dv ok = pthread.multi_np( )
+Wraps
+.Xr pthread_multi_np 3 .
+.It Dv pthread.resume_all_np( )
+Wraps
+.Xr pthread_resume_all_np 3 .
+.It Dv pthread.signals_block_np( )
+Wraps
+.Xr pthread_signals_block_np 3 .
+.It Dv pthread.signals_unblock_np( )
+Wraps
+.Xr pthread_signals_unblock_np 3 .
+.It Dv ok = pthread.single_np( )
+Wraps
+.Xr pthread_single_np 3 .
+.It Dv pthread.suspend_all_np( )
+Wraps
+.Xr pthread_suspend_all_np 3 .
+.It Dv cookie = thread:cookie( )
+Obtain a cookie for this object.
+It can be used to retain a reference in another thread.
+The cookie is a
+.Vt lightuserdata
+object, which can be safely passed between threads.
+.It Dv ok, err, code = thread:cancel( )
+Wraps
+.Xr pthread_cancel 3 .
+.It Dv ok, err, code = thread:detach( )
+Wraps
+.Xr pthread_detach 3 .
+.It Dv eq = thread:equal(other_thread )
+Wraps
+.Xr pthread_equal 3 .
+This method is also provided as the
+.Fn __eq
+metamethod.
+.It Dv status, ... = thread:join( )
+Wraps
+.Xr pthread_join 3 .
+.Pp
+The first return value is a boolean thread status, or
+.Dv nil
+followed by an error string and integer error code if
+.Xr pthread_join 3
+encountered an error.
+The
+.Va status
+is
+.Dv true
+if the thread exited successfully, otherwise
+.Dv false .
+Any values returned by the thread function or passed to
+.Fn pthread.exit
+follow the status.
+.Pp
+Joining a thread closes the Lua state for that thread, unless the thread was
+canceled.
+When a thread is canceled, the Lua state is automatically closed by a cleanup
+handler.
+.It Dv attr, err, code = thread:attr_get_np( )
+Wraps
+.Xr pthread_attr_get_np 3 .
+.Pp
+The returned
+.Va attr
+value is a
+.Vt table
+of the same form as passed to
+.Fn pthread.create .
+The
+.Va stacksize
+field described above would be redundant and is not included.
+.It Dv ok, err, code = thread:resume_np( )
+Wraps
+.Xr pthread_resume_np 3 .
+.It Dv status, ... = thread:peekjoin_np( )
+Wraps
+.Xr pthread_peekjoin_np 3 .
+.Pp
+The returned values are the same as for
+.Fn thread:join .
+The Lua state for
+.Va thread
+is not closed by this function.
+.It Dv ok, err, code = thread:suspend_np( )
+Wraps
+.Xr pthread_suspend_np 3 .
+.It Dv status, ... = thread:timedjoin_np(abstime_sec[ , abstime_nsec ] )
+Wraps
+.Xr pthread_timedjoin_np 3 .
+.Pp
+The behavior is the same as for
+.Fn thread:join ,
+with the addition of a timeout specified as an absolute time in seconds and
+optional nanoseconds.
+.It Dv name, err, code = thread:getname_np( )
+Wraps
+.Xr pthread_getname_np 3 .
+.It Dv ok, err, code = thread:setname_np(name )
+Wraps
+.Xr pthread_setname_np 3 .
+.It Dv once = pthread.once.new( )
+Allocate and initialize a
+.Vt pthread_once_t
+control value.
+.It Dv once = pthread.once.retain(cookie )
+Retain a reference to an existing
+.Vt pthread_once_t
+control value.
+.It Dv status, ... = once(func[ , ... ] )
+Wraps
+.Xr pthread_once 3 .
+.Pp
+The passed function is invoked with any arguments following it if not already
+called.
+The returned
+.Va status
+is
+.Dv true
+if the call to
+.Fa func
+succeeded, otherwise
+.Dv false .
+Any results returned by
+.Fa func
+are returned after the status.
+.It Dv cookie = once:cookie( )
+Obtain a cookie for this object.
+It can be used to retain a reference in another thread.
+The cookie is a
+.Vt lightuserdata
+object, which can be safely passed between threads.
+.It Dv mutex, err, code = pthread.mutex.new([attr ] )
+Allocate and initialize a
+.Vt pthread_mutex_t
+object.
+.Pp
+.Fa attr
+may be given as a table of the following form, where each field is optional:
+.Bd -literal -offset indent
+{
+	prioceiling = <integer>,
+	protocol = <integer>,
+	type = <integer>
+}
+.Ed
+.It Dv mutex = pthread.mutex.retain(cookie )
+Retain a reference to an existing
+.Vt pthread_mutex_t
+object.
+.It Dv cookie = mutex:cookie( )
+Obtain a cookie for this object.
+It can be used to retain a reference in another thread.
+The cookie is a
+.Vt lightuserdata
+object, which can be safely passed between threads.
+.It Dv ok, err, code = mutex:lock( )
+Wraps
+.Xr pthread_mutex_lock 3 .
+.It Dv ok, err, code = mutex:timedlock(abstime_sec[ , abstime_nsec ] )
+Wraps
+.Xr pthread_mutex_timedlock 3 .
+.It Dv ok, err, code = mutex:trylock( )
+Wraps
+.Xr pthread_mutex_trylock 3 .
+.It Dv ok, err, code = mutex:unlock( )
+Wraps
+.Xr pthread_mutex_unlock 3 .
+.It Dv count, err, code = mutex:getspinloops_np( )
+Wraps
+.Fn pthread_mutex_getspinloops_np .
+.It Dv ok, err, code = mutex:setspinloops_np(count )
+Wraps
+.Fn pthread_mutex_setspinloops_np .
+.It Dv count, err, code = mutex:getyieldloops_np( )
+Wraps
+.Fn pthread_mutex_getyieldloops_np .
+.It Dv ok, err, code = mutex:setyieldloops_np(count )
+Wraps
+.Fn pthread_mutex_setyieldloops_np .
+.It Dv isowned, err = mutex:isowned_np( )
+Wraps
+.Fn pthread_mutex_isowned_np .
+.It Dv cond, err, code = pthread.cond.new([attr ] )
+Allocate and initialize a
+.Vt pthread_cond_t
+object.
+.Pp
+.Fa attr
+may be given as a table of the following form, where each field is optional:
+.Bd -literal -offset indent
+{
+	clock = <integer>,
+	pshared = <integer>
+}
+.Ed
+.It Dv cond = pthread.cond.retain(cookie )
+Retain a reference to an existing
+.Vt pthread_cond_t
+object.
+.It Dv cookie = cond:cookie( )
+Obtain a cookie for this object.
+It can be used to retain a reference in another thread.
+The cookie is a
+.Vt lightuserdata
+object, which can be safely passed between threads.
+.It Dv ok, err, code = cond:broadcast( )
+Wraps
+.Xr pthread_cond_broadcast 3 .
+.It Dv ok, err, code = cond:signal( )
+Wraps
+.Xr pthread_cond_signal 3 .
+.It Dv ok, err, code = cond:timedwait(mutex , abstime_sec[ , abstime_nsec ] )
+Wraps
+.Xr pthread_cond_timedwait 3 .
+.It Dv ok, err, code = cond:wait(mutex )
+Wraps
+.Xr pthread_cond_wait 3 .
+.It Dv lock, err, code = pthread.rwlock.new([attr ] )
+Allocate and initialize a
+.Vt pthread_rwlock_t
+object.
+.Pp
+.Fa attr
+may be given as a table of the following form, where each field is optional:
+.Bd -literal -offset indent
+{
+	pshared = <integer>
+}
+.Ed
+.It Dv lock = pthread.rwlock.retain(cookie )
+Retain a reference to an existing
+.Vt pthread_rwlock_t
+object.
+.It Dv cookie = lock:cookie( )
+Obtain a cookie for this object.
+It can be used to retain a reference in another thread.
+The cookie is a
+.Vt lightuserdata
+object, which can be safely passed between threads.
+.It Dv ok, err, code = lock:rdlock( )
+Wraps
+.Xr pthread_rwlock_rdlock 3 .
+.It Dv ok, err, code = lock:tryrdlock( )
+Wraps
+.Xr pthread_rwlock_tryrdlock 3 .
+.It Dv ok, err, code = lock:trywrlock( )
+Wraps
+.Xr pthread_rwlock_trywrlock 3 .
+.It Dv ok, err, code = lock:unlock( )
+Wraps
+.Xr pthread_rwlock_unlock 3 .
+.It Dv ok, err, code = lock:wrlock( )
+Wraps
+.Xr pthread_rwlock_wrlock 3 .
+.It Dv key, err, code = pthread.key.create([destructor ] )
+Allocate and initialize a
+.Vt pthread_key_t
+object.
+.Pp
+.Fa destructor
+is an optional
+.Vt lightuserdata
+pointer to a C destructor function.
+.Pp
+As each thread created by this module has its own thread-local Lua state, the
+.Xr pthread 3
+functions for thread-specific data are only useful for interfacing with C.
+.It Dv key = pthread.key.retain(cookie )
+Retain a reference to an existing
+.Vt pthread_key_t
+object.
+.It Dv cookie = key:cookie( )
+Obtain a cookie for this object.
+It can be used to retain a reference in another thread.
+The cookie is a
+.Vt lightuserdata
+object, which can be safely passed between threads.
+.It Dv value = key:getspecific( )
+Wraps
+.Xr pthread_getspecific 3 .
+.Pp
+The
+.Va value
+returned is a
+.Vt lightuserdata
+pointer.
+.It Dv ok, err, code = key:setspecific(value )
+Wraps
+.Xr pthread_setspecific 3 .
+.Pp
+The
+.Fa value
+parameter is a
+.Vt lightuserdata
+pointer.
+.It Dv status, ... = pthread.cleanup.pop([execute ] )
+Emulates
+.Xr pthread_cleanup_pop 3 .
+.Pp
+The returned
+.Va status
+is
+.Dv true
+if successful, otherwise
+.Dv false .
+.Pp
+Any values returned by the cleanup handler are returned following the status.
+.It Dv pthread.cleanup.push(func[ , ... ] )
+Emulates
+.Xr pthread_cleanup_push 3 .
+.Pp
+The provided
+.Fa func
+and any arguments following are pushed to a table in the thread's Lua registry.
+If the thread is canceled, the cleanup handler iterates the cleanup stack to
+invoke each handler.
+.Pp
+It is the responsibility of the user to match each
+.Fn pthread.cleanup.push
+with a
+.Fn pthread.cleanup.pop ,
+even in the case of Lua errors!
+.It Dv barrier, err, code = pthread.barrier.new([attr ] , count )
+Allocate and initialize a
+.Vt pthread_barrier_t
+object.
+.Pp
+.Fa attr
+may be given as a table of the following form, where each field is optional:
+.Bd -literal -offset indent
+{
+	pshared = <integer>
+}
+.Ed
+.It Dv barrier = pthread.barrier.retain(cookie )
+Retain a reference to an existing
+.Vt pthread_barrier_t
+object.
+.It Dv cookie = barrier:cookie( )
+Obtain a cookie for this object.
+It can be used to retain a reference in another thread.
+The cookie is a
+.Vt lightuserdata
+object, which can be safely passed between threads.
+.It Dv ok, err, code = barrier:wait( )
+Wraps
+.Xr pthread_barrier_wait 3 .
+When successful, returns
+.Dv pthread.barrier.SERIAL_THREAD
+in the last thread to reach the barrier or
+.Dv true
+if not last.
+.El
+.Sh EXAMPLES
+Print a message from another thread:
+.Bd -literal -offset indent
+pthread = require('pthread')
+
+pthread.create(function(message) print(message) end), 'hello world'):join()
+.Ed
+.Sh SEE ALSO
+.Xr pthread 3 ,
+.Xr pthread_np 3
+.Sh AUTHORS
+.An Ryan Moeller
