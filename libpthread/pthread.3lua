@@ -50,6 +50,8 @@
 .Nm pthread_t:equal ,
 .Nm pthread_t:join ,
 .Nm pthread_t:attr_get_np ,
+.Nm pthread_t:getaffinity_np ,
+.Nm pthread_t:setaffinity_np ,
 .Nm pthread_t:resume_np ,
 .Nm pthread_t:peekjoin_np ,
 .Nm pthread_t:suspend_np ,
@@ -159,6 +161,8 @@ pthread = require('pthread')
 .It Dv eq = thread:equal(other_thread )
 .It Dv status, ... = thread:join( )
 .It Dv attr, err, code = thread:attr_get_np( )
+.It Dv cpuset, err, code = thread:getaffinity_np( )
+.It Dv ok, err, code = thread:setaffinity_np(cpuset )
 .It Dv ok, err, code = thread:resume_np( )
 .It Dv status, ... = thread:peekjoin_np( )
 .It Dv ok, err, code = thread:suspend_np( )
@@ -234,7 +238,8 @@ may be given as a table of the following form, where each field is optional:
 	schedparam = <integer>,
 	schedpolicy = <integer>,
 	scope = <integer>,
-	createsuspend_np = <boolean>
+	createsuspend_np = <boolean>,
+	affinity_np = <cpuset>
 }
 .Ed
 .Pp
@@ -405,6 +410,17 @@ of the same form as passed to
 The
 .Va stacksize
 field described above would be redundant and is not included.
+.It Dv cpuset, err, code = thread:getaffinity_np( )
+Wraps
+.Xr pthread_getaffinity_np 3 .
+Returns a cpuset object from
+.Xr cpuset 3lua .
+.It Dv ok, err, code = thread:setaffinity_np(cpuset )
+Wraps
+.Xr pthread_setaffinity_np 3 .
+.Fa cpuset
+is a cpuset object from
+.Xr cpuset 3lua .
 .It Dv ok, err, code = thread:resume_np( )
 Wraps
 .Xr pthread_resume_np 3 .
@@ -696,6 +712,7 @@ pthread.create(function(message) print(message) end), 'hello world'):join()
 .Ed
 .Sh SEE ALSO
 .Xr pthread 3 ,
-.Xr pthread_np 3
+.Xr pthread_np 3 ,
+.Xr cpuset 3lua
 .Sh AUTHORS
 .An Ryan Moeller

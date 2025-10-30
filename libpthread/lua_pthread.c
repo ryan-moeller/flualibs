@@ -25,6 +25,8 @@
  * SUCH DAMAGE.
  */
 
+#include <sys/param.h>
+#include <sys/cpuset.h>
 #include <assert.h>
 #include <errno.h>
 #include <pthread.h>
@@ -38,8 +40,8 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-/* TODO: flualibs/cpuset */
 #include "refcount.h"
+#include "../cpuset/lua_cpuset.h"
 #include "../luaerror.h"
 
 int luaopen_pthread(lua_State *);
@@ -375,7 +377,30 @@ checkattr(lua_State *L, int idx, pthread_attr_t *attr)
 		return (-1);
 	}
 	lua_pop(L, 1);
-	/* TODO: flualibs/cpuset for affinity_np */
+	switch (lua_getfield(L, idx, "affinity_np")) {
+	case LUA_TUSERDATA: {
+		cpuset_t *cpuset;
+
+		if (luaL_getmetatable(L, CPUSET_METATABLE) != LUA_TTABLE ||
+		    lua_getmetatable(L, -2) == 0 ||
+		    lua_rawequal(L, -1, -2) == 0) {
+			return (-1);
+		}
+		lua_pop(L, 2);
+
+		cpuset = lua_touserdata(L, -1);
+		if (pthread_attr_setaffinity_np(attr, sizeof(*cpuset), cpuset)
+		    != 0) {
+			return (-1);
+		}
+		break;
+	}
+	case LUA_TNIL:
+		break;
+	default:
+		return (-1);
+	}
+	lua_pop(L, 1);
 	return (0);
 }
 
@@ -657,6 +682,7 @@ l_pthread_attr_get_np(lua_State *L)
 	pthread_attr_t attr;
 	struct sched_param param;
 	struct rcthread *threadp;
+	cpuset_t *cpuset;
 	void *addr;
 	size_t size;
 	int error, val;
@@ -736,13 +762,55 @@ l_pthread_attr_get_np(lua_State *L)
 	lua_pushinteger(L, val);
 	lua_setfield(L, -2, "scope");
 
+	cpuset = newanoncpuset(L);
+	if ((error = pthread_attr_getaffinity_np(&attr, sizeof(*cpuset),
+	    cpuset)) != 0) {
+		attr_destroy(L, &attr);
+		return (luaL_error(L, "pthread_attr_getaffinity_np: %s",
+		    strerror(error)));
+	}
+	lua_setfield(L, -2, "affinity_np");
+
 	/* no pthread_attr_getcreatesuspend_np(3) */
 
 	attr_destroy(L, &attr);
 	return (1);
 }
 
-/* TODO: flualibs/cpuset for getaffinity_np/setaffinity_np */
+static int
+l_pthread_getaffinity_np(lua_State *L)
+{
+	struct rcthread *threadp;
+	cpuset_t *cpuset;
+	int error;
+
+	threadp = checkthreadp(L, 1);
+
+	cpuset = newanoncpuset(L);
+	if ((error = pthread_getaffinity_np(threadp->thread, sizeof(*cpuset),
+	    cpuset)) != 0) {
+		return (fail(L, error));
+	}
+	return (1);
+}
+
+static int
+l_pthread_setaffinity_np(lua_State *L)
+{
+	struct rcthread *threadp;
+	cpuset_t *cpuset;
+	int error;
+
+	threadp = checkthreadp(L, 1);
+	cpuset = luaL_checkudata(L, 2, CPUSET_METATABLE);
+
+	if ((error = pthread_setaffinity_np(threadp->thread, sizeof(*cpuset),
+	    cpuset)) != 0) {
+		return (fail(L, error));
+	}
+	lua_pushboolean(L, true);
+	return (1);
+}
 
 static int
 l_pthread_resume_np(lua_State *L)
@@ -2260,7 +2328,8 @@ static const struct luaL_Reg l_pthread_meta[] = {
 	{"equal", l_pthread_equal},
 	{"join", l_pthread_join},
 	{"attr_get_np", l_pthread_attr_get_np},
-	/* TODO: flualibs/cpuset for getaffinity_np/setaffinity_np */
+	{"getaffinity_np", l_pthread_getaffinity_np},
+	{"setaffinity_np", l_pthread_setaffinity_np},
 	{"resume_np", l_pthread_resume_np},
 	{"peekjoin_np", l_pthread_peekjoin_np},
 	{"suspend_np", l_pthread_suspend_np},
@@ -2375,6 +2444,11 @@ int
 luaopen_pthread(lua_State *L)
 {
 	int error;
+
+	/* Load cpuset module for its metatable. */
+	lua_getglobal(L, "require");
+	lua_pushstring(L, "cpuset");
+	lua_call(L, 1, 0);
 
 	if ((error = pthread_setspecific(thread_state_key, L)) != 0) {
 		return (luaL_error(L, "pthread_setspecific: %s",
