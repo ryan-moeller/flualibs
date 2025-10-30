@@ -4,6 +4,7 @@ SRCTOP?= /usr/src
 
 SUBDIR= \
 	b64 \
+	cpuset \
 	fileno \
 	kldstat \
 	kqueue \
