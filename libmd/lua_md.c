@@ -46,8 +46,7 @@ l_sha1_init(lua_State *L)
 	SHA_CTX *ctx;
 
 	ctx = lua_newuserdatauv(L, sizeof(SHA_CTX), 0);
-	luaL_getmetatable(L, SHA_CTX_METATABLE);
-	lua_setmetatable(L, -2);
+	luaL_setmetatable(L, SHA_CTX_METATABLE);
 
 	SHA1_Init(ctx);
 	return (1);

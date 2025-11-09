@@ -50,8 +50,7 @@ l_magic_open(lua_State *L)
 	flags = luaL_optinteger(L, 1, MAGIC_NONE);
 
 	cookiep = lua_newuserdatauv(L, sizeof(*cookiep), 0);
-	luaL_getmetatable(L, MAGIC_METATABLE);
-	lua_setmetatable(L, -2);
+	luaL_setmetatable(L, MAGIC_METATABLE);
 
 	*cookiep = magic_open(flags);
 	if (*cookiep == NULL) {
