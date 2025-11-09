@@ -59,18 +59,36 @@ enum wrapperuv {
 };
 
 static inline int
-new(lua_State *L, const char *metatable)
+new(lua_State *L, void *cookie, const char *metatable)
 {
-	assert(lua_islightuserdata(L, -1));
-
 	lua_newuserdatauv(L, 0, 1);
-	luaL_getmetatable(L, metatable);
-	lua_setmetatable(L, -2);
+	luaL_setmetatable(L, metatable);
 
-	lua_pushvalue(L, -2);
+	lua_pushlightuserdata(L, cookie);
 	lua_setiuservalue(L, -2, COOKIE);
 
 	return (1);
+}
+
+static inline void *
+checklightuserdata(lua_State *L, int idx)
+{
+	luaL_checktype(L, idx, LUA_TLIGHTUSERDATA);
+
+	return (lua_touserdata(L, idx));
+}
+
+static inline void *
+checkcookie(lua_State *L, int idx, const char *metatable)
+{
+	void *cookie;
+
+	luaL_checkudata(L, idx, metatable);
+
+	lua_getiuservalue(L, idx, COOKIE);
+	cookie = lua_touserdata(L, -1);
+	luaL_argcheck(L, cookie != NULL, idx, "cookie expired");
+	return (cookie);
 }
 
 static inline int
@@ -407,16 +425,14 @@ checkattr(lua_State *L, int idx, pthread_attr_t *attr)
 static void
 getcleanupstack(lua_State *L)
 {
-	lua_pushlightuserdata(L, getcleanupstack);
-	lua_rawget(L, LUA_REGISTRYINDEX);
+	lua_rawgetp(L, LUA_REGISTRYINDEX, getcleanupstack);
 }
 
 static inline void
 initcleanupstack(lua_State *L)
 {
-	lua_pushlightuserdata(L, getcleanupstack);
 	lua_newtable(L);
-	lua_rawset(L, LUA_REGISTRYINDEX);
+	lua_rawsetp(L, LUA_REGISTRYINDEX, getcleanupstack);
 }
 
 static void
@@ -538,8 +554,7 @@ l_pthread_create(lua_State *L)
 		return (fail(L, error));
 	}
 	refcount_init(&threadp->refs, 1);
-	lua_pushlightuserdata(L, threadp);
-	return (new(L, PTHREAD_METATABLE));
+	return (new(L, threadp, PTHREAD_METATABLE));
 }
 
 static int
@@ -547,42 +562,18 @@ l_pthread_retain(lua_State *L)
 {
 	struct rcthread *threadp;
 
-	luaL_checktype(L, 1, LUA_TLIGHTUSERDATA);
-	luaL_checktype(L, 2, LUA_TNONE);
+	threadp = checklightuserdata(L, 1);
 
-	threadp = lua_touserdata(L, 1);
-	assert(threadp != NULL);
 	refcount_retain(&threadp->refs);
-	return(new(L, PTHREAD_METATABLE));
-}
-
-static inline void
-checkthread(lua_State *L, int idx)
-{
-	luaL_checkudata(L, idx, PTHREAD_METATABLE);
-
-	lua_getiuservalue(L, idx, COOKIE);
+	return(new(L, threadp, PTHREAD_METATABLE));
 }
 
 static int
 l_pthread_cookie(lua_State *L)
 {
-	checkthread(L, 1);
+	checkcookie(L, 1, PTHREAD_METATABLE);
 
 	return (1);
-}
-
-static inline struct rcthread *
-checkthreadp(lua_State *L, int idx)
-{
-	struct rcthread *threadp;
-
-	checkthread(L, idx);
-
-	threadp = lua_touserdata(L, -1);
-	assert(threadp != NULL);
-	lua_pop(L, 1);
-	return (threadp);
 }
 
 static int
@@ -590,7 +581,7 @@ l_pthread_gc(lua_State *L)
 {
 	struct rcthread *threadp;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 
 	if (refcount_release(&threadp->refs)) {
 		free(threadp);
@@ -604,7 +595,7 @@ l_pthread_cancel(lua_State *L)
 	struct rcthread *threadp;
 	int error;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 
 	if ((error = pthread_cancel(threadp->thread)) != 0) {
 		return (fail(L, error));
@@ -619,7 +610,7 @@ l_pthread_detach(lua_State *L)
 	struct rcthread *threadp;
 	int error;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 
 	if ((error = pthread_detach(threadp->thread)) != 0) {
 		return (fail(L, error));
@@ -633,8 +624,8 @@ l_pthread_equal(lua_State *L)
 {
 	struct rcthread *t1p, *t2p;
 
-	t1p = checkthreadp(L, 1);
-	t2p = checkthreadp(L, 2);
+	t1p = checkcookie(L, 1, PTHREAD_METATABLE);
+	t2p = checkcookie(L, 2, PTHREAD_METATABLE);
 
 	lua_pushboolean(L, pthread_equal(t1p->thread, t2p->thread));
 	return (1);
@@ -656,7 +647,7 @@ l_pthread_join(lua_State *L)
 	lua_State *l;
 	int error, nresults;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 
 	if ((error = pthread_join(threadp->thread, &result)) != 0) {
 		return (fail(L, error));
@@ -687,7 +678,7 @@ l_pthread_attr_get_np(lua_State *L)
 	size_t size;
 	int error, val;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 
 	if ((error = pthread_attr_init(&attr)) != 0) {
 		return (luaL_error(L, "pthread_attr_init: %s",
@@ -784,7 +775,7 @@ l_pthread_getaffinity_np(lua_State *L)
 	cpuset_t *cpuset;
 	int error;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 
 	cpuset = newanoncpuset(L);
 	if ((error = pthread_getaffinity_np(threadp->thread, sizeof(*cpuset),
@@ -801,7 +792,7 @@ l_pthread_setaffinity_np(lua_State *L)
 	cpuset_t *cpuset;
 	int error;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 	cpuset = luaL_checkudata(L, 2, CPUSET_METATABLE);
 
 	if ((error = pthread_setaffinity_np(threadp->thread, sizeof(*cpuset),
@@ -818,7 +809,7 @@ l_pthread_resume_np(lua_State *L)
 	struct rcthread *threadp;
 	int error;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 
 	if ((error = pthread_resume_np(threadp->thread)) != 0) {
 		return (fail(L, error));
@@ -835,7 +826,7 @@ l_pthread_peekjoin_np(lua_State *L)
 	lua_State *l;
 	int error, nresults;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 
 	if ((error = pthread_peekjoin_np(threadp->thread, &result)) != 0) {
 		return (fail(L, error));
@@ -859,7 +850,7 @@ l_pthread_suspend_np(lua_State *L)
 	struct rcthread *threadp;
 	int error;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 
 	if ((error = pthread_suspend_np(threadp->thread)) != 0) {
 		return (fail(L, error));
@@ -877,7 +868,7 @@ l_pthread_timedjoin_np(lua_State *L)
 	lua_State *l;
 	int error, nresults;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 	abstime.tv_sec = luaL_checkinteger(L, 2);
 	abstime.tv_nsec = luaL_optinteger(L, 3, 0);
 
@@ -906,7 +897,7 @@ l_pthread_kill(lua_State *L)
 	struct rcthread *threadp;
 	int sig, error;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 	sig = luaL_checkinteger(L, 2);
 
 	if ((error = pthread_kill(threadp->thread, sig)) != 0) {
@@ -955,15 +946,12 @@ l_pthread_once_new(lua_State *L)
 	struct rconce *oncep;
 	int error;
 
-	luaL_checktype(L, 1, LUA_TNONE);
-
 	if ((oncep = malloc(sizeof(*oncep))) == NULL) {
 		return (luaL_error(L, "malloc: %s", strerror(ENOMEM)));
 	}
 	oncep->control = (pthread_once_t)PTHREAD_ONCE_INIT;
 	refcount_init(&oncep->refs, 1);
-	lua_pushlightuserdata(L, oncep);
-	return (new(L, PTHREAD_ONCE_METATABLE));
+	return (new(L, oncep, PTHREAD_ONCE_METATABLE));
 }
 
 static int
@@ -971,42 +959,18 @@ l_pthread_once_retain(lua_State *L)
 {
 	struct rconce *oncep;
 
-	luaL_checktype(L, 1, LUA_TLIGHTUSERDATA);
-	luaL_checktype(L, 2, LUA_TNONE);
+	oncep = checklightuserdata(L, 1);
 
-	oncep = lua_touserdata(L, 1);
-	assert(oncep != NULL);
 	refcount_retain(&oncep->refs);
-	return (new(L, PTHREAD_ONCE_METATABLE));
-}
-
-static inline void
-checkonce(lua_State *L, int idx)
-{
-	luaL_checkudata(L, idx, PTHREAD_ONCE_METATABLE);
-
-	lua_getiuservalue(L, idx, COOKIE);
+	return (new(L, oncep, PTHREAD_ONCE_METATABLE));
 }
 
 static int
 l_pthread_once_cookie(lua_State *L)
 {
-	checkonce(L, 1);
+	checkcookie(L, 1, PTHREAD_ONCE_METATABLE);
 
 	return (1);
-}
-
-static inline struct rconce *
-checkoncep(lua_State *L, int idx)
-{
-	struct rconce *oncep;
-
-	checkonce(L, idx);
-
-	oncep = lua_touserdata(L, -1);
-	assert(oncep != NULL);
-	lua_pop(L, 1);
-	return (oncep);
 }
 
 static int
@@ -1014,7 +978,7 @@ l_pthread_once_gc(lua_State *L)
 {
 	struct rconce *oncep;
 
-	oncep = checkoncep(L, 1);
+	oncep = checkcookie(L, 1, PTHREAD_ONCE_METATABLE);
 
 	if (refcount_release(&oncep->refs)) {
 		free(oncep);
@@ -1028,7 +992,7 @@ l_pthread_once_call(lua_State *L)
 	struct rconce *oncep;
 	int top, error, nresults;
 
-	oncep = checkoncep(L, 1);
+	oncep = checkcookie(L, 1, PTHREAD_ONCE_METATABLE);
 
 	top = lua_gettop(L);
 	if ((error = pthread_once(&oncep->control, once_wrapper)) != 0) {
@@ -1050,8 +1014,7 @@ l_pthread_self(lua_State *L)
 	}
 	threadp->thread = pthread_self();
 	refcount_init(&threadp->refs, 1);
-	lua_pushlightuserdata(L, threadp);
-	return (new(L, PTHREAD_METATABLE));
+	return (new(L, threadp, PTHREAD_METATABLE));
 }
 
 static int
@@ -1239,8 +1202,6 @@ l_pthread_mutex_new(lua_State *L)
 	struct rcmutex *mutexp;
 	int error, error1;
 
-	luaL_checktype(L, 2, LUA_TNONE);
-
 	if ((error = pthread_mutexattr_init(&attr)) != 0) {
 		return (luaL_error(L, "pthread_mutexattr_init: %s",
 		    strerror(error)));
@@ -1276,8 +1237,7 @@ l_pthread_mutex_new(lua_State *L)
 		return (fail(L, error));
 	}
 	refcount_init(&mutexp->refs, 1);
-	lua_pushlightuserdata(L, mutexp);
-	return (new(L, PTHREAD_MUTEX_METATABLE));
+	return (new(L, mutexp, PTHREAD_MUTEX_METATABLE));
 }
 
 static int
@@ -1285,42 +1245,18 @@ l_pthread_mutex_retain(lua_State *L)
 {
 	struct rcmutex *mutexp;
 
-	luaL_checktype(L, 1, LUA_TLIGHTUSERDATA);
-	luaL_checktype(L, 2, LUA_TNONE);
+	mutexp = checklightuserdata(L, 1);
 
-	mutexp = lua_touserdata(L, 1);
-	assert(mutexp != NULL);
 	refcount_retain(&mutexp->refs);
-	return (new(L, PTHREAD_MUTEX_METATABLE));
-}
-
-static inline void
-checkmutex(lua_State *L, int idx)
-{
-	luaL_checkudata(L, idx, PTHREAD_MUTEX_METATABLE);
-
-	lua_getiuservalue(L, idx, COOKIE);
+	return (new(L, mutexp, PTHREAD_MUTEX_METATABLE));
 }
 
 static int
 l_pthread_mutex_cookie(lua_State *L)
 {
-	checkmutex(L, 1);
+	checkcookie(L, 1, PTHREAD_MUTEX_METATABLE);
 
 	return (1);
-}
-
-static inline struct rcmutex *
-checkmutexp(lua_State *L, int idx)
-{
-	struct rcmutex *mutexp;
-
-	checkmutex(L, idx);
-
-	mutexp = lua_touserdata(L, -1);
-	assert(mutexp != NULL);
-	lua_pop(L, 1);
-	return (mutexp);
 }
 
 static int
@@ -1329,7 +1265,7 @@ l_pthread_mutex_gc(lua_State *L)
 	struct rcmutex *mutexp;
 	int error;
 
-	mutexp = checkmutexp(L, 1);
+	mutexp = checkcookie(L, 1, PTHREAD_MUTEX_METATABLE);
 
 	if (refcount_release(&mutexp->refs)) {
 		error = pthread_mutex_destroy(&mutexp->mutex);
@@ -1348,7 +1284,7 @@ l_pthread_mutex_lock(lua_State *L)
 	struct rcmutex *mutexp;
 	int error;
 
-	mutexp = checkmutexp(L, 1);
+	mutexp = checkcookie(L, 1, PTHREAD_MUTEX_METATABLE);
 
 	if ((error = pthread_mutex_lock(&mutexp->mutex)) != 0) {
 		return (fail(L, error));
@@ -1364,7 +1300,7 @@ l_pthread_mutex_timedlock(lua_State *L)
 	struct rcmutex *mutexp;
 	int error;
 
-	mutexp = checkmutexp(L, 1);
+	mutexp = checkcookie(L, 1, PTHREAD_MUTEX_METATABLE);
 	abstime.tv_sec = luaL_checkinteger(L, 2);
 	abstime.tv_nsec = luaL_optinteger(L, 3, 0);
 
@@ -1381,7 +1317,7 @@ l_pthread_mutex_trylock(lua_State *L)
 	struct rcmutex *mutexp;
 	int error;
 
-	mutexp = checkmutexp(L, 1);
+	mutexp = checkcookie(L, 1, PTHREAD_MUTEX_METATABLE);
 
 	if ((error = pthread_mutex_trylock(&mutexp->mutex)) != 0) {
 		return (fail(L, error));
@@ -1396,7 +1332,7 @@ l_pthread_mutex_unlock(lua_State *L)
 	struct rcmutex *mutexp;
 	int error;
 
-	mutexp = checkmutexp(L, 1);
+	mutexp = checkcookie(L, 1, PTHREAD_MUTEX_METATABLE);
 
 	if ((error = pthread_mutex_unlock(&mutexp->mutex)) != 0) {
 		return (fail(L, error));
@@ -1411,7 +1347,7 @@ l_pthread_mutex_getspinloops_np(lua_State *L)
 	struct rcmutex *mutexp;
 	int error, count;
 
-	mutexp = checkmutexp(L, 1);
+	mutexp = checkcookie(L, 1, PTHREAD_MUTEX_METATABLE);
 
 	if ((error = pthread_mutex_getspinloops_np(&mutexp->mutex, &count))
 	    != 0) {
@@ -1427,7 +1363,7 @@ l_pthread_mutex_setspinloops_np(lua_State *L)
 	struct rcmutex *mutexp;
 	int count, error;
 
-	mutexp = checkmutexp(L, 1);
+	mutexp = checkcookie(L, 1, PTHREAD_MUTEX_METATABLE);
 	count = luaL_checkinteger(L, 2);
 
 	if ((error = pthread_mutex_setspinloops_np(&mutexp->mutex, count))
@@ -1444,7 +1380,7 @@ l_pthread_mutex_getyieldloops_np(lua_State *L)
 	struct rcmutex *mutexp;
 	int error, count;
 
-	mutexp = checkmutexp(L, 1);
+	mutexp = checkcookie(L, 1, PTHREAD_MUTEX_METATABLE);
 
 	if ((error = pthread_mutex_getyieldloops_np(&mutexp->mutex, &count))
 	    != 0) {
@@ -1460,7 +1396,7 @@ l_pthread_mutex_setyieldloops_np(lua_State *L)
 	struct rcmutex *mutexp;
 	int count, error;
 
-	mutexp = checkmutexp(L, 1);
+	mutexp = checkcookie(L, 1, PTHREAD_MUTEX_METATABLE);
 	count = luaL_checkinteger(L, 2);
 
 	if ((error = pthread_mutex_setyieldloops_np(&mutexp->mutex, count))
@@ -1477,7 +1413,7 @@ l_pthread_mutex_isowned_np(lua_State *L)
 	struct rcmutex *mutexp;
 	int isowned;
 
-	mutexp = checkmutexp(L, 1);
+	mutexp = checkcookie(L, 1, PTHREAD_MUTEX_METATABLE);
 
 	if ((isowned = pthread_mutex_isowned_np(&mutexp->mutex)) == -1) {
 		luaL_pushfail(L);
@@ -1547,8 +1483,6 @@ l_pthread_cond_new(lua_State *L)
 	struct rccond *condp;
 	int error, error1;
 
-	luaL_checktype(L, 2, LUA_TNONE);
-
 	if ((error = pthread_condattr_init(&attr)) != 0) {
 		return (luaL_error(L, "pthread_condattr_init: %s",
 		    strerror(error)));
@@ -1584,8 +1518,7 @@ l_pthread_cond_new(lua_State *L)
 		return (fail(L, error));
 	}
 	refcount_init(&condp->refs, 1);
-	lua_pushlightuserdata(L, condp);
-	return (new(L, PTHREAD_COND_METATABLE));
+	return (new(L, condp, PTHREAD_COND_METATABLE));
 }
 
 static int
@@ -1593,42 +1526,18 @@ l_pthread_cond_retain(lua_State *L)
 {
 	struct rccond *condp;
 
-	luaL_checktype(L, 1, LUA_TLIGHTUSERDATA);
-	luaL_checktype(L, 2, LUA_TNONE);
+	condp = checklightuserdata(L, 1);
 
-	condp = lua_touserdata(L, 1);
-	assert(condp != NULL);
 	refcount_retain(&condp->refs);
-	return (new(L, PTHREAD_COND_METATABLE));
-}
-
-static inline void
-checkcond(lua_State *L, int idx)
-{
-	luaL_checkudata(L, idx, PTHREAD_COND_METATABLE);
-
-	lua_getiuservalue(L, idx, COOKIE);
+	return (new(L, condp, PTHREAD_COND_METATABLE));
 }
 
 static int
 l_pthread_cond_cookie(lua_State *L)
 {
-	checkcond(L, 1);
+	checkcookie(L, 1, PTHREAD_COND_METATABLE);
 
 	return (1);
-}
-
-static inline struct rccond *
-checkcondp(lua_State *L, int idx)
-{
-	struct rccond *condp;
-
-	checkcond(L, idx);
-
-	condp = lua_touserdata(L, -1);
-	assert(condp != NULL);
-	lua_pop(L, 1);
-	return (condp);
 }
 
 static int
@@ -1637,7 +1546,7 @@ l_pthread_cond_gc(lua_State *L)
 	struct rccond *condp;
 	int error;
 
-	condp = checkcondp(L, 1);
+	condp = checkcookie(L, 1, PTHREAD_COND_METATABLE);
 
 	if (refcount_release(&condp->refs)) {
 		error = pthread_cond_destroy(&condp->cond);
@@ -1656,7 +1565,7 @@ l_pthread_cond_broadcast(lua_State *L)
 	struct rccond *condp;
 	int error;
 
-	condp = checkcondp(L, 1);
+	condp = checkcookie(L, 1, PTHREAD_COND_METATABLE);
 
 	if ((error = pthread_cond_broadcast(&condp->cond)) != 0) {
 		return (fail(L, error));
@@ -1671,7 +1580,7 @@ l_pthread_cond_signal(lua_State *L)
 	struct rccond *condp;
 	int error;
 
-	condp = checkcondp(L, 1);
+	condp = checkcookie(L, 1, PTHREAD_COND_METATABLE);
 
 	if ((error = pthread_cond_signal(&condp->cond)) != 0) {
 		return (fail(L, error));
@@ -1688,8 +1597,8 @@ l_pthread_cond_timedwait(lua_State *L)
 	struct rcmutex *mutexp;
 	int error;
 
-	condp = checkcondp(L, 1);
-	mutexp = checkmutexp(L, 2);
+	condp = checkcookie(L, 1, PTHREAD_COND_METATABLE);
+	mutexp = checkcookie(L, 2, PTHREAD_MUTEX_METATABLE);
 	abstime.tv_sec = luaL_checkinteger(L, 3);
 	abstime.tv_nsec = luaL_optinteger(L, 4, 0);
 
@@ -1708,8 +1617,8 @@ l_pthread_cond_wait(lua_State *L)
 	struct rcmutex *mutexp;
 	int error;
 
-	condp = checkcondp(L, 1);
-	mutexp = checkmutexp(L, 2);
+	condp = checkcookie(L, 1, PTHREAD_COND_METATABLE);
+	mutexp = checkcookie(L, 2, PTHREAD_MUTEX_METATABLE);
 
 	if ((error = pthread_cond_wait(&condp->cond, &mutexp->mutex)) != 0) {
 		return (fail(L, error));
@@ -1764,8 +1673,6 @@ l_pthread_rwlock_new(lua_State *L)
 	struct rcrwlock *lockp;
 	int error, error1;
 
-	luaL_checktype(L, 2, LUA_TNONE);
-
 	if ((error = pthread_rwlockattr_init(&attr)) != 0) {
 		return (luaL_error(L, "pthread_rwlockattr_init: %s",
 		    strerror(error)));
@@ -1801,8 +1708,7 @@ l_pthread_rwlock_new(lua_State *L)
 		return (fail(L, error));
 	}
 	refcount_init(&lockp->refs, 1);
-	lua_pushlightuserdata(L, lockp);
-	return (new(L, PTHREAD_RWLOCK_METATABLE));
+	return (new(L, lockp, PTHREAD_RWLOCK_METATABLE));
 }
 
 static int
@@ -1810,42 +1716,18 @@ l_pthread_rwlock_retain(lua_State *L)
 {
 	struct rcrwlock *lockp;
 
-	luaL_checktype(L, 1, LUA_TLIGHTUSERDATA);
-	luaL_checktype(L, 2, LUA_TNONE);
+	lockp = checklightuserdata(L, 1);
 
-	lockp = lua_touserdata(L, 1);
-	assert(lockp != NULL);
 	refcount_retain(&lockp->refs);
-	return (new(L, PTHREAD_RWLOCK_METATABLE));
-}
-
-static inline void
-checkrwlock(lua_State *L, int idx)
-{
-	luaL_checkudata(L, idx, PTHREAD_RWLOCK_METATABLE);
-
-	lua_getiuservalue(L, idx, COOKIE);
+	return (new(L, lockp, PTHREAD_RWLOCK_METATABLE));
 }
 
 static int
 l_pthread_rwlock_cookie(lua_State *L)
 {
-	checkrwlock(L, 1);
+	checkcookie(L, 1, PTHREAD_RWLOCK_METATABLE);
 
 	return (1);
-}
-
-static inline struct rcrwlock *
-checkrwlockp(lua_State *L, int idx)
-{
-	struct rcrwlock *lockp;
-
-	checkrwlock(L, idx);
-
-	lockp = lua_touserdata(L, -1);
-	assert(lockp != NULL);
-	lua_pop(L, 1);
-	return (lockp);
 }
 
 static int
@@ -1854,7 +1736,7 @@ l_pthread_rwlock_gc(lua_State *L)
 	struct rcrwlock *lockp;
 	int error;
 
-	lockp = checkrwlockp(L, 1);
+	lockp = checkcookie(L, 1, PTHREAD_RWLOCK_METATABLE);
 
 	if (refcount_release(&lockp->refs)) {
 		error = pthread_rwlock_destroy(&lockp->lock);
@@ -1873,7 +1755,7 @@ l_pthread_rwlock_rdlock(lua_State *L)
 	struct rcrwlock *lockp;
 	int error;
 
-	lockp = checkrwlockp(L, 1);
+	lockp = checkcookie(L, 1, PTHREAD_RWLOCK_METATABLE);
 
 	if ((error = pthread_rwlock_rdlock(&lockp->lock)) != 0) {
 		return (fail(L, error));
@@ -1888,7 +1770,7 @@ l_pthread_rwlock_tryrdlock(lua_State *L)
 	struct rcrwlock *lockp;
 	int error;
 
-	lockp = checkrwlockp(L, 1);
+	lockp = checkcookie(L, 1, PTHREAD_RWLOCK_METATABLE);
 
 	if ((error = pthread_rwlock_tryrdlock(&lockp->lock)) != 0) {
 		return (fail(L, error));
@@ -1903,7 +1785,7 @@ l_pthread_rwlock_trywrlock(lua_State *L)
 	struct rcrwlock *lockp;
 	int error;
 
-	lockp = checkrwlockp(L, 1);
+	lockp = checkcookie(L, 1, PTHREAD_RWLOCK_METATABLE);
 
 	if ((error = pthread_rwlock_trywrlock(&lockp->lock)) != 0) {
 		return (fail(L, error));
@@ -1918,7 +1800,7 @@ l_pthread_rwlock_unlock(lua_State *L)
 	struct rcrwlock *lockp;
 	int error;
 
-	lockp = checkrwlockp(L, 1);
+	lockp = checkcookie(L, 1, PTHREAD_RWLOCK_METATABLE);
 
 	if ((error = pthread_rwlock_unlock(&lockp->lock)) != 0) {
 		return (fail(L, error));
@@ -1933,7 +1815,7 @@ l_pthread_rwlock_wrlock(lua_State *L)
 	struct rcrwlock *lockp;
 	int error;
 
-	lockp = checkrwlockp(L, 1);
+	lockp = checkcookie(L, 1, PTHREAD_RWLOCK_METATABLE);
 
 	if ((error = pthread_rwlock_wrlock(&lockp->lock)) != 0) {
 		return (fail(L, error));
@@ -1955,7 +1837,6 @@ l_pthread_key_create(lua_State *L)
 	int error;
 
 	destructor = lua_islightuserdata(L, 1) ? lua_touserdata(L, 1) : NULL;
-	luaL_checktype(L, 2, LUA_TNONE);
 
 	if ((keyp = malloc(sizeof(*keyp))) == NULL) {
 		return (luaL_error(L, "malloc: %s", strerror(ENOMEM)));
@@ -1965,8 +1846,7 @@ l_pthread_key_create(lua_State *L)
 		return (fail(L, error));
 	}
 	refcount_init(&keyp->refs, 1);
-	lua_pushlightuserdata(L, keyp);
-	return (new(L, PTHREAD_KEY_METATABLE));
+	return (new(L, keyp, PTHREAD_KEY_METATABLE));
 }
 
 static int
@@ -1974,42 +1854,18 @@ l_pthread_key_retain(lua_State *L)
 {
 	struct rckey *keyp;
 
-	luaL_checktype(L, 1, LUA_TLIGHTUSERDATA);
-	luaL_checktype(L, 2, LUA_TNONE);
+	keyp = checklightuserdata(L, 1);
 
-	keyp = lua_touserdata(L, 1);
-	assert(keyp != NULL);
 	refcount_retain(&keyp->refs);
-	return (new(L, PTHREAD_KEY_METATABLE));
-}
-
-static inline void
-checkkey(lua_State *L, int idx)
-{
-	luaL_checkudata(L, idx, PTHREAD_KEY_METATABLE);
-
-	lua_getiuservalue(L, idx, COOKIE);
+	return (new(L, keyp, PTHREAD_KEY_METATABLE));
 }
 
 static int
 l_pthread_key_cookie(lua_State *L)
 {
-	checkkey(L, 1);
+	checkcookie(L, 1, PTHREAD_KEY_METATABLE);
 
 	return (1);
-}
-
-static inline struct rckey *
-checkkeyp(lua_State *L, int idx)
-{
-	struct rckey *keyp;
-
-	checkkey(L, idx);
-
-	keyp = lua_touserdata(L, -1);
-	assert(keyp != NULL);
-	lua_pop(L, 1);
-	return (keyp);
 }
 
 static int
@@ -2018,7 +1874,7 @@ l_pthread_key_gc(lua_State *L)
 	struct rckey *keyp;
 	int error;
 
-	keyp = checkkeyp(L, 1);
+	keyp = checkcookie(L, 1, PTHREAD_KEY_METATABLE);
 
 	if (refcount_release(&keyp->refs)) {
 		error = pthread_key_delete(keyp->key);
@@ -2037,7 +1893,7 @@ l_pthread_key_getspecific(lua_State *L)
 	struct rckey *keyp;
 	void *value;
 
-	keyp = checkkeyp(L, 1);
+	keyp = checkcookie(L, 1, PTHREAD_KEY_METATABLE);
 
 	value = pthread_getspecific(keyp->key);
 	lua_pushlightuserdata(L, value);
@@ -2051,9 +1907,8 @@ l_pthread_key_setspecific(lua_State *L)
 	void *value;
 	int error;
 
-	keyp = checkkeyp(L, 1);
-	luaL_checktype(L, 2, LUA_TLIGHTUSERDATA);
-	value = lua_touserdata(L, 2);
+	keyp = checkcookie(L, 1, PTHREAD_KEY_METATABLE);
+	value = checklightuserdata(L, 2);
 
 	if ((error = pthread_setspecific(keyp->key, value)) != 0) {
 		return (fail(L, error));
@@ -2069,7 +1924,7 @@ l_pthread_getname_np(lua_State *L)
 	struct rcthread *threadp;
 	int error;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 
 	if ((error = pthread_getname_np(threadp->thread, name, sizeof(name)))
 	    != 0) {
@@ -2086,7 +1941,7 @@ l_pthread_setname_np(lua_State *L)
 	const char *name;
 	int error;
 
-	threadp = checkthreadp(L, 1);
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 	name = luaL_checkstring(L, 2);
 
 	if ((error = pthread_setname_np(threadp->thread, name)) != 0) {
@@ -2214,8 +2069,7 @@ l_pthread_barrier_new(lua_State *L)
 		return (fail(L, error));
 	}
 	refcount_init(&barrierp->refs, 1);
-	lua_pushlightuserdata(L, barrierp);
-	return (new(L, PTHREAD_BARRIER_METATABLE));
+	return (new(L, barrierp, PTHREAD_BARRIER_METATABLE));
 }
 
 static int
@@ -2223,42 +2077,18 @@ l_pthread_barrier_retain(lua_State *L)
 {
 	struct rcbarrier *barrierp;
 
-	luaL_checktype(L, 1, LUA_TLIGHTUSERDATA);
-	luaL_checktype(L, 2, LUA_TNONE);
+	barrierp = checklightuserdata(L, 1);
 
-	barrierp = lua_touserdata(L, 1);
-	assert(barrierp != NULL);
 	refcount_retain(&barrierp->refs);
-	return (new(L, PTHREAD_BARRIER_METATABLE));
-}
-
-static inline void
-checkbarrier(lua_State *L, int idx)
-{
-	luaL_checkudata(L, idx, PTHREAD_BARRIER_METATABLE);
-
-	lua_getiuservalue(L, idx, COOKIE);
+	return (new(L, barrierp, PTHREAD_BARRIER_METATABLE));
 }
 
 static int
 l_pthread_barrier_cookie(lua_State *L)
 {
-	checkbarrier(L, 1);
+	checkcookie(L, 1, PTHREAD_BARRIER_METATABLE);
 
 	return (1);
-}
-
-static inline struct rcbarrier *
-checkbarrierp(lua_State *L, int idx)
-{
-	struct rcbarrier *barrierp;
-
-	checkbarrier(L, idx);
-
-	barrierp = lua_touserdata(L, -1);
-	assert(barrierp != NULL);
-	lua_pop(L, 1);
-	return (barrierp);
 }
 
 static int
@@ -2267,7 +2097,7 @@ l_pthread_barrier_gc(lua_State *L)
 	struct rcbarrier *barrierp;
 	int error;
 
-	barrierp = checkbarrierp(L, 1);
+	barrierp = checkcookie(L, 1, PTHREAD_BARRIER_METATABLE);
 
 	if (refcount_release(&barrierp->refs)) {
 		error = pthread_barrier_destroy(&barrierp->barrier);
@@ -2286,7 +2116,7 @@ l_pthread_barrier_wait(lua_State *L)
 	struct rcbarrier *barrierp;
 	int error;
 
-	barrierp = checkbarrierp(L, 1);
+	barrierp = checkcookie(L, 1, PTHREAD_BARRIER_METATABLE);
 
 	if ((error = pthread_barrier_wait(&barrierp->barrier)) != 0) {
 		if (error == PTHREAD_BARRIER_SERIAL_THREAD) {
