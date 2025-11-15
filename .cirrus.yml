@@ -16,6 +16,10 @@ task:
     - name: snapshots/amd64/16.0-CURRENT
       freebsd_instance:
         image_family: freebsd-16-0-snap
+    - name: snapshots/arm64/16.0-CURRENT
+      freebsd_instance:
+        image_family: freebsd-16-0-snap
+        architecture: arm64
     - name: releases/amd64/13.5-RELEASE
       freebsd_instance:
         image_family: freebsd-13-5
