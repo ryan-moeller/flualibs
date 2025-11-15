@@ -19,12 +19,15 @@ task:
     - name: releases/amd64/13.5-RELEASE
       freebsd_instance:
         image_family: freebsd-13-5
+      only_if: ${CIRRUS_TAG} != '' && ${CIRRUS_REPO_FULL_NAME} == 'ryan-moeller/flualibs'
     - name: releases/amd64/14.3-RELEASE
       freebsd_instance:
         image_family: freebsd-14-3
+      only_if: ${CIRRUS_TAG} != '' && ${CIRRUS_REPO_FULL_NAME} == 'ryan-moeller/flualibs'
     - name: releases/amd64/15.0-RC2
       freebsd_instance:
         image_family: freebsd-15-0-amd64-ufs
+      only_if: ${CIRRUS_TAG} != '' && ${CIRRUS_REPO_FULL_NAME} == 'ryan-moeller/flualibs'
   stateful: false
   env:
     ARCHIVES_BASE: https://download.freebsd.org/${CIRRUS_TASK_NAME}
