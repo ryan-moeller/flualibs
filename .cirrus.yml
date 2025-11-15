@@ -15,12 +15,9 @@ task:
         image_family: freebsd-15-0-amd64-ufs
   stateful: false
   env:
-    WD: /tmp/wd
     ARCHIVES_BASE: https://download.freebsd.org/${CIRRUS_TASK_NAME}
   build_setup_script:
-    - mkdir ${WD}
-    - cd ${WD} && fetch -q ${ARCHIVES_BASE}/src.txz
-    - tar xf ${WD}/src.txz -C / && rm ${WD}/src.txz
+    - test -e /usr/src/contrib/lua/src/lua.h || fetch -o - ${ARCHIVES_BASE}/src.txz | tar x -C /
   build_script:
     - make -j${CIRRUS_CPU}
     - make install
