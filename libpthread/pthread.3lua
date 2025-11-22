@@ -24,7 +24,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.Dd October 30, 2025
+.Dd November 22, 2025
 .Dt PTHREAD 3lua
 .Os
 .Sh NAME
@@ -99,6 +99,11 @@
 .Nm pthread.barrier.retain ,
 .Nm pthread_barrier_t:cookie ,
 .Nm pthread_barrier_t:wait ,
+.Nm pthread.rendezvous.new ,
+.Nm pthread.rendezvous.retain ,
+.Nm pthread.rendezvous:cookie ,
+.Nm pthread.rendezvous:exchange ,
+.Nm pthread.rendezvous:timedexchange ,
 .Nm pthread.DESTRUCTOR_ITERATIONS ,
 .Nm pthread.KEYS_MAX ,
 .Nm pthread.STACK_MIN ,
@@ -211,6 +216,11 @@ pthread = require('pthread')
 .It Dv barrier = pthread.barrier.retain(cookie )
 .It Dv cookie = barrier:cookie( )
 .It Dv ok, err, code = barrier:wait( )
+.It Dv rendezvous = pthread.rendezvous.new( )
+.It Dv rendezvous = pthread.rendezvous.retain(cookie )
+.It Dv cookie = rendezvous:cookie( )
+.It Dv ... = rendezvous:exchange(... )
+.It Dv exchanged, ... = rendezvous:timedexchange(abstime_sec , abstime_nsec , ... )
 .El
 .Sh DESCRIPTION
 The
@@ -702,6 +712,37 @@ When successful, returns
 in the last thread to reach the barrier or
 .Dv true
 if not last.
+.It Dv rendezvous = pthread.rendezvous.new( )
+Allocate and initialize a
+.Vt pthread.rendezvous
+object.
+The rendezvous construct is an extension to the
+.Xr pthread 3
+API for Lua.
+A rendezvous enables a synchronized exchange of primitive values between Lua
+states running in different threads.
+.It Dv rendezvous = pthread.rendezvous.retain(cookie )
+Retain a reference to an existing
+.Vt pthread.rendezvous
+object.
+.It Dv cookie = rendezvous:cookie( )
+Obtain a cookie for this object.
+It can be used to retain a reference in another thread.
+The cookie is a
+.Vt lightuserdata
+object, which can be safely passed between threads.
+.It Dv ... = rendezvous:exchange(... )
+Perform a synchronized exchange of values.
+The call blocks until matched with a call from another thread.
+Arguments passed the the other call are returned by this call.
+Errors are raised, potentially in both threads.
+.It Dv exchanged, ... = rendezvous:timedexchange(abstime_sec, abstime_nsec, ... )
+Same as above, with a deadline.
+Returns
+.Dv true
+as the first result if the exchange took place or
+.Dv false
+if a timeout occurred.
 .El
 .Sh EXAMPLES
 Print a message from another thread:

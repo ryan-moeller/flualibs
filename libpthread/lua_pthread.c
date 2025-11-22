@@ -53,6 +53,7 @@ int luaopen_pthread(lua_State *);
 #define PTHREAD_RWLOCK_METATABLE "pthread_rwlock_t"
 #define PTHREAD_KEY_METATABLE "pthread_key_t"
 #define PTHREAD_BARRIER_METATABLE "pthread_barrier_t"
+#define PTHREAD_RENDEZVOUS_METATABLE "pthread.rendezvous"
 
 enum wrapperuv {
 	COOKIE = 1,
@@ -2129,6 +2130,224 @@ l_pthread_barrier_wait(lua_State *L)
 	return (1);
 }
 
+/* TODO: variation using rcmutex and rccond? */
+struct rcrendezvous {
+	pthread_mutex_t mutex;
+	pthread_cond_t cond;
+	lua_State *waiter;
+	atomic_refcount refs;
+};
+
+static int
+l_pthread_rendezvous_new(lua_State *L)
+{
+	struct rcrendezvous *rp;
+	int error;
+
+	if ((rp = malloc(sizeof(*rp))) == NULL) {
+		return (luaL_error(L, "malloc: %s", strerror(ENOMEM)));
+	}
+	if ((error = pthread_mutex_init(&rp->mutex, NULL)) != 0) {
+		free(rp);
+		return (luaL_error(L, "pthread_mutex_init: %s",
+		    strerror(error)));
+	}
+	if ((error = pthread_cond_init(&rp->cond, NULL)) != 0) {
+		pthread_mutex_destroy(&rp->mutex);
+		free(rp);
+		return (luaL_error(L, "pthread_cond_init: %s",
+		    strerror(error)));
+	}
+	rp->waiter = NULL;
+	refcount_init(&rp->refs, 1);
+	return (new(L, rp, PTHREAD_RENDEZVOUS_METATABLE));
+}
+
+static int
+l_pthread_rendezvous_retain(lua_State *L)
+{
+	struct rcrendezvous *rp;
+
+	rp = checklightuserdata(L, 1);
+
+	refcount_retain(&rp->refs);
+	return (new(L, rp, PTHREAD_RENDEZVOUS_METATABLE));
+}
+
+static int
+l_pthread_rendezvous_gc(lua_State *L)
+{
+	struct rcrendezvous *rp;
+	int error1, error2;
+
+	rp = checkcookie(L, 1, PTHREAD_RENDEZVOUS_METATABLE);
+
+	if (refcount_release(&rp->refs)) {
+		error1 = pthread_cond_destroy(&rp->cond);
+		error2 = pthread_mutex_destroy(&rp->mutex);
+		free(rp);
+		if (error1 != 0) {
+			return (luaL_error(L, "pthread_cond_destroy: %s",
+			    strerror(error1)));
+		}
+		if (error2 != 0) {
+			return (luaL_error(L, "pthread_mutex_destroy: %s",
+			    strerror(error2)));
+		}
+	}
+	return (0);
+}
+
+static int
+l_pthread_rendezvous_cookie(lua_State *L)
+{
+	checkcookie(L, 1, PTHREAD_RENDEZVOUS_METATABLE);
+
+	return (1);
+}
+
+static inline int
+exchange(lua_State *L, lua_State *l, int idx, int narg)
+{
+	int nres, error;
+
+	nres = lua_tointeger(l, -1);
+	lua_pop(l, 1);
+	/* Copy results from waiter. */
+	if ((error = copyn(l, L, lua_gettop(l) - nres + 1, nres)) != 0) {
+		lua_pushfstring(l,
+		    "bad argument #%d to 'exchange' (non-serializable value)",
+		    error - 1);
+		lua_pushinteger(l, -1);
+		lua_pushliteral(L, "other thread attempted invalid 'exchange'");
+		return (-1);
+	}
+	/* Copy args to waiter. */
+	if ((error = copyn(L, l, idx, narg)) != 0) {
+		lua_pushliteral(l, "other thread attempted invalid 'exchange'");
+		lua_pushinteger(l, -1);
+		lua_pushfstring(L,
+		    "bad argument #%d to 'exchange' (non-serializable value)",
+		    error - 1);
+		return (-1);
+	}
+	lua_pushinteger(l, narg);
+	return (nres);
+}
+
+static int
+l_pthread_rendezvous_exchange(lua_State *L)
+{
+	struct rcrendezvous *rp;
+	int narg, nres, error;
+
+	narg = lua_gettop(L) - 1;
+	rp = checkcookie(L, 1, PTHREAD_RENDEZVOUS_METATABLE);
+	lua_pop(L, 1);
+
+	if ((error = pthread_mutex_lock(&rp->mutex)) != 0) {
+		return (luaL_error(L, "pthread_mutex_lock: %s",
+		    strerror(error)));
+	}
+	if (rp->waiter == NULL) {
+		lua_pushinteger(L, narg);
+		rp->waiter = L;
+		if ((error = pthread_cond_wait(&rp->cond, &rp->mutex)) == 0) {
+			nres = lua_tointeger(L, -1);
+			lua_pop(L, 1);
+		} else {
+			/* XXX: sucks to be the other thread, maybe poison? */
+			rp->waiter = NULL;
+			lua_pushfstring(L, "pthread_cond_wait: %s",
+			    strerror(error));
+			nres = -1;
+		}
+	} else {
+		nres = exchange(L, rp->waiter, 2, narg);
+		rp->waiter = NULL;
+		if ((error = pthread_cond_signal(&rp->cond)) != 0) {
+			/* XXX: sucks to be the other thread */
+			lua_pushfstring(L, "pthread_cond_signal: %s",
+			    strerror(error));
+			nres = -1;
+		}
+	}
+	if ((error = pthread_mutex_unlock(&rp->mutex)) != 0) {
+		return (luaL_error(L, "pthread_mutex_unlock: %s",
+		    strerror(error)));
+	}
+	return (nres < 0 ? lua_error(L) : nres);
+}
+
+static int
+l_pthread_rendezvous_timedexchange(lua_State *L)
+{
+	struct timespec abstime;
+	struct rcrendezvous *rp;
+	int narg, nres, error;
+
+	narg = lua_gettop(L) - 3;
+	rp = checkcookie(L, 1, PTHREAD_RENDEZVOUS_METATABLE);
+	lua_pop(L, 1);
+	abstime.tv_sec = luaL_checkinteger(L, 2);
+	abstime.tv_nsec = luaL_checkinteger(L, 3);
+
+	if ((error = pthread_mutex_timedlock(&rp->mutex, &abstime)) != 0) {
+		if (error == ETIMEDOUT) {
+			lua_pushboolean(L, false);
+			return (1);
+		}
+		return (luaL_error(L, "pthread_mutex_lock: %s",
+		    strerror(error)));
+	}
+	if (rp->waiter == NULL) {
+		lua_pushinteger(L, narg);
+		rp->waiter = L;
+		if ((error = pthread_cond_timedwait(&rp->cond, &rp->mutex,
+		    &abstime)) == 0) {
+			nres = lua_tointeger(L, -1);
+			lua_pop(L, 1);
+		} else {
+			rp->waiter = NULL;
+			if (error == ETIMEDOUT) {
+				nres = -2;
+			} else {
+				/*
+				 * XXX: sucks to be the other thread,
+				 * maybe poison?
+				 */
+				lua_pushfstring(L, "pthread_cond_wait: %s",
+				    strerror(error));
+				nres = -1;
+			}
+		}
+	} else {
+		nres = exchange(L, rp->waiter, 4, narg);
+		rp->waiter = NULL;
+		if ((error = pthread_cond_signal(&rp->cond)) != 0) {
+			/* XXX: sucks to be the other thread */
+			lua_pushfstring(L, "pthread_cond_signal: %s",
+			    strerror(error));
+			nres = -1;
+		}
+	}
+	if ((error = pthread_mutex_unlock(&rp->mutex)) != 0) {
+		return (luaL_error(L, "pthread_mutex_unlock: %s",
+		    strerror(error)));
+	}
+	switch (nres) {
+	case -1:
+		return (lua_error(L));
+	case -2:
+		lua_pushboolean(L, false);
+		return (1);
+	default:
+		lua_pushboolean(L, true);
+		lua_insert(L, lua_gettop(L) - ++nres);
+		return (nres);
+	}
+}
+
 static const struct luaL_Reg l_pthread_funcs[] = {
 	{"create", l_pthread_create}, /* (...) */
 	{"retain", l_pthread_retain},
@@ -2270,6 +2489,20 @@ static const struct luaL_Reg l_pthread_barrier_meta[] = {
 	{NULL, NULL}
 };
 
+static const struct luaL_Reg l_pthread_rendezvous_funcs[] = {
+	{"new", l_pthread_rendezvous_new},
+	{"retain", l_pthread_rendezvous_retain},
+	{NULL, NULL}
+};
+
+static const struct luaL_Reg l_pthread_rendezvous_meta[] = {
+	{"__gc", l_pthread_rendezvous_gc},
+	{"cookie", l_pthread_rendezvous_cookie},
+	{"exchange", l_pthread_rendezvous_exchange},
+	{"timedexchange", l_pthread_rendezvous_timedexchange},
+	{NULL, NULL}
+};
+
 int
 luaopen_pthread(lua_State *L)
 {
@@ -2320,6 +2553,11 @@ luaopen_pthread(lua_State *L)
 	lua_setfield(L, -2, "__index");
 	luaL_setfuncs(L, l_pthread_barrier_meta, 0);
 
+	luaL_newmetatable(L, PTHREAD_RENDEZVOUS_METATABLE);
+	lua_pushvalue(L, -1);
+	lua_setfield(L, -2, "__index");
+	luaL_setfuncs(L, l_pthread_rendezvous_meta, 0);
+
 	luaL_newlib(L, l_pthread_funcs);
 
 	luaL_newlib(L, l_pthread_once_funcs);
@@ -2358,6 +2596,9 @@ luaopen_pthread(lua_State *L)
 	lua_pushinteger(L, PTHREAD_BARRIER_SERIAL_THREAD);
 	lua_setfield(L, -2, "SERIAL_THREAD");
 	lua_setfield(L, -2, "barrier");
+
+	luaL_newlib(L, l_pthread_rendezvous_funcs);
+	lua_setfield(L, -2, "rendezvous");
 
 #define SETCONST(ident) ({ \
 	lua_pushinteger(L, PTHREAD_ ## ident); \
