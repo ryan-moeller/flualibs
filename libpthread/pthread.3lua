@@ -79,7 +79,7 @@
 .Nm pthread_cond_t:broadcast ,
 .Nm pthread_cond_t:signal ,
 .Nm pthread_cond_t:timedwait ,
-.Nm pthread_codn_t:wait ,
+.Nm pthread_cond_t:wait ,
 .Nm pthread.rwlock.new ,
 .Nm pthread.rwlock.retain ,
 .Nm pthread_rwlock_t:cookie ,
