@@ -514,8 +514,8 @@ l_bsddialog_menu(lua_State *L)
 	return (2);
 }
 
-static const char **
-checkminibars(lua_State *L, int index, unsigned int *nminibars,
+static unsigned int
+checkminibars(lua_State *L, int index, const char ***pminilabels,
     int **pminipercs)
 {
 	const char **minilabels;
@@ -524,7 +524,6 @@ checkminibars(lua_State *L, int index, unsigned int *nminibars,
 
 	luaL_checktype(L, index, LUA_TTABLE);
 	len = luaL_len(L, index);
-	*nminibars = len;
 	minilabels = calloc(len, sizeof(*minilabels));
 	minipercs = calloc(len, sizeof(*minipercs));
 	if (minilabels == NULL || minipercs == NULL) {
@@ -546,7 +545,9 @@ checkminibars(lua_State *L, int index, unsigned int *nminibars,
 
 		lua_pop(L, 1);
 	}
-	return (minilabels);
+	*pminilabels = minilabels;
+	*pminipercs = minipercs;
+	return (len);
 }
 
 static void
@@ -575,7 +576,7 @@ l_bsddialog_mixedgauge(lua_State *L)
 	rows = luaL_checkinteger(L, 3);
 	cols = luaL_checkinteger(L, 4);
 	mainperc = luaL_checkinteger(L, 5);
-	minilabels = checkminibars(L, 6, &nminibars, &minipercs);
+	nminibars = checkminibars(L, 6, &minilabels, &minipercs);
 
 	rv = bsddialog_mixedgauge(conf, text, rows, cols, mainperc, nminibars,
 	    minilabels, minipercs);
