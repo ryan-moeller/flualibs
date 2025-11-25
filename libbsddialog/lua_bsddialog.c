@@ -584,7 +584,7 @@ l_bsddialog_mixedgauge(lua_State *L)
 		luaL_error(L, "bsddialog_mixedgauge: %s", bsddialog_geterror());
 	}
 	lua_pushinteger(L, rv);
-	return (2);
+	return (1);
 }
 
 static struct bsddialog_menugroup *
