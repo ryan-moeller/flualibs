@@ -4,6 +4,7 @@ SRCTOP?= /usr/src
 
 SUBDIR= \
 	b64 \
+	clock \
 	cpuset \
 	fileno \
 	kldstat \
