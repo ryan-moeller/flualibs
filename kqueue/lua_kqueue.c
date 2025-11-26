@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include <sys/event.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -37,6 +38,7 @@
 #include <lualib.h>
 
 #include "../luaerror.h"
+#include "../utils.h"
 
 #define KQUEUE_METATABLE "kqueue"
 
@@ -53,7 +55,7 @@ l_kqueue(lua_State *L)
 
 	kq = kqueuex(KQUEUE_CLOEXEC);
 	if (kq == -1) {
-		luaL_error(L, "kqueuex(KQUEUE_CLOEXEC) failed");
+		return (fail(L, errno));
 	}
 	*kqp = kq;
 
@@ -146,9 +148,9 @@ l_kevent(lua_State *L)
 
 	ret = kevent(*kqp, changelist, nchanges, &event, 1, NULL);
 	if (ret == -1) {
-		luaL_error(L, "kevent failed: %s", strerror(errno));
+		return (fail(L, errno));
 	} else if (ret != 1) {
-		luaL_error(L, "kevent failed spectacularly");
+		return (luaL_error(L, "kevent failed spectacularly"));
 	}
 
 	lua_newtable(L);
@@ -186,14 +188,17 @@ l_kevent(lua_State *L)
 static int
 l_close(struct lua_State *L)
 {
-	int kq, *kqp;
+	int *kqp, kq;
 
 	kqp = luaL_checkudata(L, 1, KQUEUE_METATABLE);
 	kq = *kqp;
 	luaL_argcheck(L, kq != -1, 1, "`kq' already closed");
-	close(kq);
+	if (close(kq) == -1) {
+		return (fail(L, errno));
+	}
 	*kqp = -1;
-	return (0);
+	lua_pushboolean(L, true);
+	return (1);
 }
 
 static int

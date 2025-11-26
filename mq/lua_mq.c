@@ -36,7 +36,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "../luaerror.h"
+#include "../utils.h"
 
 #define MQ_METATABLE "mq"
 
@@ -81,7 +81,7 @@ l_mq_open(lua_State *L)
 		mq = mq_open(name, oflag);
 	}
 	if (mq == (mqd_t)-1) {
-		luaL_error(L, "failed to open mq %s: %s", name, strerror(errno));
+		return (fail(L, errno));
 	}
 	*mqp = mq;
 	return (1);
@@ -96,9 +96,10 @@ l_mq_close(lua_State *L)
 	mq = *mqp;
 	*mqp = (mqd_t)-1;
 	if (mq_close(mq) == -1) {
-		luaL_error(L, "failed to close mq: %s", strerror(errno));
+		return (fail(L, errno));
 	}
-	return (0);
+	lua_pushboolean(L, true);
+	return (1);
 }
 
 static int
@@ -109,9 +110,10 @@ l_mq_unlink(lua_State *L)
 	name = luaL_checkstring(L, 1);
 
 	if (mq_unlink(name) == -1) {
-		luaL_error(L, "failed to unlink mq %s: %s", name, strerror(errno));
+		return (fail(L, errno));
 	}
-	return (0);
+	lua_pushboolean(L, true);
+	return (1);
 }
 
 static int
@@ -123,7 +125,7 @@ l_mq_getattr(lua_State *L)
 	mqp = luaL_checkudata(L, 1, MQ_METATABLE);
 
 	if (mq_getattr(*mqp, &attr) == -1) {
-		luaL_error(L, "failed to getattr mq: %s", strerror(errno));
+		return (fail(L, errno));
 	}
 
 	lua_newtable(L);
@@ -148,9 +150,10 @@ l_mq_setattr(lua_State *L)
 	attr.mq_flags = luaL_checkinteger(L, 2);
 
 	if (mq_setattr(*mqp, &attr, NULL) == -1) {
-		luaL_error(L, "failed to setattr mq: %s", strerror(errno));
+		return (fail(L, errno));
 	}
-	return (0);
+	lua_pushboolean(L, true);
+	return (1);
 }
 
 static int
@@ -166,9 +169,10 @@ l_mq_send(lua_State *L)
 	prio = luaL_checkinteger(L, 3);
 
 	if (mq_send(*mqp, msg, len, prio) == -1) {
-		luaL_error(L, "failed to send on mq: %s", strerror(errno));
+		return (fail(L, errno));
 	}
-	return (0);
+	lua_pushboolean(L, true);
+	return (1);
 }
 
 static int
@@ -184,31 +188,72 @@ l_mq_receive(lua_State *L)
 	buflen = luaL_checkinteger(L, 2);
 	buf = malloc(buflen);
 	if (buf == NULL) {
-		luaL_error(L, "failed to allocate %d bytes: %s", buflen, strerror(errno));
+		return (fatal(L, "malloc", ENOMEM));
 	}
 	prio = 0;
 
 	len = mq_receive(*mqp, buf, buflen, &prio);
 	if (len == -1) {
 		free(buf);
-		luaL_error(L, "failed to receive on mq: %s", strerror(errno));
+		return (fail(L, errno));
 	}
 	lua_pushlstring(L, buf, len);
 	lua_pushinteger(L, prio);
 	return (2);
 }
 
-/* TODO
 static int
 l_mq_timedsend(lua_State *L)
 {
+	struct timespec abs_timeout;
+	mqd_t *mqp;
+	const char *msg;
+	size_t len;
+	unsigned prio;
+
+	mqp = luaL_checkudata(L, 1, MQ_METATABLE);
+	msg = luaL_checklstring(L, 2, &len);
+	prio = luaL_checkinteger(L, 3);
+	abs_timeout.tv_sec = luaL_checkinteger(L, 4);
+	abs_timeout.tv_nsec = luaL_optinteger(L, 5, 0);
+
+	if (mq_timedsend(*mqp, msg, len, prio, &abs_timeout) == -1) {
+		return (fail(L, errno));
+	}
+	lua_pushboolean(L, true);
+	return (1);
 }
 
 static int
 l_mq_timedreceive(lua_State *L)
 {
+	struct timespec abs_timeout;
+	mqd_t *mqp;
+	char *buf;
+	size_t buflen;
+	ssize_t len;
+	unsigned prio;
+
+	mqp = luaL_checkudata(L, 1, MQ_METATABLE);
+	buflen = luaL_checkinteger(L, 2);
+	abs_timeout.tv_sec = luaL_checkinteger(L, 3);
+	abs_timeout.tv_nsec = luaL_optinteger(L, 4, 0);
+
+	buf = malloc(buflen);
+	if (buf == NULL) {
+		return (fatal(L, "malloc", ENOMEM));
+	}
+	prio = 0;
+
+	len = mq_timedreceive(*mqp, buf, buflen, &prio, &abs_timeout);
+	if (len == -1) {
+		free(buf);
+		return (fail(L, errno));
+	}
+	lua_pushlstring(L, buf, len);
+	lua_pushinteger(L, prio);
+	return (2);
 }
-*/
 
 static int
 l_mq_getfd_np(lua_State *L)
@@ -237,7 +282,7 @@ l_mq_gc(lua_State *L)
 	}
 	*mqp = (mqd_t)-1;
 	if (mq_close(mq) == -1) {
-		luaL_error(L, "failed to close mq: %s", strerror(errno));
+		return (fail(L, errno));
 	}
 	return (0);
 }
@@ -254,10 +299,8 @@ static const struct luaL_Reg l_mq_meta[] = {
 	{"setattr", l_mq_setattr},
 	{"send", l_mq_send},
 	{"receive", l_mq_receive},
-	/* TODO
 	{"timedsend", l_mq_timedsend},
 	{"timedreceive", l_mq_timedreceive},
-	*/
 	{"getfd", l_mq_getfd_np},
 	{NULL, NULL}
 };

@@ -36,6 +36,7 @@
 #include <lualib.h>
 
 #include "../luaerror.h"
+#include "../utils.h"
 
 #define MAGIC_METATABLE "magic_t"
 
@@ -54,12 +55,7 @@ l_magic_open(lua_State *L)
 
 	*cookiep = magic_open(flags);
 	if (*cookiep == NULL) {
-		int error = errno;
-
-		luaL_pushfail(L);
-		lua_pushstring(L, strerror(error));
-		lua_pushinteger(L, error);
-		return (3);
+		return (fail(L, errno));
 	}
 	return (1);
 }

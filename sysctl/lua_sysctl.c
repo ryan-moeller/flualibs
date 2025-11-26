@@ -37,6 +37,7 @@
 #include <lualib.h>
 
 #include "../luaerror.h"
+#include "../utils.h"
 
 #define MIB_METATABLE "struct mib *"
 
@@ -72,12 +73,12 @@ l_sysctl(lua_State *L)
 		mib->oidlen = nitems(mib->oid);
 		error = sysctlnametomib(name, mib->oid, &mib->oidlen);
 		if (error != 0) {
-			luaL_error(L, "sysctlnametomib: %s", strerror(errno));
+			return (fail(L, errno));
 		}
 		mib->prefix = mib->oidlen * sizeof(int);
 		mib->name = strdup(name);
 		if (mib->name == NULL) {
-			luaL_error(L, "strdup: %s", strerror(errno));
+			return (fatal(L, "strdup", errno));
 		}
 	}
 	return (1);
@@ -129,12 +130,12 @@ l_mib_format(lua_State *L)
 		memset(buf, 0, length);
 		error = sysctl(qoid, mib->oidlen + 2, buf, &length, NULL, 0);
 		if (error != 0) {
-			luaL_error(L, "sysctl: %s", strerror(errno));
+			return (fail(L, errno));
 		}
 		mib->kind = *(u_int *)buf;
 		mib->format = strdup(buf + sizeof(u_int));
 		if (mib->format == NULL) {
-			luaL_error(L, "strdup: %s", strerror(errno));
+			return (fatal(L, "strdup", errno));
 		}
 	}
 	lua_pushinteger(L, mib->kind);
@@ -161,11 +162,11 @@ l_mib_name(lua_State *L)
 		memset(buf, 0, length);
 		error = sysctl(qoid, mib->oidlen + 2, buf, &length, NULL, 0);
 		if (error != 0) {
-			luaL_error(L, "sysctl: %s", strerror(errno));
+			return (fail(L, errno));
 		}
 		mib->name = strdup(buf);
 		if (mib->name == NULL) {
-			luaL_error(L, "strdup: %s", strerror(errno));
+			return (fatal(L, "strdup", errno));
 		}
 	}
 	lua_pushstring(L, mib->name);
@@ -195,11 +196,11 @@ l_mib_description(lua_State *L)
 				lua_pushnil(L);
 				return (1);
 			}
-			luaL_error(L, "sysctl: %s", strerror(errno));
+			return (fail(L, errno));
 		}
 		mib->description = strdup(buf);
 		if (mib->description == NULL) {
-			luaL_error(L, "strdup: %s", strerror(errno));
+			return (fatal(L, "strdup", errno));
 		}
 	}
 	lua_pushstring(L, mib->description);
@@ -228,12 +229,12 @@ l_mib_value(lua_State *L)
 		size = 0;
 		error = sysctl(mib->oid, mib->oidlen, NULL, &size, NULL, 0);
 		if (error != 0) {
-			luaL_error(L, "sysctl: %s", strerror(errno));
+			return (fail(L, errno));
 		}
 		size = round_page(size * 2); /* in case it grows */
 		p = malloc(size);
 		if (p == NULL) {
-			luaL_error(L, "malloc: %s", strerror(errno));
+			return (fatal(L, "malloc", errno));
 		}
 		for (;;) {
 			error =
@@ -244,14 +245,14 @@ l_mib_value(lua_State *L)
 			if (error != ENOMEM) {
 				error = errno;
 				free(p);
-				luaL_error(L, "sysctl: %s", strerror(error));
+				return (fail(L, error));
 			}
 			size = round_page(size * 2); /* in case it grows more */
 			newp = realloc(p, size);
 			if (newp == NULL) {
 				error = errno;
 				free(p);
-				luaL_error(L, "realloc: %s", strerror(error));
+				return (fatal(L, "realloc", error));
 			}
 			p = newp;
 		}
@@ -299,7 +300,7 @@ l_mib_value(lua_State *L)
 			lua_pushlstring(L, p, size);
 			break;
 		default:
-			luaL_error(L, "unknown ctltype: %d", ctltype);
+			return (luaL_error(L, "unknown ctltype: %d", ctltype));
 		}
 		free(p);
 		return (1);
@@ -397,7 +398,7 @@ l_mib_value(lua_State *L)
 		luaL_error(L, "unknown ctltype: %d", ctltype);
 	}
 	if (error != 0) {
-		luaL_error(L, "sysctl: %s", strerror(errno));
+		return (fail(L, errno));
 	}
 	return (0);
 }
@@ -429,7 +430,7 @@ l_mib_iter_next(lua_State *L)
 			lua_pushnil(L);
 			return (1);
 		}
-		luaL_error(L, "sysctl: %s", strerror(errno));
+		return (fail(L, errno));
 	}
 	if (memcmp(prev->oid, next->oid, prev->prefix) != 0) {
 		lua_pushnil(L);

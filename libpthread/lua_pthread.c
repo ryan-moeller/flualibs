@@ -29,6 +29,7 @@
 #include <sys/cpuset.h>
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <pthread.h>
 #include <pthread_np.h>
 #include <signal.h>
@@ -43,6 +44,7 @@
 #include "refcount.h"
 #include "../cpuset/lua_cpuset.h"
 #include "../luaerror.h"
+#include "../utils.h"
 
 int luaopen_pthread(lua_State *);
 
@@ -90,15 +92,6 @@ checkcookie(lua_State *L, int idx, const char *metatable)
 	cookie = lua_touserdata(L, -1);
 	luaL_argcheck(L, cookie != NULL, idx, "cookie expired");
 	return (cookie);
-}
-
-static inline int
-fail(lua_State *L, int error)
-{
-	luaL_pushfail(L);
-	lua_pushstring(L, strerror(error));
-	lua_pushinteger(L, error);
-	return (3);
 }
 
 static inline void
@@ -493,7 +486,7 @@ attr_destroy(lua_State *L, pthread_attr_t *attr)
 	int error;
 
 	if ((error = pthread_attr_destroy(attr)) != 0) {
-		luaL_error(L, "pthread_attr_destroy: %s", strerror(error));
+		fatal(L, "pthread_attr_destroy", error);
 	}
 }
 
@@ -506,8 +499,7 @@ l_pthread_create(lua_State *L)
 	int error, n, fnidx, error1;
 
 	if ((error = pthread_attr_init(&attr)) != 0) {
-		return (luaL_error(L, "pthread_attr_init: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_attr_init", error));
 	}
 
 	n = lua_gettop(L);
@@ -528,7 +520,7 @@ l_pthread_create(lua_State *L)
 
 	if ((l = luaL_newstate()) == NULL) {
 		attr_destroy(L, &attr);
-		return (luaL_error(L, "luaL_newstate: %s", strerror(ENOMEM)));
+		return (fatal(L, "luaL_newstate", ENOMEM));
 	}
 	luaL_openlibs(l);
 	if ((error = copyn(L, l, fnidx, n)) != 0) {
@@ -540,14 +532,13 @@ l_pthread_create(lua_State *L)
 	if ((threadp = malloc(sizeof(*threadp))) == NULL) {
 		lua_close(L);
 		attr_destroy(L, &attr);
-		return (luaL_error(L, "malloc: %s", strerror(ENOMEM)));
+		return (fatal(L, "malloc", ENOMEM));
 	}
 	error = pthread_create(&threadp->thread, &attr, thread_wrapper, l);
 	if ((error1 = pthread_attr_destroy(&attr)) != 0) {
 		lua_close(l);
 		free(threadp);
-		return (luaL_error(L, "pthread_attr_destroy: %s",
-		    strerror(error1)));
+		return (fatal(L, "pthread_attr_destroy", error1));
 	}
 	if (error != 0) {
 		lua_close(l);
@@ -682,8 +673,7 @@ l_pthread_attr_get_np(lua_State *L)
 	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
 
 	if ((error = pthread_attr_init(&attr)) != 0) {
-		return (luaL_error(L, "pthread_attr_init: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_attr_init", error));
 	}
 	if ((error = pthread_attr_get_np(threadp->thread, &attr)) != 0) {
 		attr_destroy(L, &attr);
@@ -694,8 +684,7 @@ l_pthread_attr_get_np(lua_State *L)
 
 	if ((error = pthread_attr_getstack(&attr, &addr, &size)) != 0) {
 		attr_destroy(L, &attr);
-		return (luaL_error(L, "pthread_attr_getstack: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_attr_getstack", error));
 	}
 	lua_createtable(L, 0, 2);
 	lua_pushlightuserdata(L, addr);
@@ -706,32 +695,28 @@ l_pthread_attr_get_np(lua_State *L)
 
 	if ((error = pthread_attr_getguardsize(&attr, &size)) != 0) {
 		attr_destroy(L, &attr);
-		return (luaL_error(L, "pthread_attr_getguardsize: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_attr_getguardsize", error));
 	}
 	lua_pushinteger(L, size);
 	lua_setfield(L, -2, "guardsize");
 
 	if ((error = pthread_attr_getdetachstate(&attr, &val)) != 0) {
 		attr_destroy(L, &attr);
-		return (luaL_error(L, "pthread_attr_getdetachstate: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_attr_getdetachstate", error));
 	}
 	lua_pushinteger(L, val);
 	lua_setfield(L, -2, "detachstate");
 
 	if ((error = pthread_attr_getinheritsched(&attr, &val)) != 0) {
 		attr_destroy(L, &attr);
-		return (luaL_error(L, "pthread_attr_getinheritsched: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_attr_getinheritsched", error));
 	}
 	lua_pushinteger(L, val);
 	lua_setfield(L, -2, "inheritsched");
 
 	if ((error = pthread_attr_getschedparam(&attr, &param)) != 0) {
 		attr_destroy(L, &attr);
-		return (luaL_error(L, "pthread_attr_getschedparam: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_attr_getschedparam", error));
 	}
 	lua_createtable(L, 0, 1);
 	lua_pushinteger(L, param.sched_priority);
@@ -740,16 +725,14 @@ l_pthread_attr_get_np(lua_State *L)
 
 	if ((error = pthread_attr_getschedpolicy(&attr, &val)) != 0) {
 		attr_destroy(L, &attr);
-		return (luaL_error(L, "pthread_attr_getschedpolicy: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_attr_getschedpolicy", error));
 	}
 	lua_pushinteger(L, val);
 	lua_setfield(L, -2, "schedpolicy");
 
 	if ((error = pthread_attr_getscope(&attr, &val)) != 0) {
 		attr_destroy(L, &attr);
-		return (luaL_error(L, "pthread_attr_getscope: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_attr_getscope", error));
 	}
 	lua_pushinteger(L, val);
 	lua_setfield(L, -2, "scope");
@@ -758,8 +741,7 @@ l_pthread_attr_get_np(lua_State *L)
 	if ((error = pthread_attr_getaffinity_np(&attr, sizeof(*cpuset),
 	    cpuset)) != 0) {
 		attr_destroy(L, &attr);
-		return (luaL_error(L, "pthread_attr_getaffinity_np: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_attr_getaffinity_np", error));
 	}
 	lua_setfield(L, -2, "affinity_np");
 
@@ -948,7 +930,7 @@ l_pthread_once_new(lua_State *L)
 	int error;
 
 	if ((oncep = malloc(sizeof(*oncep))) == NULL) {
-		return (luaL_error(L, "malloc: %s", strerror(ENOMEM)));
+		return (fatal(L, "malloc", ENOMEM));
 	}
 	oncep->control = (pthread_once_t)PTHREAD_ONCE_INIT;
 	refcount_init(&oncep->refs, 1);
@@ -1011,7 +993,7 @@ l_pthread_self(lua_State *L)
 	struct rcthread *threadp;
 
 	if ((threadp = malloc(sizeof(*threadp))) == NULL) {
-		return (luaL_error(L, "malloc: %s", strerror(ENOMEM)));
+		return (fatal(L, "malloc", ENOMEM));
 	}
 	threadp->thread = pthread_self();
 	refcount_init(&threadp->refs, 1);
@@ -1192,7 +1174,7 @@ mutexattr_destroy(lua_State *L, pthread_mutexattr_t *attr)
 	int error;
 
 	if ((error = pthread_mutexattr_destroy(attr)) != 0) {
-		luaL_error(L, "pthread_mutexattr_destroy: %s", strerror(error));
+		fatal(L, "pthread_mutexattr_destroy", error);
 	}
 }
 
@@ -1204,8 +1186,7 @@ l_pthread_mutex_new(lua_State *L)
 	int error, error1;
 
 	if ((error = pthread_mutexattr_init(&attr)) != 0) {
-		return (luaL_error(L, "pthread_mutexattr_init: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_mutexattr_init", error));
 	}
 
 	switch (lua_type(L, 1)) {
@@ -1225,13 +1206,12 @@ l_pthread_mutex_new(lua_State *L)
 
 	if ((mutexp = malloc(sizeof(*mutexp))) == NULL) {
 		mutexattr_destroy(L, &attr);
-		return (luaL_error(L, "malloc: %s", strerror(ENOMEM)));
+		return (fatal(L, "malloc", ENOMEM));
 	}
 	error = pthread_mutex_init(&mutexp->mutex, &attr);
 	if ((error1 = pthread_mutexattr_destroy(&attr)) != 0) {
 		free(mutexp);
-		return (luaL_error(L, "pthread_mutexattr_destroy: %s",
-		    strerror(error1)));
+		return (fatal(L, "pthread_mutexattr_destroy", error1));
 	}
 	if (error != 0) {
 		free(mutexp);
@@ -1272,8 +1252,7 @@ l_pthread_mutex_gc(lua_State *L)
 		error = pthread_mutex_destroy(&mutexp->mutex);
 		free(mutexp);
 		if (error != 0) {
-			return (luaL_error(L, "pthread_mutex_destroy: %s",
-			    strerror(error)));
+			return (fatal(L, "pthread_mutex_destroy", error));
 		}
 	}
 	return (0);
@@ -1473,7 +1452,7 @@ condattr_destroy(lua_State *L, pthread_condattr_t *attr)
 	int error;
 
 	if ((error = pthread_condattr_destroy(attr)) != 0) {
-		luaL_error(L, "pthread_condattr_destroy: %s", strerror(error));
+		fatal(L, "pthread_condattr_destroy", error);
 	}
 }
 
@@ -1485,8 +1464,7 @@ l_pthread_cond_new(lua_State *L)
 	int error, error1;
 
 	if ((error = pthread_condattr_init(&attr)) != 0) {
-		return (luaL_error(L, "pthread_condattr_init: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_condattr_init", error));
 	}
 
 	switch (lua_type(L, 1)) {
@@ -1506,13 +1484,12 @@ l_pthread_cond_new(lua_State *L)
 
 	if ((condp = malloc(sizeof(*condp))) == NULL) {
 		condattr_destroy(L, &attr);
-		return (luaL_error(L, "malloc: %s", strerror(ENOMEM)));
+		return (fatal(L, "malloc", ENOMEM));
 	}
 	error = pthread_cond_init(&condp->cond, &attr);
 	if ((error1 = pthread_condattr_destroy(&attr)) != 0) {
 		free(condp);
-		return (luaL_error(L, "pthread_condattr_destroy: %s",
-		    strerror(error1)));
+		return (fatal(L, "pthread_condattr_destroy", error1));
 	}
 	if (error != 0) {
 		free(condp);
@@ -1553,8 +1530,7 @@ l_pthread_cond_gc(lua_State *L)
 		error = pthread_cond_destroy(&condp->cond);
 		free(condp);
 		if (error != 0) {
-			return (luaL_error(L, "pthread_cond_destroy: %s",
-			    strerror(error)));
+			return (fatal(L, "pthread_cond_destroy", error));
 		}
 	}
 	return (0);
@@ -1662,8 +1638,7 @@ rwlockattr_destroy(lua_State *L, pthread_rwlockattr_t *attr)
 	int error;
 
 	if ((error = pthread_rwlockattr_destroy(attr)) != 0) {
-		luaL_error(L, "pthread_rwlockattr_destroy: %s",
-		    strerror(error));
+		fatal(L, "pthread_rwlockattr_destroy", error);
 	}
 }
 
@@ -1675,8 +1650,7 @@ l_pthread_rwlock_new(lua_State *L)
 	int error, error1;
 
 	if ((error = pthread_rwlockattr_init(&attr)) != 0) {
-		return (luaL_error(L, "pthread_rwlockattr_init: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_rwlockattr_init", error));
 	}
 
 	switch (lua_type(L, 1)) {
@@ -1696,13 +1670,12 @@ l_pthread_rwlock_new(lua_State *L)
 
 	if ((lockp = malloc(sizeof(*lockp))) == NULL) {
 		rwlockattr_destroy(L, &attr);
-		return (luaL_error(L, "malloc: %s", strerror(ENOMEM)));
+		return (fatal(L, "malloc", ENOMEM));
 	}
 	error = pthread_rwlock_init(&lockp->lock, &attr);
 	if ((error1 = pthread_rwlockattr_destroy(&attr)) != 0) {
 		free(lockp);
-		return (luaL_error(L, "pthread_rwlockattr_destroy: %s",
-		    strerror(error1)));
+		return (fatal(L, "pthread_rwlockattr_destroy", error1));
 	}
 	if (error != 0) {
 		free(lockp);
@@ -1743,8 +1716,7 @@ l_pthread_rwlock_gc(lua_State *L)
 		error = pthread_rwlock_destroy(&lockp->lock);
 		free(lockp);
 		if (error != 0) {
-			return (luaL_error(L, "pthread_rwlock_destroy: %s",
-			    strerror(error)));
+			return (fatal(L, "pthread_rwlock_destroy", error));
 		}
 	}
 	return (0);
@@ -1840,7 +1812,7 @@ l_pthread_key_create(lua_State *L)
 	destructor = lua_islightuserdata(L, 1) ? lua_touserdata(L, 1) : NULL;
 
 	if ((keyp = malloc(sizeof(*keyp))) == NULL) {
-		return (luaL_error(L, "malloc: %s", strerror(ENOMEM)));
+		return (fatal(L, "malloc", ENOMEM));
 	}
 	if ((error = pthread_key_create(&keyp->key, destructor)) != 0) {
 		free(keyp);
@@ -1881,8 +1853,7 @@ l_pthread_key_gc(lua_State *L)
 		error = pthread_key_delete(keyp->key);
 		free(keyp);
 		if (error != 0) {
-			return (luaL_error(L, "pthread_key_delete: %s",
-			    strerror(error)));
+			return (fatal(L, "pthread_key_delete", error));
 		}
 	}
 	return (0);
@@ -2022,8 +1993,7 @@ barrierattr_destroy(lua_State *L, pthread_barrierattr_t *attr)
 	int error;
 
 	if ((error = pthread_barrierattr_destroy(attr)) != 0) {
-		luaL_error(L, "pthread_barrierattr_destroy: %s",
-		    strerror(error));
+		fatal(L, "pthread_barrierattr_destroy", error);
 	}
 }
 
@@ -2036,8 +2006,7 @@ l_pthread_barrier_new(lua_State *L)
 	int error, countidx, error1;
 
 	if ((error = pthread_barrierattr_init(&attr)) != 0) {
-		return (luaL_error(L, "pthread_barrierattr_init: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_barrierattr_init", error));
 	}
 
 	if (lua_type(L, 1) == LUA_TTABLE) {
@@ -2057,13 +2026,12 @@ l_pthread_barrier_new(lua_State *L)
 
 	if ((barrierp = malloc(sizeof(*barrierp))) == NULL) {
 		barrierattr_destroy(L, &attr);
-		return (luaL_error(L, "malloc: %s", strerror(ENOMEM)));
+		return (fatal(L, "malloc", ENOMEM));
 	}
 	error = pthread_barrier_init(&barrierp->barrier, &attr, count);
 	if ((error1 = pthread_barrierattr_destroy(&attr)) != 0) {
 		free(barrierp);
-		return (luaL_error(L, "pthread_barrierattr_destroy: %s",
-		    strerror(error1)));
+		return (fatal(L, "pthread_barrierattr_destroy", error1));
 	}
 	if (error != 0) {
 		free(barrierp);
@@ -2104,8 +2072,7 @@ l_pthread_barrier_gc(lua_State *L)
 		error = pthread_barrier_destroy(&barrierp->barrier);
 		free(barrierp);
 		if (error != 0) {
-			return (luaL_error(L, "pthread_barrier_destroy: %s",
-			    strerror(error)));
+			return (fatal(L, "pthread_barrier_destroy", error));
 		}
 	}
 	return (0);
@@ -2145,18 +2112,16 @@ l_pthread_rendezvous_new(lua_State *L)
 	int error;
 
 	if ((rp = malloc(sizeof(*rp))) == NULL) {
-		return (luaL_error(L, "malloc: %s", strerror(ENOMEM)));
+		return (fatal(L, "malloc", ENOMEM));
 	}
 	if ((error = pthread_mutex_init(&rp->mutex, NULL)) != 0) {
 		free(rp);
-		return (luaL_error(L, "pthread_mutex_init: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_mutex_init", error));
 	}
 	if ((error = pthread_cond_init(&rp->cond, NULL)) != 0) {
 		pthread_mutex_destroy(&rp->mutex);
 		free(rp);
-		return (luaL_error(L, "pthread_cond_init: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_cond_init", error));
 	}
 	rp->waiter = NULL;
 	refcount_init(&rp->refs, 1);
@@ -2187,12 +2152,10 @@ l_pthread_rendezvous_gc(lua_State *L)
 		error2 = pthread_mutex_destroy(&rp->mutex);
 		free(rp);
 		if (error1 != 0) {
-			return (luaL_error(L, "pthread_cond_destroy: %s",
-			    strerror(error1)));
+			return (fatal(L, "pthread_cond_destroy", error1));
 		}
 		if (error2 != 0) {
-			return (luaL_error(L, "pthread_mutex_destroy: %s",
-			    strerror(error2)));
+			return (fatal(L, "pthread_mutex_destroy", error2));
 		}
 	}
 	return (0);
@@ -2246,8 +2209,7 @@ l_pthread_rendezvous_exchange(lua_State *L)
 	lua_pop(L, 1);
 
 	if ((error = pthread_mutex_lock(&rp->mutex)) != 0) {
-		return (luaL_error(L, "pthread_mutex_lock: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_mutex_lock", error));
 	}
 	if (rp->waiter == NULL) {
 		lua_pushinteger(L, narg);
@@ -2256,25 +2218,28 @@ l_pthread_rendezvous_exchange(lua_State *L)
 			nres = lua_tointeger(L, -1);
 			lua_pop(L, 1);
 		} else {
+			char msg[NL_TEXTMAX];
+
 			/* XXX: sucks to be the other thread, maybe poison? */
 			rp->waiter = NULL;
-			lua_pushfstring(L, "pthread_cond_wait: %s",
-			    strerror(error));
+			strerror_r(error, msg, sizeof(msg));
+			lua_pushfstring(L, "pthread_cond_wait: %s", msg);
 			nres = -1;
 		}
 	} else {
 		nres = exchange(L, rp->waiter, 2, narg);
 		rp->waiter = NULL;
 		if ((error = pthread_cond_signal(&rp->cond)) != 0) {
+			char msg[NL_TEXTMAX];
+
 			/* XXX: sucks to be the other thread */
-			lua_pushfstring(L, "pthread_cond_signal: %s",
-			    strerror(error));
+			strerror_r(error, msg, sizeof(msg));
+			lua_pushfstring(L, "pthread_cond_signal: %s", msg);
 			nres = -1;
 		}
 	}
 	if ((error = pthread_mutex_unlock(&rp->mutex)) != 0) {
-		return (luaL_error(L, "pthread_mutex_unlock: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_mutex_unlock", error));
 	}
 	return (nres < 0 ? lua_error(L) : nres);
 }
@@ -2297,8 +2262,7 @@ l_pthread_rendezvous_timedexchange(lua_State *L)
 			lua_pushboolean(L, false);
 			return (1);
 		}
-		return (luaL_error(L, "pthread_mutex_lock: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_mutex_lock", error));
 	}
 	if (rp->waiter == NULL) {
 		lua_pushinteger(L, narg);
@@ -2312,12 +2276,15 @@ l_pthread_rendezvous_timedexchange(lua_State *L)
 			if (error == ETIMEDOUT) {
 				nres = -2;
 			} else {
+				char msg[NL_TEXTMAX];
+
 				/*
 				 * XXX: sucks to be the other thread,
 				 * maybe poison?
 				 */
+				strerror_r(error, msg, sizeof(msg));
 				lua_pushfstring(L, "pthread_cond_wait: %s",
-				    strerror(error));
+				    msg);
 				nres = -1;
 			}
 		}
@@ -2325,15 +2292,16 @@ l_pthread_rendezvous_timedexchange(lua_State *L)
 		nres = exchange(L, rp->waiter, 4, narg);
 		rp->waiter = NULL;
 		if ((error = pthread_cond_signal(&rp->cond)) != 0) {
+			char msg[NL_TEXTMAX];
+
 			/* XXX: sucks to be the other thread */
-			lua_pushfstring(L, "pthread_cond_signal: %s",
-			    strerror(error));
+			strerror_r(error, msg, sizeof(msg));
+			lua_pushfstring(L, "pthread_cond_signal: %s", msg);
 			nres = -1;
 		}
 	}
 	if ((error = pthread_mutex_unlock(&rp->mutex)) != 0) {
-		return (luaL_error(L, "pthread_mutex_unlock: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_mutex_unlock", error));
 	}
 	switch (nres) {
 	case -1:
@@ -2514,8 +2482,7 @@ luaopen_pthread(lua_State *L)
 	lua_call(L, 1, 0);
 
 	if ((error = pthread_setspecific(thread_state_key, L)) != 0) {
-		return (luaL_error(L, "pthread_setspecific: %s",
-		    strerror(error)));
+		return (fatal(L, "pthread_setspecific", error));
 	}
 
 	luaL_newmetatable(L, PTHREAD_METATABLE);

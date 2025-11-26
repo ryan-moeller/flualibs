@@ -94,9 +94,9 @@ local kqueue = require('kqueue')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv kq = kqueue.kqueue( )
-.It Dv event = kq:kevent([changelist ] )
-.It Dv kq:close( )
+.It Dv kq, err, code = kqueue.kqueue( )
+.It Dv event, err, code = kq:kevent([changelist ] )
+.It Dv ok, err, code = kq:close( )
 .El
 .Sh DESCRIPTION
 The
@@ -107,15 +107,15 @@ and
 .Xr kevent 2
 system calls.
 .Bl -tag -width XXXX
-.It Dv kq = kqueue.kqueue( )
+.It Dv kq, err, code = kqueue.kqueue( )
 Create a new kernel event queue and return a descriptor.
 This is implemented as kqueuex(KQUEUE_CLOEXEC) so the returned
 file descriptor is automatically closed on execve(2).
-.It Dv event = kq:kevent([changelist ] )
+.It Dv event, err, code = kq:kevent([changelist ] )
 Apply an optional
 .Fa changelist
 to the queue and wait for an event to return.
-.It Dv kq:close( )
+.It Dv ok, err, code = kq:close( )
 Close the kernel event queue descriptor.
 .El
 .Sh EXAMPLES

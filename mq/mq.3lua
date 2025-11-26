@@ -24,7 +24,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.Dd May 20, 2025
+.Dd November 26, 2025
 .Dt MQ 3lua
 .Os
 .Sh NAME
@@ -48,20 +48,26 @@
 .Xr mq_getattr 2 ,
 .Xr mq_setattr 2 ,
 .Xr mq_send 2 ,
-.Xr mq_receive 2
+.Xr mq_receive 2 ,
+.Xr mq_timedsend 2 ,
+.Xr mq_timedreceive 2 ,
+.Fn mq_getfd_np
 .Sh SYNOPSIS
 .Bd -literal
 local mq = require('mq')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv q = mq.open(name , oflags[ , mode[ , attr ] ] )
-.It Dv attr = q:getattr( )
-.It Dv q:setattr(attr )
-.It Dv q:send(msg , prio )
-.It Dv msg, prio = q:receive(attr.msgsize )
-.It Dv q:close( )
-.It Dv mq.unlink(name )
+.It Dv q, err, code = mq.open(name , oflags[ , mode[ , attr ] ] )
+.It Dv attr, err, code = q:getattr( )
+.It Dv ok, err, code = q:setattr(attr )
+.It Dv ok, err, code = q:send(msg , prio )
+.It Dv msg, prio_or_err, code = q:receive(attr.msgsize )
+.It Dv ok, err, code = q:timedsend(msg , prio , sec[ , nsec ] )
+.It Dv msg, prio_or_err, code = q:timedreceive(attr.msgsize , sec[ , nsec ] )
+.It Dv fd = q:getfd( )
+.It Dv ok, err, code = q:close( )
+.It Dv ok, err, code = mq.unlink(name )
 .El
 .Sh DESCRIPTION
 The
@@ -70,26 +76,32 @@ module provides bindings for the
 .Xr mqueuefs 4
 system calls.
 .Bl -tag -width XXXX
-.It Dv q = mq.open(name , oflags[ , mode[ , attr ] ] )
+.It Dv q, err, code = mq.open(name , oflags[ , mode[ , attr ] ] )
 Open a message queue with the given
 .Fa name
 and
 .Fa oflags .
-.It Dv attr = q:getattr( )
+.It Dv attr, err, code = q:getattr( )
 Obtain status information and attributes of the open message queue.
-.It Dv q:setattr(attr )
+.It Dv ok, err, code = q:setattr(attr )
 Set attributes of the open message queue.
-.It Dv q:send(msg , prio )
+.It Dv ok, err, code = q:send(msg , prio )
 Add
 .Fa msg
 to the open message queue with priority
 .Fa prio .
-.It Dv msg, prio = q:receive(attr.msgsize )
+.It Dv msg, prio_or_err, code = q:receive(attr.msgsize )
 Receive the oldest of the highest priority messages from the open message queue.
 A size for the message buffer must be passed as the only argument.
-.It Dv q:close( )
+.It Dv ok, err, code = q:timedsend(msg , prio , sec[ , nsec ] )
+Send with an absolute timeout.
+.It Dv msg, prio_or_err, code = q:timedreceive(attr.msgsize , sec[ , nsec ] )
+Receive with an absolute timeout.
+.It Dv fd = q:getfd( )
+Get the underlying file descriptor number of the open message queue.
+.It Dv ok, err, code = q:close( )
 Close the open message queue.
-.It Dv mq.unlink(name )
+.It Dv ok, err, code = mq.unlink(name )
 Remove the named message queue given by
 .Fa name .
 .El
@@ -97,8 +109,8 @@ Remove the named message queue given by
 Create a message queue:
 .Bd -literal -offset indent
 local mq = require('mq')
-local q = mq.open('/myqueue', mq.O_CREAT | mq.O_WRONLY, 438)
-q:send("hello", 0)
+local q = assert(mq.open('/myqueue', mq.O_CREAT | mq.O_WRONLY, 438))
+assert(q:send("hello", 0))
 .Ed
 .Sh SEE ALSO
 .Xr mq_close 2 ,
@@ -106,6 +118,8 @@ q:send("hello", 0)
 .Xr mq_open 2 ,
 .Xr mq_receive 2 ,
 .Xr mq_send 2 ,
-.Xr mq_setattr 2
+.Xr mq_setattr 2 ,
+.Xr mq_timedreceive 2 ,
+.Xr mq_timedsend 2
 .Sh AUTHORS
 .An Ryan Moeller

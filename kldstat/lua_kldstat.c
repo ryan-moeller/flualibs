@@ -30,14 +30,14 @@
 #include <sys/module.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "../luaerror.h"
+#include "../utils.h"
 
 int luaopen_kldstat(lua_State *);
 
@@ -53,7 +53,7 @@ l_kldstat_iter_next(lua_State *L)
 	}
 	stat.version = sizeof(stat);
 	if (kldstat(nextid, &stat) == -1) {
-		luaL_error(L, "cannot kldstat %d: %s", nextid, strerror(errno));
+		return (fatal(L, "kldstat", errno));
 	}
 	nextid = kldnext(nextid);
 	lua_pushinteger(L, nextid);
@@ -69,7 +69,7 @@ l_kldstat_iter_next(lua_State *L)
 	{
 		char *s = NULL;
 		if (asprintf(&s, "%p", stat.address) == -1) {
-			luaL_error(L, "cannot allocate for address");
+			return (fatal(L, "asprintf", errno));
 		}
 		lua_pushstring(L, s);
 		free(s);
@@ -103,7 +103,7 @@ l_modstat_next(lua_State *L)
 	}
 	stat.version = sizeof(stat);
 	if (modstat(nextid, &stat) == -1) {
-		luaL_error(L, "cannot modstat %d: %s", nextid, strerror(errno));
+		return (fatal(L, "modstat", errno));
 	}
 	nextid = modfnext(nextid);
 	lua_pushinteger(L, nextid);

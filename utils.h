@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (c) 2024-2025 Ryan Moeller
+ * Copyright (c) 2025 Ryan Moeller
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,65 +25,33 @@
  * SUCH DAMAGE.
  */
 
-#include <errno.h>
-#include <stdlib.h>
+#pragma once
+
+#include <limits.h>
+#include <string.h>
 
 #include <lua.h>
 #include <lauxlib.h>
-#include <lualib.h>
 
-#include "../luaerror.h"
-#include "../utils.h"
+#include "luaerror.h"
 
-int luaopen_xor(lua_State *);
-
-static int
-l_xor_apply(lua_State *L)
+static inline int
+fail(lua_State *L, int error)
 {
-	const int keylen = 4;
-	unsigned char key[keylen];
-	const char *input;
-	size_t len;
-	char *output;
+	char msg[NL_TEXTMAX];
 
-	input = luaL_checklstring(L, 1, &len);
-
-	luaL_checktype(L, 2, LUA_TTABLE);
-	luaL_argcheck(L, luaL_len(L, 2) == keylen, 2,
-	    "`key' with length 4 expected");
-
-	for (int i = 1; i <= keylen; ++i) {
-		if (lua_rawgeti(L, 2, i) != LUA_TNUMBER) {
-			return (luaL_error(L, "`key[%d]' is not a number", i));
-		}
-		key[i-1] = lua_tonumber(L, -1);
-	}
-	lua_pop(L, keylen);
-
-	output = malloc(len);
-	if (output == NULL) {
-		return (fatal(L, "malloc", ENOMEM));
-	}
-
-	for (size_t i = 0; i < len; ++i) {
-		output[i] = input[i] ^ key[i % keylen];
-	}
-
-	lua_pushlstring(L, output, len);
-
-	free(output);
-	
-	return (1);
+	strerror_r(error, msg, sizeof(msg));
+	luaL_pushfail(L);
+	lua_pushstring(L, msg);
+	lua_pushinteger(L, error);
+	return (3);
 }
 
-static const struct luaL_Reg l_xor_funcs[] = {
-	{"apply", l_xor_apply},
-	{NULL, NULL}
-};
-
-int
-luaopen_xor(lua_State *L)
+static inline int __dead2
+fatal(lua_State *L, const char *source, int error)
 {
-	luaL_newlib(L, l_xor_funcs);
-	return (1);
+	char msg[NL_TEXTMAX];
+
+	strerror_r(error, msg, sizeof(msg));
+	luaL_error(L, "%s: %s", source, msg);
 }

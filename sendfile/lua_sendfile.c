@@ -38,6 +38,7 @@
 #include <lualib.h>
 
 #include "../luaerror.h"
+#include "../utils.h"
 
 int luaopen_sendfile(lua_State *);
 
@@ -54,8 +55,7 @@ get_hdtr(lua_State *L, int arg, struct sf_hdtr *hdtr)
 			hdtr->headers =
 			    malloc(hdtr->hdr_cnt * sizeof(*hdtr->headers));
 			if (hdtr->headers == NULL) {
-				return (luaL_error(L, "malloc: %s",
-				    strerror(errno)));
+				return (fatal(L, "malloc", ENOMEM));
 			}
 		}
 		for (int i = 0; i < hdtr->hdr_cnt; i++) {
@@ -83,8 +83,7 @@ get_hdtr(lua_State *L, int arg, struct sf_hdtr *hdtr)
 			    malloc(hdtr->trl_cnt * sizeof(*hdtr->trailers));
 			if (hdtr->trailers == NULL) {
 				free(hdtr->headers);
-				return (luaL_error(L, "malloc: %s",
-				    strerror(errno)));
+				return (fatal(L, "malloc", ENOMEM));
 			}
 		}
 		for (int i = 0; i < hdtr->trl_cnt; i++) {
@@ -129,7 +128,7 @@ l_sendfile(lua_State *L)
 	struct sf_hdtr hdtr, *hdtrp;
 	off_t offset, sbytes;
 	size_t nbytes;
-	int fd, s, flags, readahead, error;
+	int fd, s, flags, readahead;
 
 	lua_remove(L, 1); /* func table from the __call metamethod */
 	fd = check_fd(L, 1);
@@ -149,14 +148,9 @@ l_sendfile(lua_State *L)
 		flags = luaL_optinteger(L, 5, 0);
 		readahead = luaL_optinteger(L, 6, 0);
 	}
-	error = sendfile(fd, s, offset, nbytes, hdtrp, &sbytes,
-	    SF_FLAGS(readahead, flags));
-	if (error == -1) {
-		error = errno;
-		luaL_pushfail(L);
-		lua_pushfstring(L, "sendfile: %s", strerror(error));
-		lua_pushinteger(L, error);
-		return (3);
+	if (sendfile(fd, s, offset, nbytes, hdtrp, &sbytes,
+	    SF_FLAGS(readahead, flags)) == -1) {
+		return (fail(L, errno));
 	}
 	lua_pushinteger(L, sbytes);
 	return (1);
