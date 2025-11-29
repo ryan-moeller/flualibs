@@ -19,7 +19,7 @@ task:
     - name: releases/amd64/14.3-RELEASE
       freebsd_instance:
         image_family: freebsd-14-3
-    - name: releases/amd64/15.0-RC2
+    - name: releases/amd64/15.0-RELEASE
       freebsd_instance:
         image_family: freebsd-15-0-amd64-ufs
   stateful: false
