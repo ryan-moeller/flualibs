@@ -172,6 +172,10 @@ assert(dpv({options=dpv.options.TEST_MODE}, {
 }))
 .Ed
 .Sh SEE ALSO
+.Xr dialog 1 ,
+.Xr dpv 1 ,
+.Xr dialog 3 ,
+.Xr dpv 3 ,
 .Xr bsddialog 3lua
 .Sh AUTHORS
 .An Ryan Moeller
