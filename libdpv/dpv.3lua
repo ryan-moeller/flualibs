@@ -1,0 +1,177 @@
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.Dd December 3, 2025
+.Dt DPV 3lua
+.Os
+.Sh NAME
+.Nm dpv
+.Nd Lua bindings for
+.Xr dpv 3
+.Sh SYNOPSIS
+.Bd -literal
+dpv = require('dpv')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv success = dpv(config , files )
+.It Dv abort = dpv.abort([abort ] )
+.It Dv interrupt = dpv.interrupt([interrupt ] )
+.It Dv overall_read = dpv.overall_read([overall_read ] )
+.It Dv dpv.display.LIBDIALOG
+.It Dv dpv.display.STDOUT
+.It Dv dpv.display.DIALOG
+.It Dv dpv.display.XDIALOG
+.It Dv dpv.options.TEST_MODE
+.It Dv dpv.options.WIDE_MODE
+.It Dv dpv.options.NO_LABELS
+.It Dv dpv.options.USE_COLOR
+.It Dv dpv.options.NO_OVERRUN
+.It Dv dpv.output.NONE
+.It Dv dpv.output.FILE
+.It Dv dpv.output.SHELL
+.It Dv dpv.status.RUNNING
+.It Dv dpv.status.DONE
+.It Dv dpv.status.FAILED
+.El
+.Sh DESCRIPTION
+The
+.Nm dpv
+module provides bindings for dialog progress view library
+.Pq libdpv
+function calls.
+.Bl -tag -width XXXX
+.It Dv success = dpv(config , files )
+Wraps
+.Xr dpv 3 .
+.Pp
+.Fa config
+can be
+.Dv nil
+for a default configuration, or a table of the form
+.Bd -literal -compact
+{
+	keep_tite = <boolean>,
+	display_type = <dpv.display>,
+	output_type = <dpv.output>,
+	debug = <integer>,
+	display_limit = <integer>,
+	label_size = <integer>,
+	pbar_size = <integer>,
+	dialog_updates_per_second = <integer>,
+	status_updates_per_second = <integer>,
+	options = <dpv.options>,
+	title = <string>,
+	backtitle = <string>,
+	aprompt = <string>,
+	pprompt = <string>,
+	msg_done = <string>,
+	msg_fail = <string>,
+	msg_pending = <string>,
+	output = <string>,
+	status_solo = <string>,
+	status_many = <string>,
+	action = <function>,
+}
+.Ed
+.Pp
+Any field in the config table may be omitted to use the default value.
+The
+.Va action
+field is a function with the signature
+.Dv percent = action(file[ , out ] )
+where
+.Fa file
+is a table of the form
+.Bd -literal -compact
+{
+	status = <dpv.status>,
+	[ msg = <string>, ]
+	name = <string>,
+	path = <string>,
+	length = <integer>,
+	read = <integer>,
+}
+.Ed
+.Pp
+Modifications to these fields are permitted to update the values.
+.Pp
+.Fa out
+is an output file stream if file output is configured.
+.Pp
+The
+.Va action
+function returns the total percent completion for the given file.
+.Pp
+.Fa files
+specifies the files to invoke
+.Fa action
+on as an array of tables with the form
+.Bd -literal -compact
+{
+	{
+		[ status = <dpv.status>, ]
+		[ msg = <string>, ]
+		name = <string>,
+		path = <string>,
+		[ length = <integer>, ]
+		[ read = <integer>, ]
+	}, ...
+}
+.Ed
+.It Dv abort = dpv.abort([abort ] )
+Returns the value of
+.Va dpv_abort ,
+optionally after setting it to the
+.Vt integer
+.Fa abort .
+.It Dv interrupt = dpv.interrupt([interrupt ] )
+Returns the value of
+.Va dpv_interrupt ,
+optionally after setting it to the
+.Vt integer
+.Fa interrupt .
+.It Dv overall_read = dpv.overall_read([overall_read ] )
+Returns the value of
+.Va dpv_overall_read ,
+optionally after setting it to the
+.Vt integer
+.Fa overall_read .
+.El
+.Sh EXAMPLES
+Run a short test:
+.Bd -literal -offset indent
+local dpv = require('dpv')
+
+assert(dpv({options=dpv.options.TEST_MODE}, {
+	{name="null", path="/dev/null"},
+	{name="zero", path="/dev/zero"},
+}))
+.Ed
+.Sh SEE ALSO
+.Xr bsddialog 3lua
+.Sh AUTHORS
+.An Ryan Moeller

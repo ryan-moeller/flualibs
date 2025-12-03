@@ -9,6 +9,7 @@ SUBDIR= \
 	fileno \
 	kldstat \
 	kqueue \
+	libdpv \
 	libfetch \
 	libifconfig \
 	libmagic \
