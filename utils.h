@@ -55,3 +55,109 @@ fatal(lua_State *L, const char *source, int error)
 	strerror_r(error, msg, sizeof(msg));
 	luaL_error(L, "%s: %s", source, msg);
 }
+
+enum wrapperuv {
+	COOKIE = 1,
+	REF = 2,
+};
+
+static inline int
+new(lua_State *L, void *cookie, const char *metatable)
+{
+	lua_newuserdatauv(L, 0, 1);
+	luaL_setmetatable(L, metatable);
+
+	lua_pushlightuserdata(L, cookie);
+	lua_setiuservalue(L, -2, COOKIE);
+
+	return (1);
+}
+
+/* pointer into another object (at idx) with a ref to keep it alive */
+static inline int
+newref(lua_State *L, int idx, void *cookie, const char *metatable)
+{
+	lua_newuserdatauv(L, 0, 2);
+	luaL_setmetatable(L, metatable);
+
+	lua_pushlightuserdata(L, cookie);
+	lua_setiuservalue(L, -2, COOKIE);
+
+	lua_pushvalue(L, idx);
+	lua_setiuservalue(L, -2, REF);
+
+	return (1);
+}
+
+static inline void *
+checklightuserdata(lua_State *L, int idx)
+{
+	luaL_checktype(L, idx, LUA_TLIGHTUSERDATA);
+
+	return (lua_touserdata(L, idx));
+}
+
+static inline void *
+checkcookie(lua_State *L, int idx, const char *metatable)
+{
+	void *cookie;
+
+	luaL_checkudata(L, idx, metatable);
+
+	lua_getiuservalue(L, idx, COOKIE);
+	cookie = lua_touserdata(L, -1);
+	luaL_argcheck(L, cookie != NULL, idx, "cookie expired");
+	return (cookie);
+}
+
+static inline void
+tpush(lua_State *L, int idx)
+{
+	int len;
+
+	len = luaL_len(L, idx);
+	lua_rawseti(L, idx, len + 1);
+}
+
+static inline void
+tpop(lua_State *L, int idx)
+{
+	int len;
+
+	idx = lua_absindex(L, idx);
+	len = luaL_len(L, idx);
+	lua_rawgeti(L, idx, len);
+	lua_pushnil(L);
+	lua_rawseti(L, idx, len);
+}
+
+static inline void
+tpack(lua_State *L, int n)
+{
+	int idx;
+
+	lua_createtable(L, n, 0);
+	if (n > 0) {
+		idx = lua_gettop(L) - n;
+		lua_insert(L, idx);
+		for (int i = 1; i <= n; i++) {
+			lua_pushvalue(L, idx + i);
+			lua_rawseti(L, idx, i);
+		}
+		lua_settop(L, idx);
+	}
+}
+
+static inline int
+tunpack(lua_State *L, int idx)
+{
+	int len;
+
+	idx = lua_absindex(L, idx);
+	len = luaL_len(L, idx);
+	for (int i = 1; i <= len; i++) {
+		lua_rawgeti(L, idx, i);
+	}
+	lua_remove(L, idx);
+	return (len);
+}
