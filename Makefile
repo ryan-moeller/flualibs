@@ -3,6 +3,7 @@ SRCTOP?= /usr/src
 .export SRCTOP
 
 SUBDIR= \
+	acl \
 	b64 \
 	clock \
 	cpuset \
