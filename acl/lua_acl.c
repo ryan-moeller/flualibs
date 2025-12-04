@@ -25,7 +25,7 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/types.h>
+#include <sys/param.h>
 #include <sys/acl.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -116,6 +116,7 @@ l_acl_delete_link(lua_State *L)
 	return (1);
 }
 
+#if __FreeBSD_version > 1400032
 static int
 l_acl_extended_file(lua_State *L)
 {
@@ -145,7 +146,9 @@ l_acl_extended_link(lua_State *L)
 	lua_pushboolean(L, extended);
 	return (1);
 }
+#endif
 
+#if __FreeBSD_version > 1400032
 static int
 l_acl_from_mode(lua_State *L)
 {
@@ -159,6 +162,7 @@ l_acl_from_mode(lua_State *L)
 	}
 	return (new(L, acl, ACL_METATABLE));
 }
+#endif
 
 static int
 l_acl_from_text(lua_State *L)
@@ -256,6 +260,7 @@ l_acl_new(lua_State *L)
 	return (new(L, acl, ACL_METATABLE));
 }
 
+#if __FreeBSD_version > 1400032
 static int
 l_acl_cmp(lua_State *L)
 {
@@ -271,6 +276,7 @@ l_acl_cmp(lua_State *L)
 	lua_pushboolean(L, cmp == 0);
 	return (1);
 }
+#endif
 
 static int
 l_acl_gc(lua_State *L)
@@ -363,6 +369,7 @@ l_acl_dup(lua_State *L)
 	return (new(L, acl2, ACL_METATABLE));
 }
 
+#if __FreeBSD_version > 1400032
 static int
 l_acl_equiv_mode(lua_State *L)
 {
@@ -386,6 +393,7 @@ l_acl_equiv_mode(lua_State *L)
 		return (luaL_error(L, "undocumented acl_equiv_mode_np result"));
 	}
 }
+#endif
 
 static int
 l_acl_get_brand(lua_State *L)
@@ -940,9 +948,11 @@ static const struct luaL_Reg l_acl_funcs[] = {
 	{"delete_file", l_acl_delete_file},
 	{"delete_link", l_acl_delete_link},
 	/* acl_delete_def_file and acl_delete_def_link_np are redundant */
+#if __FreeBSD_version > 1400032
 	{"extended_file", l_acl_extended_file},
 	{"extended_link", l_acl_extended_link},
 	{"from_mode", l_acl_from_mode},
+#endif
 	{"from_text", l_acl_from_text},
 	{"get", l_acl_get},
 	{"get_fd", l_acl_get_fd},
@@ -953,13 +963,17 @@ static const struct luaL_Reg l_acl_funcs[] = {
 };
 
 static const struct luaL_Reg l_acl_meta[] = {
+#if __FreeBSD_version > 1400032
 	{"__eq", l_acl_cmp},
+#endif
 	{"__gc", l_acl_gc},
 	{"calc_mask", l_acl_calc_mask},
 	{"create_entry", l_acl_create_entry},
 	{"delete_entry", l_acl_delete_entry},
 	{"dup", l_acl_dup},
+#if __FreeBSD_version > 1400032
 	{"equiv_mode", l_acl_equiv_mode},
+#endif
 	{"get_brand", l_acl_get_brand},
 	{"get_entry", l_acl_get_entry},
 	{"is_trivial", l_acl_is_trivial},
