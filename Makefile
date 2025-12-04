@@ -10,7 +10,6 @@ SUBDIR= \
 	fileno \
 	kldstat \
 	kqueue \
-	libdpv \
 	libfetch \
 	libifconfig \
 	libmagic \
@@ -26,6 +25,9 @@ SUBDIR+=libbsddialog
 .endif
 .if exists(/usr/include/libnvpair.h)
 SUBDIR+=libbe
+.endif
+.if exists(/usr/include/dpv.h)
+SUBDIR+=libdpv
 .endif
 
 MANDOC_CMD=	sh ../manlint.sh
