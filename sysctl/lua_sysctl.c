@@ -211,7 +211,7 @@ static int
 l_mib_value(lua_State *L)
 {
 	struct mib *mib;
-	void *p, *newp;
+	void *p;
 	size_t size;
 	int argc, ctltype, error;
 
@@ -226,35 +226,23 @@ l_mib_value(lua_State *L)
 			lua_pushnil(L);
 			return (1);
 		}
+		p = NULL;
 		size = 0;
-		error = sysctl(mib->oid, mib->oidlen, NULL, &size, NULL, 0);
-		if (error != 0) {
-			return (fail(L, errno));
-		}
-		size = round_page(size * 2); /* in case it grows */
-		p = malloc(size);
-		if (p == NULL) {
-			return (fatal(L, "malloc", errno));
-		}
 		for (;;) {
-			error =
-			    sysctl(mib->oid, mib->oidlen, p, &size, NULL, 0);
-			if (error == 0) {
+			if (sysctl(mib->oid, mib->oidlen, p, &size, NULL, 0)
+			    == -1) {
+				if ((error = errno) != ENOMEM) {
+					free(p);
+					return (fail(L, error));
+				}
+			} else if (p != NULL) {
 				break;
 			}
-			if (error != ENOMEM) {
-				error = errno;
-				free(p);
-				return (fail(L, error));
+			free(p);
+			size *= 2; /* in case it grows */
+			if ((p = malloc(size)) == NULL) {
+				return (fatal(L, "malloc", ENOMEM));
 			}
-			size = round_page(size * 2); /* in case it grows more */
-			newp = realloc(p, size);
-			if (newp == NULL) {
-				error = errno;
-				free(p);
-				return (fatal(L, "realloc", error));
-			}
-			p = newp;
 		}
 		switch (ctltype) {
 		case CTLTYPE_INT:
