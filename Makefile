@@ -7,6 +7,7 @@ SUBDIR= \
 	b64 \
 	clock \
 	cpuset \
+	extattr \
 	fileno \
 	kldstat \
 	kqueue \
