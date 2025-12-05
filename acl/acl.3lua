@@ -24,7 +24,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.Dd December 4, 2025
+.Dd December 5, 2025
 .Dt ACL 3lua
 .Os
 .Sh NAME
@@ -197,7 +197,7 @@ is an optional ACL type with the default value
 .Dv ACL.TYPE_ACCESS .
 If
 .Fa path
-is the path to a symlink, the link is followed.
+is a path to a symlink, the link is followed.
 .It Dv ok, errmsg, errcode = ACL.delete_link(path[ , type ] )
 Wraps
 .Xr acl_delete 3 .
@@ -210,7 +210,7 @@ is an optional ACL type with the default value
 .Dv ACL.TYPE_ACCESS .
 If
 .Fa path
-is the path to a symlink, the link is not followed.
+is a path to a symlink, the link is not followed.
 .It Dv extended, errmsg, errcode = ACL.extended_file(path )
 Wraps
 .Xr acl_extended_file_np 3 .
@@ -258,7 +258,7 @@ is an optional ACL type with the default value
 .Dv ACL.TYPE_ACCESS .
 If
 .Fa path
-is the path to a symlink, the link is followed.
+is a path to a symlink, the link is followed.
 .It Dv acl, errmsg, errcode = ACL.get_link(path[ , type ] )
 Wraps
 .Xr acl_get 3 .
@@ -271,7 +271,7 @@ is an optional ACL type with the default value
 .Dv ACL.TYPE_ACCESS .
 If
 .Fa path
-is the path to a symlink, the link is not followed.
+is a path to a symlink, the link is not followed.
 .It Dv acl, errmsg, errcode = ACL.new([count ] )
 Wraps
 .Xr acl_init 3 .
@@ -343,7 +343,7 @@ is an optional ACL type with the default value
 .Dv ACL.TYPE_ACCESS .
 If
 .Fa path
-is the path to a symlink, the link is followed.
+is a path to a symlink, the link is followed.
 .It Dv ok, errmsg, errcode = acl:set_link(path[ , type ] )
 Wraps
 .Xr acl_set 3 .
@@ -356,7 +356,7 @@ is an optional ACL type with the default value
 .Dv ACL.TYPE_ACCESS .
 If
 .Fa path
-is the path to a symlink, the link is not followed.
+is a path to a symlink, the link is not followed.
 .It Dv acl1, errmsg, errcode = acl:strip(recalculate_mask )
 Wraps
 .Xr acl_strip_np 3 .
@@ -398,7 +398,7 @@ is an optional ACL type with the default value
 .Dv ACL.TYPE_ACCESS .
 If
 .Fa path
-is the path to a symlink, the link is followed.
+is a path to a symlink, the link is followed.
 .It Dv valid, errmsg, errcode = acl:valid_link(path[ , type ] )
 Wraps
 .Xr acl_valid 3 .
@@ -411,7 +411,7 @@ is an optional ACL type with the default value
 .Dv ACL.TYPE_ACCESS .
 If
 .Fa path
-is the path to a symlink, the link is not followed.
+is a path to a symlink, the link is not followed.
 .It Dv ok, errmsg, errcode = entry:copy(src_entry )
 Wraps
 .Xr acl_copy_entry 3 .
