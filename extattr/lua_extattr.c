@@ -120,7 +120,7 @@ l_extattr_get(lua_State *L)
 	const char *attrname;
 	void *data;
 	ssize_t datalen, getlen;
-	int attrnamespace, fd;
+	int attrnamespace, fd, error;
 
 	s = luaL_checkudata(L, 1, LUA_FILEHANDLE);
 	attrnamespace = luaL_checkinteger(L, 2);
@@ -134,8 +134,9 @@ l_extattr_get(lua_State *L)
 	for (;;) {
 		if ((getlen = extattr_get_fd(fd, attrnamespace, attrname, data,
 		    datalen)) == -1) {
+			error = errno;
 			free(data);
-			return (fail(L, errno));
+			return (fail(L, error));
 		}
 		if (getlen <= datalen) {
 			break;
@@ -157,7 +158,7 @@ l_extattr_get_fd(lua_State *L)
 	const char *attrname;
 	void *data;
 	ssize_t datalen, getlen;
-	int fd, attrnamespace;
+	int fd, attrnamespace, error;
 
 	fd = luaL_checkinteger(L, 1);
 	attrnamespace = luaL_checkinteger(L, 2);
@@ -168,8 +169,9 @@ l_extattr_get_fd(lua_State *L)
 	for (;;) {
 		if ((getlen = extattr_get_fd(fd, attrnamespace, attrname, data,
 		    datalen)) == -1) {
+			error = errno;
 			free(data);
-			return (fail(L, errno));
+			return (fail(L, error));
 		}
 		if (getlen <= datalen) {
 			break;
@@ -191,7 +193,7 @@ l_extattr_get_file(lua_State *L)
 	const char *path, *attrname;
 	void *data;
 	ssize_t datalen, getlen;
-	int attrnamespace, fd;
+	int attrnamespace, fd, error;
 
 	path = luaL_checkstring(L, 1);
 	attrnamespace = luaL_checkinteger(L, 2);
@@ -202,8 +204,9 @@ l_extattr_get_file(lua_State *L)
 	for (;;) {
 		if ((getlen = extattr_get_file(path, attrnamespace, attrname,
 		    data, datalen)) == -1) {
+			error = errno;
 			free(data);
-			return (fail(L, errno));
+			return (fail(L, error));
 		}
 		if (getlen <= datalen) {
 			break;
@@ -225,7 +228,7 @@ l_extattr_get_link(lua_State *L)
 	const char *path, *attrname;
 	void *data;
 	ssize_t datalen, getlen;
-	int attrnamespace, fd;
+	int attrnamespace, fd, error;
 
 	path = luaL_checkstring(L, 1);
 	attrnamespace = luaL_checkinteger(L, 2);
@@ -236,8 +239,9 @@ l_extattr_get_link(lua_State *L)
 	for (;;) {
 		if ((getlen = extattr_get_link(path, attrnamespace, attrname,
 		    data, datalen)) == -1) {
+			error = errno;
 			free(data);
-			return (fail(L, errno));
+			return (fail(L, error));
 		}
 		if (getlen <= datalen) {
 			break;
@@ -272,7 +276,7 @@ l_extattr_list(lua_State *L)
 	luaL_Stream *s;
 	void *data;
 	ssize_t datalen, listlen;
-	int attrnamespace, fd;
+	int attrnamespace, fd, error;
 
 	s = luaL_checkudata(L, 1, LUA_FILEHANDLE);
 	attrnamespace = luaL_checkinteger(L, 2);
@@ -285,8 +289,9 @@ l_extattr_list(lua_State *L)
 	for (;;) {
 		if ((listlen = extattr_list_fd(fd, attrnamespace, data,
 		    datalen)) == -1) {
+			error = errno;
 			free(data);
-			return (fail(L, errno));
+			return (fail(L, error));
 		}
 		if (listlen <= datalen) {
 			break;
@@ -307,7 +312,7 @@ l_extattr_list_fd(lua_State *L)
 {
 	void *data;
 	ssize_t datalen, listlen;
-	int fd, attrnamespace;
+	int fd, attrnamespace, error;
 
 	fd = luaL_checkinteger(L, 1);
 	attrnamespace = luaL_checkinteger(L, 2);
@@ -317,8 +322,9 @@ l_extattr_list_fd(lua_State *L)
 	for (;;) {
 		if ((listlen = extattr_list_fd(fd, attrnamespace, data,
 		    datalen)) == -1) {
+			error = errno;
 			free(data);
-			return (fail(L, errno));
+			return (fail(L, error));
 		}
 		if (listlen <= datalen) {
 			break;
@@ -340,7 +346,7 @@ l_extattr_list_file(lua_State *L)
 	const char *path;
 	void *data;
 	ssize_t datalen, listlen;
-	int attrnamespace;
+	int attrnamespace, error;
 
 	path = luaL_checkstring(L, 1);
 	attrnamespace = luaL_checkinteger(L, 2);
@@ -350,8 +356,9 @@ l_extattr_list_file(lua_State *L)
 	for (;;) {
 		if ((listlen = extattr_list_file(path, attrnamespace, data,
 		    datalen)) == -1) {
+			error = errno;
 			free(data);
-			return (fail(L, errno));
+			return (fail(L, error));
 		}
 		if (listlen <= datalen) {
 			break;
@@ -373,7 +380,7 @@ l_extattr_list_link(lua_State *L)
 	const char *path;
 	void *data;
 	ssize_t datalen, listlen;
-	int attrnamespace;
+	int attrnamespace, error;
 
 	path = luaL_checkstring(L, 1);
 	attrnamespace = luaL_checkinteger(L, 2);
@@ -383,8 +390,9 @@ l_extattr_list_link(lua_State *L)
 	for (;;) {
 		if ((listlen = extattr_list_link(path, attrnamespace, data,
 		    datalen)) == -1) {
+			error = errno;
 			free(data);
-			return (fail(L, errno));
+			return (fail(L, error));
 		}
 		if (listlen <= datalen) {
 			break;
