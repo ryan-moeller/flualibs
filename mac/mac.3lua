@@ -1,0 +1,225 @@
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.Dd December 5, 2025
+.Dt MAC 3lua
+.Os
+.Sh NAME
+.Nm mac
+.Nd Lua bindings for the
+.Xr mac 3
+Mandatory Access Control
+.Pq MAC
+security API in libc
+.Sh SYNOPSIS
+.Bd -literal
+mac = require('mac')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv present, errmsg, errcode = mac.is_present([policyname ] )
+.It Dv arg, errmsg, errcode = mac.syscall(policyname , call[ , arg ] )
+.It Dv label, errmsg, errcode = mac.from_text(text )
+.It Dv label, errmsg, errcode = mac.prepare(elements )
+.It Dv label, errmsg, errcode = mac.prepare_file_label( )
+.It Dv label, errmsg, errcode = mac.prepare_ifnet_label( )
+.It Dv label, errmsg, errcode = mac.prepare_process_label( )
+.It Dv label, errmsg, errcode = mac.prepare_type(type )
+.It Dv _, errmsg, errcode = label:execve(fname , args , env )
+.It Dv ok, errmsg, errcode = label:get(file )
+.It Dv ok, errmsg, errcode = label:get_fd(fd )
+.It Dv ok, errmsg, errcode = label:get_file(path )
+.It Dv ok, errmsg, errcode = label:get_link(path )
+.It Dv ok, errmsg, errcode = label:get_peer(fd )
+.It Dv ok, errmsg, errcode = label:get_pid(pid )
+.It Dv ok, errmsg, errcode = label:get_proc( )
+.It Dv ok, errmsg, errcode = label:set(file )
+.It Dv ok, errmsg, errcode = label:set_fd(fd )
+.It Dv ok, errmsg, errcode = label:set_file(path )
+.It Dv ok, errmsg, errcode = label:set_link(path )
+.It Dv ok, errmsg, errcode = label:set_proc( )
+.It Dv text, errmsg, errcode = label:to_text( )
+.It Dv mac.MAX_POLICY_NAME
+.It Dv mac.MAX_LABEL_ELEMENT_NAME
+.It Dv mac.MAX_LABEL_ELEMENT_DATA
+.It Dv mac.MAX_LABEL_BUF_LEN
+.El
+.Sh DESCRIPTION
+The
+.Nm mac
+module provides bindings for the libc
+.Xr mac 3
+Mandatory Access Control
+.Pq MAC
+security API.
+.Bl -tag -width XXXX
+.It Dv present, errmsg, errcode = mac.is_present([policyname ] )
+Wraps
+.Xr mac_is_present 3 .
+Returns a
+.Vt boolean .
+.It Dv arg, errmsg, errcode = mac.syscall(policyname , call[ , arg ] )
+Wraps
+.Fn mac_syscall .
+.Fa arg
+is accepted and returned as a
+.Vt string .
+.It Dv label, errmsg, errcode = mac.from_text(text )
+Wraps
+.Xr mac_from_text 3 .
+.It Dv label, errmsg, errcode = mac.prepare(elements )
+Wraps
+.Xr mac_prepare 3 .
+.It Dv label, errmsg, errcode = mac.prepare_file_label( )
+Wraps
+.Xr mac_prepare_file_label 3 .
+.It Dv label, errmsg, errcode = mac.prepare_ifnet_label( )
+Wraps
+.Xr mac_prepare_ifnet_label 3 .
+.It Dv label, errmsg, errcode = mac.prepare_process_label( )
+Wraps
+.Xr mac_prepare_process_label 3 .
+.It Dv label, errmsg, errcode = mac.prepare_type(type )
+Wraps
+.Xr mac_prepare_type 3 .
+.It Dv _, errmsg, errcode = label:execve(fname , args , env )
+Wraps
+.Fn mac_execve .
+.It Dv ok, errmsg, errcode = label:get(file )
+Wraps
+.Xr mac_get_fd 3 .
+.Fa file
+is a Lua
+.Vt file
+object.
+.It Dv ok, errmsg, errcode = label:get_fd(fd )
+Wraps
+.Xr mac_get_fd 3 .
+.Fa fd
+is an
+.Vt integer
+file descriptor number.
+.It Dv ok, errmsg, errcode = label:get_file(path )
+Wraps
+.Xr mac_get_file 3 .
+.Fa path
+is a
+.Vt string
+file path.
+If
+.Fa path
+is a path to a symlink, the link is followed.
+.It Dv ok, errmsg, errcode = label:get_link(path )
+Wraps
+.Xr mac_get_link 3 .
+.Fa path
+is a
+.Vt string
+file path.
+If
+.Fa path
+is a path to a symlink, the link is not followed.
+.It Dv ok, errmsg, errcode = label:get_peer(fd )
+Wraps
+.Xr mac_get_peer 3 .
+.Fa fd
+is an
+.Vt integer
+socket file descriptor number.
+.It Dv ok, errmsg, errcode = label:get_pid(pid )
+Wraps
+.Xr mac_get_pid 3 .
+.Fa pid
+is an
+.Vt integer
+process identifier.
+.It Dv ok, errmsg, errcode = label:get_proc( )
+Wraps
+.Xr mac_get_proc 3 .
+.It Dv ok, errmsg, errcode = label:set(file )
+Wraps
+.Xr mac_set_fd 3 .
+.Fa file
+is a Lua
+.Vt file
+object.
+.It Dv ok, errmsg, errcode = label:set_fd(fd )
+Wraps
+.Xr mac_set_fd 3 .
+.Fa fd
+is an
+.Vt integer
+file descriptor number.
+.It Dv ok, errmsg, errcode = label:set_file(path )
+Wraps
+.Xr mac_set_file 3 .
+.Fa path
+is a
+.Vt string
+file path.
+If
+.Fa path
+is a path to a symlink, the link is followed.
+.It Dv ok, errmsg, errcode = label:set_link(path )
+Wraps
+.Xr mac_set_link 3 .
+.Fa path
+is a
+.Vt string
+file path.
+If
+.Fa path
+is a path to a symlink, the link is not followed.
+.It Dv ok, errmsg, errcode = label:set_proc( )
+Wraps
+.Xr mac_set_proc 3 .
+.It Dv text, errmsg, errcode = label:to_text( )
+Wraps
+.Xr mac_to_text 3 .
+.El
+.Sh EXAMPLES
+Set and show a MAC label for the current process:
+.Bd -literal -offset indent
+-- # kldload mac_partition
+local mac = require('mac')
+
+mac.prepare('partition/1'):set_proc()
+
+local label = mac.prepare_process_label()
+label:get_proc()
+print(label:to_text())
+.Ed
+.Sh SEE ALSO
+.Xr mac 3 ,
+.Xr mac 4 ,
+.Xr maclabel 7 ,
+.Xr getfmac 8 ,
+.Xr getpmac 8 ,
+.Xr setfmac 8 ,
+.Xr setpmac 8 ,
+.Xr mac 9
+.Sh AUTHORS
+.An Ryan Moeller

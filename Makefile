@@ -16,6 +16,7 @@ SUBDIR= \
 	libmagic \
 	libmd \
 	libpthread \
+	mac \
 	mq \
 	sendfile \
 	sysctl \
