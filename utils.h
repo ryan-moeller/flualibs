@@ -61,15 +61,44 @@ enum wrapperuv {
 	REF = 2,
 };
 
+static inline void
+setcookie(lua_State *L, int idx, void *cookie)
+{
+	idx = lua_absindex(L, idx);
+	lua_pushlightuserdata(L, cookie);
+	lua_setiuservalue(L, idx, COOKIE);
+}
+
+static inline void *
+getcookie(lua_State *L, int idx)
+{
+	void *cookie;
+
+	lua_getiuservalue(L, idx, COOKIE);
+	return (lua_touserdata(L, -1));
+}
+
+static inline void
+setref(lua_State *L, int idx, int ref)
+{
+	idx = lua_absindex(L, idx);
+	lua_pushvalue(L, ref);
+	lua_setiuservalue(L, idx, REF);
+}
+
+static inline int
+getref(lua_State *L, int idx)
+{
+	return (lua_getiuservalue(L, idx, REF));
+}
+
 static inline int
 new(lua_State *L, void *cookie, const char *metatable)
 {
 	lua_newuserdatauv(L, 0, 1);
 	luaL_setmetatable(L, metatable);
 
-	lua_pushlightuserdata(L, cookie);
-	lua_setiuservalue(L, -2, COOKIE);
-
+	setcookie(L, -1, cookie);
 	return (1);
 }
 
@@ -77,15 +106,12 @@ new(lua_State *L, void *cookie, const char *metatable)
 static inline int
 newref(lua_State *L, int idx, void *cookie, const char *metatable)
 {
+	idx = lua_absindex(L, idx);
 	lua_newuserdatauv(L, 0, 2);
 	luaL_setmetatable(L, metatable);
 
-	lua_pushlightuserdata(L, cookie);
-	lua_setiuservalue(L, -2, COOKIE);
-
-	lua_pushvalue(L, idx);
-	lua_setiuservalue(L, -2, REF);
-
+	setcookie(L, -1, cookie);
+	setref(L, -1, idx);
 	return (1);
 }
 
@@ -98,14 +124,21 @@ checklightuserdata(lua_State *L, int idx)
 }
 
 static inline void *
-checkcookie(lua_State *L, int idx, const char *metatable)
+checkcookienull(lua_State *L, int idx, const char *metatable)
 {
 	void *cookie;
 
 	luaL_checkudata(L, idx, metatable);
 
-	lua_getiuservalue(L, idx, COOKIE);
-	cookie = lua_touserdata(L, -1);
+	return (getcookie(L, idx));
+}
+
+static inline void *
+checkcookie(lua_State *L, int idx, const char *metatable)
+{
+	void *cookie;
+
+	cookie = checkcookienull(L, idx, metatable);
 	luaL_argcheck(L, cookie != NULL, idx, "cookie expired");
 	return (cookie);
 }
