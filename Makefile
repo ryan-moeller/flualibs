@@ -15,6 +15,7 @@ SUBDIR= \
 	libifconfig \
 	libmagic \
 	libmd \
+	libnv \
 	libpthread \
 	mac \
 	mq \

@@ -1,0 +1,813 @@
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.Dd December 8, 2025
+.Dt NV 3lua
+.Os
+.Sh NAME
+.Nm nv
+.Nd Lua bindings for
+.Xr libnv 9
+.Sh SYNOPSIS
+.Bd -literal
+nv = require('nv')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv nvl = nv.create([flags ] )
+.It Dv nvl, errmsg, errcode = nv.recv(socket[ , flags ] )
+.It Dv nvl, errmsg, errcode = nv.unpack(buffer[ , flags ] )
+.It Dv errcode = nvl:error( )
+.It Dv nvl:set_error(errcode )
+.It Dv empty = nvl:empty( )
+.It Dv flags = nvl:flags( )
+.It Dv inarray = nvl:in_array( )
+.It Dv clone = nvl:clone( )
+.It Dv nvl:dump(fd )
+.It Dv nvl:fdump(file )
+.It Dv size = nvl:size( )
+.It Dv packed, errmsg, errcode = nvl:pack( )
+.It Dv ok, errmsg, errcode = nvl:send(socket )
+.It Dv rcvd, errmsg, errcode = nvl:xfer(socket[ , flags ] )
+.It Dv exists = nvl:exists(name )
+.It Dv exists = nvl:exists_type(name , type )
+.It Dv exists = nvl:exists_null(name )
+.It Dv exists = nvl:exists_bool(name )
+.It Dv exists = nvl:exists_number(name )
+.It Dv exists = nvl:exists_string(name )
+.It Dv exists = nvl:exists_nvlist(name )
+.It Dv exists = nvl:exists_descriptor(name )
+.It Dv exists = nvl:exists_binary(name )
+.It Dv exists = nvl:exists_bool_array(name )
+.It Dv exists = nvl:exists_number_array(name )
+.It Dv exists = nvl:exists_string_array(name )
+.It Dv exists = nvl:exists_nvlist_array(name )
+.It Dv exists = nvl:exists_descriptor_array(name )
+.It Dv nvl:add_null(name )
+.It Dv nvl:add_bool(name , value )
+.It Dv nvl:add_number(name , value )
+.It Dv nvl:add_string(name , value )
+.It Dv nvl:add_nvlist(name , value )
+.It Dv nvl:add_descriptor(name , value )
+.It Dv nvl:add_binary(name , value )
+.It Dv nvl:add_bool_array(name , value )
+.It Dv nvl:add_number_array(name , value )
+.It Dv nvl:add_string_array(name , value )
+.It Dv nvl:add_nvlist_array(name , value )
+.It Dv nvl:add_descriptor_array(name , value )
+.It Dv nvl:move_nvlist(name , value )
+.It Dv nvl:move_descriptor(name , value )
+.It Dv nvl:move_nvlist_array(name , value )
+.It Dv nvl:move_descriptor_array(name , value )
+.It Dv value = nvl:get_bool(name[ , default ] )
+.It Dv value = nvl:get_number(name[ , default ] )
+.It Dv value = nvl:get_string(name[ , default ] )
+.It Dv value = nvl:get_nvlist(name[ , default ] )
+.It Dv value = nvl:get_descriptor(name[ , default ] )
+.It Dv value = nvl:get_binary(name[ , default ] )
+.It Dv value = nvl:get_bool_array(name )
+.It Dv value = nvl:get_number_array(name )
+.It Dv value = nvl:get_string_array(name )
+.It Dv value = nvl:get_nvlist_array(name )
+.It Dv value = nvl:get_descriptor_array(name )
+.It Dv value = nvl:take_bool(name[ , default ] )
+.It Dv value = nvl:take_number(name[ , default ] )
+.It Dv value = nvl:take_string(name[ , default ] )
+.It Dv value = nvl:take_nvlist(name[ , default ] )
+.It Dv value = nvl:take_descriptor(name[ , default ] )
+.It Dv value = nvl:take_binary(name[ , default ] )
+.It Dv value = nvl:take_bool_array(name )
+.It Dv value = nvl:take_number_array(name )
+.It Dv value = nvl:take_string_array(name )
+.It Dv value = nvl:take_nvlist_array(name )
+.It Dv value = nvl:take_descriptor_array(name )
+.It Dv nvl:append_bool_array(name , value )
+.It Dv nvl:append_number_array(name , value )
+.It Dv nvl:append_string_array(name , value )
+.It Dv nvl:append_nvlist_array(name , value )
+.It Dv nvl:append_descriptor_array(name , value )
+.It Dv nvl:free(name )
+.It Dv nvl:free_type(name , type )
+.It Dv nvl:free_null(name )
+.It Dv nvl:free_bool(name )
+.It Dv nvl:free_number(name )
+.It Dv nvl:free_string(name )
+.It Dv nvl:free_nvlist(name )
+.It Dv nvl:free_descriptor(name )
+.It Dv nvl:free_binary(name )
+.It Dv nvl:free_bool_array(name )
+.It Dv nvl:free_number_array(name )
+.It Dv nvl:free_string_array(name )
+.It Dv nvl:free_nvlist_array(name )
+.It Dv nvl:free_descriptor_array(name )
+.It Dv name, type, cookie = nvl:next([cookie ] )
+.It Dv parentref, cookie = nvl:get_parent( )
+.It Dv nextref = nvl:get_array_next( )
+.It Dv parentref, cookie = nvl:get_pararr( )
+.It Dv errcode = ref:error( )
+.It Dv empty = ref:empty( )
+.It Dv flags = ref:flags( )
+.It Dv inarray = ref:in_array( )
+.It Dv clone = ref:clone( )
+.It Dv ref:dump(fd )
+.It Dv ref:fdump(file )
+.It Dv size = ref:size( )
+.It Dv packed, errmsg, errcode = ref:pack( )
+.It Dv ok, errmsg, errcode = ref:send(socket )
+.It Dv exists = ref:exists(name )
+.It Dv exists = ref:exists_type(name , type )
+.It Dv exists = ref:exists_null(name )
+.It Dv exists = ref:exists_bool(name )
+.It Dv exists = ref:exists_number(name )
+.It Dv exists = ref:exists_string(name )
+.It Dv exists = ref:exists_nvlist(name )
+.It Dv exists = ref:exists_descriptor(name )
+.It Dv exists = ref:exists_binary(name )
+.It Dv exists = ref:exists_bool_array(name )
+.It Dv exists = ref:exists_number_array(name )
+.It Dv exists = ref:exists_string_array(name )
+.It Dv exists = ref:exists_nvlist_array(name )
+.It Dv exists = ref:exists_descriptor_array(name )
+.It Dv value = ref:get_bool(name[ , default ] )
+.It Dv value = ref:get_number(name[ , default ] )
+.It Dv value = ref:get_string(name[ , default ] )
+.It Dv value = ref:get_nvlist(name[ , default ] )
+.It Dv value = ref:get_descriptor(name[ , default ] )
+.It Dv value = ref:get_binary(name[ , default ] )
+.It Dv value = ref:get_bool_array(name[ , default ] )
+.It Dv value = ref:get_number_array(name )
+.It Dv value = ref:get_string_array(name )
+.It Dv value = ref:get_nvlist_array(name )
+.It Dv value = ref:get_descriptor_array(name )
+.It Dv name, type, cookie = ref:next([cookie ] )
+.It Dv parentref, cookie = ref:get_parent( )
+.It Dv nextref = ref:get_array_next( )
+.It Dv parentref, cookie = ref:get_pararr( )
+.It Dv name = cookie:name( )
+.It Dv type = cookie:type( )
+.It Dv value = cookie:get_bool( )
+.It Dv value = cookie:get_number( )
+.It Dv value = cookie:get_string( )
+.It Dv value = cookie:get_nvlist( )
+.It Dv value = cookie:get_descriptor( )
+.It Dv value = cookie:get_binary( )
+.It Dv value = cookie:get_bool_array( )
+.It Dv value = cookie:get_number_array( )
+.It Dv value = cookie:get_string_array( )
+.It Dv value = cookie:get_nvlist_array( )
+.It Dv value = cookie:get_descriptor_array( )
+.It Dv value = cookie:take_bool( )
+.It Dv value = cookie:take_number( )
+.It Dv value = cookie:take_string( )
+.It Dv value = cookie:take_nvlist( )
+.It Dv value = cookie:take_descriptor( )
+.It Dv value = cookie:take_binary( )
+.It Dv value = cookie:take_bool_array( )
+.It Dv value = cookie:take_number_array( )
+.It Dv value = cookie:take_string_array( )
+.It Dv value = cookie:take_nvlist_array( )
+.It Dv value = cookie:take_descriptor_array( )
+.It Dv cookie:free_bool( )
+.It Dv cookie:free_number( )
+.It Dv cookie:free_string( )
+.It Dv cookie:free_nvlist( )
+.It Dv cookie:free_descriptor( )
+.It Dv cookie:free_binary( )
+.It Dv cookie:free_bool_array( )
+.It Dv cookie:free_number_array( )
+.It Dv cookie:free_string_array( )
+.It Dv cookie:free_nvlist_array( )
+.It Dv cookie:free_descriptor_array( )
+.El
+.Sh DESCRIPTION
+The
+.Nm nv
+module provides bindings for name/value pairs library
+.Pq libbe
+function calls.
+.Pp
+Functions in this module guard from the minefield of aborts in libnv by
+performing extra checks to raise errors early.
+.Bl -tag -width XXXX
+.It Dv nvl = nv.create([flags ] )
+Wraps
+.Xr nvlist_create 9 .
+.It Dv nvl, errmsg, errcode = nv.recv(socket[ , flags ] )
+Wraps
+.Xr nvlist_recv 9 .
+.It Dv nvl, errmsg, errcode = nv.unpack(buffer[ , flags ] )
+Wraps
+.Xr nvlist_unpack 9 .
+.It Dv errcode = nvl:error( )
+Wraps
+.Xr nvlist_error 9 .
+.It Dv nvl:set_error(errcode )
+Wraps
+.Xr nvlist_set_error 9 .
+.It Dv empty = nvl:empty( )
+Wraps
+.Xr nvlist_empty 9 .
+.It Dv flags = nvl:flags( )
+Wraps
+.Xr nvlist_flags 9 .
+.It Dv inarray = nvl:in_array( )
+Wraps
+.Xr nvlist_in_array 9 .
+.It Dv clone = nvl:clone( )
+Wraps
+.Xr nvlist_clone 9 .
+.It Dv nvl:dump(fd )
+Wraps
+.Xr nvlist_dump 9 .
+.It Dv nvl:fdump(file )
+Wraps
+.Xr nvlist_fdump 9 .
+.It Dv size = nvl:size( )
+Wraps
+.Xr nvlist_size 9 .
+.It Dv packed, errmsg, errcode = nvl:pack( )
+Wraps
+.Xr nvlist_pack 9 .
+.It Dv ok, errmsg, errcode = nvl:send(socket )
+Wraps
+.Xr nvlist_send 9 .
+.It Dv rcvd, errmsg, errcode = nvl:xfer(socket[ , flags ] )
+Wraps
+.Xr nvlist_xfer 9 .
+.It Dv exists = nvl:exists(name )
+Wraps
+.Xr nvlist_exists 9 .
+.It Dv exists = nvl:exists_type(name , type )
+Wraps
+.Xr nvlist_exists_type 9 .
+.It Dv exists = nvl:exists_null(name )
+Wraps
+.Xr nvlist_exists_null 9 .
+.It Dv exists = nvl:exists_bool(name )
+Wraps
+.Xr nvlist_exists_bool 9 .
+.It Dv exists = nvl:exists_number(name )
+Wraps
+.Xr nvlist_exists_number 9 .
+.It Dv exists = nvl:exists_string(name )
+Wraps
+.Xr nvlist_exists_string 9 .
+.It Dv exists = nvl:exists_nvlist(name )
+Wraps
+.Xr nvlist_exists_nvlist 9 .
+.It Dv exists = nvl:exists_descriptor(name )
+Wraps
+.Xr nvlist_exists_descriptor 9 .
+.It Dv exists = nvl:exists_binary(name )
+Wraps
+.Xr nvlist_exists_binary 9 .
+.It Dv exists = nvl:exists_bool_array(name )
+Wraps
+.Xr nvlist_exists_bool_array 9 .
+.It Dv exists = nvl:exists_number_array(name )
+Wraps
+.Xr nvlist_exists_number_array 9 .
+.It Dv exists = nvl:exists_string_array(name )
+Wraps
+.Fn nvlist_exists_string_array .
+.It Dv exists = nvl:exists_nvlist_array(name )
+Wraps
+.Xr nvlist_exists_nvlist_array 9 .
+.It Dv exists = nvl:exists_descriptor_array(name )
+Wraps
+.Xr nvlist_exists_descriptor_array 9 .
+.It Dv nvl:add_null(name )
+Wraps
+.Xr nvlist_add_null 9 .
+.It Dv nvl:add_bool(name , value )
+Wraps
+.Xr nvlist_add_bool 9 .
+.It Dv nvl:add_number(name , value )
+Wraps
+.Xr nvlist_add_number 9 .
+.It Dv nvl:add_string(name , value )
+Wraps
+.Xr nvlist_add_string 9 .
+.It Dv nvl:add_nvlist(name , value )
+Wraps
+.Xr nvlist_add_nvlist 9 .
+.It Dv nvl:add_descriptor(name , value )
+Wraps
+.Xr nvlist_add_descriptor 9 .
+.It Dv nvl:add_binary(name , value )
+Wraps
+.Xr nvlist_add_binary 9 .
+.It Dv nvl:add_bool_array(name , value )
+Wraps
+.Xr nvlist_add_bool_array 9 .
+.It Dv nvl:add_number_array(name , value )
+Wraps
+.Xr nvlist_add_number_array 9 .
+.It Dv nvl:add_string_array(name , value )
+Wraps
+.Xr nvlist_add_string_array 9 .
+.It Dv nvl:add_nvlist_array(name , value )
+Wraps
+.Xr nvlist_add_nvlist_array 9 .
+.It Dv nvl:add_descriptor_array(name , value )
+Wraps
+.Xr nvlist_add_descriptor_array 9 .
+.It Dv nvl:move_nvlist(name , value )
+Wraps
+.Xr nvlist_move_nvlist 9 .
+.It Dv nvl:move_descriptor(name , value )
+Wraps
+.Xr nvlist_move_descriptor 9 .
+.It Dv nvl:move_nvlist_array(name , value )
+Wraps
+.Xr nvlist_move_nvlist_array 9 .
+.It Dv nvl:move_descriptor_array(name , value )
+Wraps
+.Xr nvlist_move_descriptor_array 9 .
+.It Dv value = nvl:get_bool(name[ , default ] )
+Wraps
+.Xr nvlist_get_bool 9 ,
+or
+.Xr dnvlist_get_bool 9
+if
+.Fa default
+is given.
+.It Dv value = nvl:get_number(name[ , default ] )
+Wraps
+.Xr nvlist_get_number 9 ,
+or
+.Xr dnvlist_get_number 9
+if
+.Fa default
+is given.
+.It Dv value = nvl:get_string(name[ , default ] )
+Wraps
+.Xr nvlist_get_string 9 ,
+or
+.Xr dnvlist_get_string 9
+if
+.Fa default
+is given.
+.It Dv value = nvl:get_nvlist(name[ , default ] )
+Wraps
+.Xr nvlist_get_nvlist 9 ,
+or
+.Xr dnvlist_get_nvlist 9
+if
+.Fa default
+is given.
+.It Dv value = nvl:get_descriptor(name[ , default ] )
+Wraps
+.Xr nvlist_get_descriptor 9 ,
+or
+.Xr dnvlist_get_descriptor 9
+if
+.Fa default
+is given.
+.It Dv value = nvl:get_binary(name[ , default ] )
+Wraps
+.Xr nvlist_get_binary 9 ,
+or
+.Xr dnvlist_get_binary 9
+if
+.Fa default
+is given.
+.It Dv value = nvl:get_bool_array(name )
+Wraps
+.Xr nvlist_get_bool_array 9 .
+.It Dv value = nvl:get_number_array(name )
+Wraps
+.Xr nvlist_get_number_array 9 .
+.It Dv value = nvl:get_string_array(name )
+Wraps
+.Xr nvlist_get_string_array 9 .
+.It Dv value = nvl:get_nvlist_array(name )
+Wraps
+.Xr nvlist_get_nvlist_array 9 .
+.It Dv value = nvl:get_descriptor_array(name )
+Wraps
+.Xr nvlist_get_descriptor_array 9 .
+.It Dv value = nvl:take_bool(name[ , default ] )
+Wraps
+.Xr nvlist_take_bool 9 ,
+or
+.Xr dnvlist_take_bool 9
+if
+.Fa default
+is given.
+.It Dv value = nvl:take_number(name[ , default ] )
+Wraps
+.Xr nvlist_take_number 9 ,
+or
+.Xr dnvlist_take_number 9
+if
+.Fa default
+is given.
+.It Dv value = nvl:take_string(name[ , default ] )
+Wraps
+.Xr nvlist_take_string 9 ,
+or
+.Xr dnvlist_take_string 9
+if
+.Fa default
+is given.
+.It Dv value = nvl:take_nvlist(name[ , default ] )
+Wraps
+.Xr nvlist_take_nvlist 9 ,
+or
+.Xr dnvlist_take_nvlist 9
+if
+.Fa default
+is given.
+.It Dv value = nvl:take_descriptor(name[ , default ] )
+Wraps
+.Xr nvlist_take_descriptor 9 ,
+or
+.Xr dnvlist_take_descriptor 9
+if
+.Fa default
+is given.
+.It Dv value = nvl:take_binary(name[ , default ] )
+Wraps
+.Xr nvlist_take_binary 9 ,
+or
+.Xr dnvlist_take_binary 9
+if
+.Fa default
+is given.
+.It Dv value = nvl:take_bool_array(name[ , default ] )
+Wraps
+.Xr nvlist_take_bool_array 9 .
+.It Dv value = nvl:take_number_array(name[ , default ] )
+Wraps
+.Xr nvlist_take_number_array 9 .
+.It Dv value = nvl:take_string_array(name[ , default ] )
+Wraps
+.Xr nvlist_take_string_array 9 .
+.It Dv value = nvl:take_nvlist_array(name[ , default ] )
+Wraps
+.Xr nvlist_take_nvlist_array 9 .
+.It Dv value = nvl:take_descriptor_array(name[ , default ] )
+Wraps
+.Xr nvlist_take_descriptor_array 9 .
+.It Dv nvl:append_bool_array(name , value )
+Wraps
+.Xr nvlist_append_bool_array 9 .
+.It Dv nvl:append_number_array(name , value )
+Wraps
+.Xr nvlist_append_number_array 9 .
+.It Dv nvl:append_string_array(name , value )
+Wraps
+.Xr nvlist_append_string_array 9 .
+.It Dv nvl:append_nvlist_array(name , value )
+Wraps
+.Xr nvlist_append_nvlist_array 9 .
+.It Dv nvl:append_descriptor_array(name , value )
+Wraps
+.Xr nvlist_append_descriptor_array 9 .
+.It Dv nvl:free(name )
+Wraps
+.Xr nvlist_free 9 .
+.It Dv nvl:free_type(name , type )
+Wraps
+.Xr nvlist_free_type 9 .
+.It Dv nvl:free_null(name )
+Wraps
+.Xr nvlist_free_null 9 .
+.It Dv nvl:free_bool(name )
+Wraps
+.Xr nvlist_free_bool 9 .
+.It Dv nvl:free_number(name )
+Wraps
+.Xr nvlist_free_number 9 .
+.It Dv nvl:free_string(name )
+Wraps
+.Xr nvlist_free_string 9 .
+.It Dv nvl:free_nvlist(name )
+Wraps
+.Xr nvlist_free_nvlist 9 .
+.It Dv nvl:free_descriptor(name )
+Wraps
+.Xr nvlist_free_descriptor 9 .
+.It Dv nvl:free_binary(name )
+Wraps
+.Xr nvlist_free_binary 9 .
+.It Dv nvl:free_bool_array(name )
+Wraps
+.Xr nvlist_free_bool_array 9 .
+.It Dv nvl:free_number_array(name )
+Wraps
+.Xr nvlist_free_number_array 9 .
+.It Dv nvl:free_string_array(name )
+Wraps
+.Xr nvlist_free_string_array 9 .
+.It Dv nvl:free_nvlist_array(name )
+Wraps
+.Xr nvlist_free_nvlist_array 9 .
+.It Dv nvl:free_descriptor_array(name )
+Wraps
+.Xr nvlist_free_descriptor_array 9 .
+.It Dv name, type, cookie = nvl:next([cookie ] )
+Wraps
+.Xr nvlist_next 9 .
+.It Dv parentref, cookie = nvl:get_parent( )
+Wraps
+.Xr nvlist_get_parent 9 .
+.It Dv nextref = nvl:get_array_next( )
+Wraps
+.Fn nvlist_get_array_next .
+.It Dv parentref, cookie = nvl:get_pararr( )
+Wraps
+.Fn nvlist_get_pararr .
+.It Dv errcode = ref:error( )
+Wraps
+.Xr nvlist_error 9 .
+.It Dv empty = ref:empty( )
+Wraps
+.Xr nvlist_empty 9 .
+.It Dv flags = ref:flags( )
+Wraps
+.Xr nvlist_flags 9 .
+.It Dv inarray = ref:in_array( )
+Wraps
+.Xr nvlist_in_array 9 .
+.It Dv clone = ref:clone( )
+Wraps
+.Xr nvlist_clone 9 .
+.It Dv ref:dump(fd )
+Wraps
+.Xr nvlist_dump 9 .
+.It Dv ref:fdump(file )
+Wraps
+.Xr nvlist_fdump 9 .
+.It Dv size = ref:size( )
+Wraps
+.Xr nvlist_size 9 .
+.It Dv packed, errmsg, errcode = ref:pack( )
+Wraps
+.Xr nvlist_pack 9 .
+.It Dv ok, errmsg, errcode = ref:send(socket )
+Wraps
+.Xr nvlist_send 9 .
+.It Dv exists = ref:exists(name )
+Wraps
+.Xr nvlist_exists 9 .
+.It Dv exists = ref:exists_type(name , type )
+Wraps
+.Xr nvlist_exists_type 9 .
+.It Dv exists = ref:exists_null(name )
+Wraps
+.Xr nvlist_exists_null 9 .
+.It Dv exists = ref:exists_bool(name )
+Wraps
+.Xr nvlist_exists_bool 9 .
+.It Dv exists = ref:exists_number(name )
+Wraps
+.Xr nvlist_exists_number 9 .
+.It Dv exists = ref:exists_string(name )
+Wraps
+.Xr nvlist_exists_string 9 .
+.It Dv exists = ref:exists_nvlist(name )
+Wraps
+.Xr nvlist_exists_nvlist 9 .
+.It Dv exists = ref:exists_descriptor(name )
+Wraps
+.Xr nvlist_exists_descriptor 9 .
+.It Dv exists = ref:exists_binary(name )
+Wraps
+.Xr nvlist_exists_binary 9 .
+.It Dv exists = ref:exists_bool_array(name )
+Wraps
+.Xr nvlist_exists_bool_array 9 .
+.It Dv exists = ref:exists_number_array(name )
+Wraps
+.Xr nvlist_exists_number_array 9 .
+.It Dv exists = ref:exists_string_array(name )
+Wraps
+.Fn nvlist_exists_string_array .
+.It Dv exists = ref:exists_nvlist_array(name )
+Wraps
+.Xr nvlist_exists_nvlist_array 9 .
+.It Dv exists = ref:exists_descriptor_array(name )
+Wraps
+.Xr nvlist_exists_descriptor_array 9 .
+.It Dv value = ref:get_bool(name[ , default ] )
+Wraps
+.Xr nvlist_get_bool 9 ,
+or
+.Xr dnvlist_get_bool 9
+if
+.Fa default
+is given.
+.It Dv value = ref:get_number(name[ , default ] )
+Wraps
+.Xr nvlist_get_number 9 ,
+or
+.Xr dnvlist_get_number 9
+if
+.Fa default
+is given.
+.It Dv value = ref:get_string(name[ , default ] )
+Wraps
+.Xr nvlist_get_string 9 ,
+or
+.Xr dnvlist_get_string 9
+if
+.Fa default
+is given.
+.It Dv value = ref:get_nvlist(name[ , default ] )
+Wraps
+.Xr nvlist_get_nvlist 9 ,
+or
+.Xr dnvlist_get_nvlist 9
+if
+.Fa default
+is given.
+.It Dv value = ref:get_descriptor(name[ , default ] )
+Wraps
+.Xr nvlist_get_descriptor 9 ,
+or
+.Xr dnvlist_get_descriptor 9
+if
+.Fa default
+is given.
+.It Dv value = ref:get_binary(name[ , default ] )
+Wraps
+.Xr nvlist_get_binary 9 ,
+or
+.Xr dnvlist_get_binary 9
+if
+.Fa default
+is given.
+.It Dv value = ref:get_bool_array(name[ , default ] )
+Wraps
+.Xr nvlist_get_bool_array 9 .
+.It Dv value = ref:get_number_array(name[ , default ] )
+Wraps
+.Xr nvlist_get_number_array 9 .
+.It Dv value = ref:get_string_array(name[ , default ] )
+Wraps
+.Xr nvlist_get_string_array 9 .
+.It Dv value = ref:get_nvlist_array(name[ , default ] )
+Wraps
+.Xr nvlist_get_nvlist_array 9 .
+.It Dv value = ref:get_descriptor_array(name[ , default ] )
+Wraps
+.Xr nvlist_get_descriptor_array 9 .
+.It Dv name, type, cookie = ref:next([cookie ] )
+Wraps
+.Xr nvlist_next 9 .
+.It Dv parentref, cookie = ref:get_parent( )
+Wraps
+.Xr nvlist_get_parent 9 .
+.It Dv nextref = ref:get_array_next( )
+Wraps
+.Fn nvlist_get_array_next .
+.It Dv parentref, cookie = ref:get_pararr( )
+Wraps
+.Fn nvlist_get_pararr .
+.It Dv name = cookie:name( )
+Wraps
+.Fn cnvlist_name .
+.It Dv type = cookie:type( )
+Wraps
+.Fn cnvlist_type .
+.It Dv value = cookie:get_bool( )
+Wraps
+.Xr cnvlist_get_bool 9 .
+.It Dv value = cookie:get_number( )
+Wraps
+.Xr cnvlist_get_number 9 .
+.It Dv value = cookie:get_string( )
+Wraps
+.Xr cnvlist_get_string 9 .
+.It Dv value = cookie:get_nvlist( )
+Wraps
+.Xr cnvlist_get_nvlist 9 .
+.It Dv value = cookie:get_descriptor( )
+Wraps
+.Xr cnvlist_get_descriptor 9 .
+.It Dv value = cookie:get_binary( )
+Wraps
+.Xr cnvlist_get_binary 9 .
+.It Dv value = cookie:get_bool_array( )
+Wraps
+.Xr cnvlist_get_bool_array 9 .
+.It Dv value = cookie:get_number_array( )
+Wraps
+.Xr cnvlist_get_number_array 9 .
+.It Dv value = cookie:get_string_array( )
+Wraps
+.Xr cnvlist_get_string_array 9 .
+.It Dv value = cookie:get_nvlist_array( )
+Wraps
+.Xr cnvlist_get_nvlist_array 9 .
+.It Dv value = cookie:get_descriptor_array( )
+Wraps
+.Xr cnvlist_get_descriptor_array 9 .
+.It Dv value = cookie:take_bool( )
+Wraps
+.Xr cnvlist_take_bool 9 .
+.It Dv value = cookie:take_number( )
+Wraps
+.Xr cnvlist_take_number 9 .
+.It Dv value = cookie:take_string( )
+Wraps
+.Xr cnvlist_take_string 9 .
+.It Dv value = cookie:take_nvlist( )
+Wraps
+.Xr cnvlist_take_nvlist 9 .
+.It Dv value = cookie:take_descriptor( )
+Wraps
+.Xr cnvlist_take_descriptor 9 .
+.It Dv value = cookie:take_binary( )
+Wraps
+.Xr cnvlist_take_binary 9 .
+.It Dv value = cookie:take_bool_array( )
+Wraps
+.Xr cnvlist_take_bool_array 9 .
+.It Dv value = cookie:take_number_array( )
+Wraps
+.Xr cnvlist_take_number_array 9 .
+.It Dv value = cookie:take_string_array( )
+Wraps
+.Xr cnvlist_take_string_array 9 .
+.It Dv value = cookie:take_nvlist_array( )
+Wraps
+.Xr cnvlist_take_nvlist_array 9 .
+.It Dv value = cookie:take_descriptor_array( )
+Wraps
+.Xr cnvlist_take_descriptor_array 9 .
+.It Dv cookie:free_bool( )
+Wraps
+.Xr cnvlist_free_bool 9 .
+.It Dv cookie:free_number( )
+Wraps
+.Xr cnvlist_free_number 9 .
+.It Dv cookie:free_string( )
+Wraps
+.Xr cnvlist_free_string 9 .
+.It Dv cookie:free_nvlist( )
+Wraps
+.Xr cnvlist_free_nvlist 9 .
+.It Dv cookie:free_descriptor( )
+Wraps
+.Xr cnvlist_free_descriptor 9 .
+.It Dv cookie:free_binary( )
+Wraps
+.Xr cnvlist_free_binary 9 .
+.It Dv cookie:free_bool_array( )
+Wraps
+.Xr cnvlist_free_bool_array 9 .
+.It Dv cookie:free_number_array( )
+Wraps
+.Xr cnvlist_free_number_array 9 .
+.It Dv cookie:free_string_array( )
+Wraps
+.Xr cnvlist_free_string_array 9 .
+.It Dv cookie:free_nvlist_array( )
+Wraps
+.Xr cnvlist_free_nvlist_array 9 .
+.It Dv cookie:free_descriptor_array( )
+Wraps
+.Xr cnvlist_free_descriptor_array 9 .
+.El
+.Sh EXAMPLES
+Construct and display a simple name/value list:
+.Bd -literal -offset indent
+local nv = require('nv')
+
+local nvl = nv.create()
+nvl:add_bool("simple", true)
+nvl:add_string("hello", "Lua")
+nvl:fdump(io.stdout)
+.Ed
+.Sh SEE ALSO
+.Xr cnv 9 ,
+.Xr dnv 9 ,
+.Xr nv 9
+.Sh AUTHORS
+.An Ryan Moeller
