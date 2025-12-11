@@ -22,6 +22,7 @@ SUBDIR= \
 	mq \
 	pathconf \
 	sendfile \
+	sysconf \
 	sysctl \
 	xor \
 

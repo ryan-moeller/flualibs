@@ -106,6 +106,7 @@ local pc = require('pathconf')
 print(assert(pc.pathconf('/COPYRIGHT', pc.CLONE_BLKSIZE)))
 .Ed
 .Sh SEE ALSO
+.Xr sysconf 3lua ,
 .Xr sysctl 3lua
 .Sh AUTHORS
 .An Ryan Moeller
