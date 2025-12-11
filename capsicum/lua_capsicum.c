@@ -37,6 +37,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+#include "../luaerror.h"
 #include "../utils.h"
 
 #define CAP_RIGHTS_METATABLE "acl_t"
