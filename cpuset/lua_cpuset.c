@@ -87,6 +87,7 @@ l_cpuset_ored(lua_State *L)
 	return (1);
 }
 
+#ifdef CPU_ORNOT
 static int
 l_cpuset_ornoted(lua_State *L)
 {
@@ -99,6 +100,7 @@ l_cpuset_ornoted(lua_State *L)
 	CPU_ORNOT(dst, src1, src2);
 	return (1);
 }
+#endif
 
 static int
 l_cpuset_anded(lua_State *L)
@@ -357,6 +359,7 @@ l_cpuset_or(lua_State *L)
 	return (1);
 }
 
+#ifdef CPU_ORNOT
 static int
 l_cpuset_ornot(lua_State *L)
 {
@@ -370,6 +373,7 @@ l_cpuset_ornot(lua_State *L)
 	lua_pop(L, 1);
 	return (1);
 }
+#endif
 
 static int
 l_cpuset_and(lua_State *L)
@@ -418,7 +422,9 @@ static const struct luaL_Reg l_cpuset_funcs[] = {
 	{"fill", l_cpuset_filled},
 	{"only", l_cpuset_only},
 	{"or", l_cpuset_ored},
+#ifdef CPU_ORNOT
 	{"ornot", l_cpuset_ornoted},
+#endif
 	{"and", l_cpuset_anded},
 	{"andnot", l_cpuset_andnoted},
 	{"xor", l_cpuset_xored},
@@ -448,7 +454,9 @@ static const struct luaL_Reg l_cpuset_meta[] = {
 	{"cmp", l_cpuset_cmp},
 	{"equal", l_cpuset_equal},
 	{"or", l_cpuset_or},
+#ifdef CPU_ORNOT
 	{"ornot", l_cpuset_ornot},
+#endif
 	{"and", l_cpuset_and},
 	{"andnot", l_cpuset_andnot},
 	{"xor", l_cpuset_xor},
