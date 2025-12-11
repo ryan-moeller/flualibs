@@ -6,6 +6,7 @@ SUBDIR= \
 	acl \
 	b64 \
 	capsicum \
+	chflags \
 	clock \
 	confstr \
 	cpuset \
