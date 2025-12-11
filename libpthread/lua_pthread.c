@@ -991,6 +991,7 @@ l_pthread_resume_all_np(lua_State *L __unused)
 	return (0);
 }
 
+#if __FreeBSD_version > 1500043
 static int
 l_pthread_signals_block_np(lua_State *L __unused)
 {
@@ -1004,6 +1005,7 @@ l_pthread_signals_unblock_np(lua_State *L __unused)
 	pthread_signals_unblock_np();
 	return (0);
 }
+#endif
 
 static int
 l_pthread_single_np(lua_State *L)
@@ -2240,8 +2242,10 @@ static const struct luaL_Reg l_pthread_funcs[] = {
 	{"main_np", l_pthread_main_np},
 	{"multi_np", l_pthread_multi_np},
 	{"resume_all_np", l_pthread_resume_all_np},
+#if __FreeBSD_version > 1500043
 	{"signals_block_np", l_pthread_signals_block_np},
 	{"signals_unblock_np", l_pthread_signals_unblock_np},
+#endif
 	{"single_np", l_pthread_single_np},
 	{"suspend_all_np", l_pthread_suspend_all_np},
 	{NULL, NULL}
