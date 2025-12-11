@@ -24,7 +24,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.Dd November 22, 2025
+.Dd December 11, 2025
 .Dt PTHREAD 3lua
 .Os
 .Sh NAME
@@ -58,6 +58,7 @@
 .Nm pthread_t:timedjoin_np ,
 .Nm pthread_t:getname_np ,
 .Nm pthread_t:setname_np ,
+.Nm pthread_t:sigqueue ,
 .Nm pthread.once.new ,
 .Nm pthread.once.retain ,
 .Nm pthread_once_t:cookie ,
@@ -174,6 +175,7 @@ pthread = require('pthread')
 .It Dv status, ... = thread:timedjoin_np(abstime_sec[ , abstime_nsec ] )
 .It Dv name, err, code = thread:getname_np( )
 .It Dv ok, err, code = thread:setname_np(name )
+.It Dv ok, err, code = thread:sigqueue(sig , value )
 .It Dv once = pthread.once.new( )
 .It Dv once = pthread.once.retain(cookie )
 .It Dv status, ... = once(func[ , ... ] )
@@ -460,6 +462,14 @@ Wraps
 .It Dv ok, err, code = thread:setname_np(name )
 Wraps
 .Xr pthread_setname_np 3 .
+.It Dv ok, err, code = thread:sigqueue(sig , value )
+Wraps
+.Xr pthread_sigqueue 3 .
+.Fa value
+may be either an
+.Vt integer
+or a
+.Vt lightuserdata .
 .It Dv once = pthread.once.new( )
 Allocate and initialize a
 .Vt pthread_once_t

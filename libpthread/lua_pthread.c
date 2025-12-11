@@ -1836,6 +1836,30 @@ l_pthread_setname_np(lua_State *L)
 	return (1);
 }
 
+#if __FreeBSD_version > 1500043
+static int
+l_pthread_sigqueue(lua_State *L)
+{
+	struct rcthread *threadp;
+	union sigval value;
+	int sig, error;
+
+	threadp = checkcookie(L, 1, PTHREAD_METATABLE);
+	sig = luaL_checkinteger(L, 2);
+	if (lua_isinteger(L, 3)) {
+		value.sival_int = lua_tointeger(L, 3);
+	} else {
+		value.sival_ptr = checklightuserdata(L, 3);
+	}
+
+	if ((error = pthread_sigqueue(threadp->thread, sig, value)) != 0) {
+		return (fail(L, error));
+	}
+	lua_pushboolean(L, true);
+	return (1);
+}
+#endif
+
 static int
 l_pthread_cleanup_pop(lua_State *L)
 {
@@ -2268,6 +2292,9 @@ static const struct luaL_Reg l_pthread_meta[] = {
 	{"timedjoin_np", l_pthread_timedjoin_np},
 	{"getname_np", l_pthread_getname_np},
 	{"setname_np", l_pthread_setname_np},
+#if __FreeBSD_version > 1500043
+	{"sigqueue", l_pthread_sigqueue},
+#endif
 	{NULL, NULL}
 };
 
