@@ -20,6 +20,7 @@ SUBDIR= \
 	libpthread \
 	mac \
 	mq \
+	pathconf \
 	sendfile \
 	sysctl \
 	xor \
