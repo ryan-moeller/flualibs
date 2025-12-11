@@ -5,6 +5,7 @@ SRCTOP?= /usr/src
 SUBDIR= \
 	acl \
 	b64 \
+	capsicum \
 	clock \
 	cpuset \
 	extattr \
