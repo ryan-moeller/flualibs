@@ -29,7 +29,7 @@
 .Os
 .Sh NAME
 .Nm pathconf
-.Nd Lua binding for
+.Nd Lua bindings for
 .Xr pathconf 2 ,
 .Xr lpathconf 2 ,
 and
@@ -80,7 +80,7 @@ pc = require('pathconf')
 .Sh DESCRIPTION
 The
 .Nm pathconf
-module provides a binding for the
+module provides bindings for the
 .Xr pathconf 2 ,
 .Xr lpathconf 2 ,
 and
