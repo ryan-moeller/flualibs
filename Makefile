@@ -7,6 +7,7 @@ SUBDIR= \
 	b64 \
 	capsicum \
 	clock \
+	confstr \
 	cpuset \
 	extattr \
 	fileno \

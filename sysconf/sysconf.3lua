@@ -181,6 +181,7 @@ local sc = require('sysconf')
 print(assert(sc.sysconf(sc.NPROCESSORS_ONLN)))
 .Ed
 .Sh SEE ALSO
+.Xr confstr 3lua ,
 .Xr pathconf 3lua ,
 .Xr sysctl 3lua
 .Sh AUTHORS

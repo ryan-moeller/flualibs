@@ -24,89 +24,56 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.Dd December 10, 2025
-.Dt PATHCONF 3lua
+.Dd December 11, 2025
+.Dt CONFSTR 3lua
 .Os
 .Sh NAME
-.Nm pathconf
-.Nd Lua bindings for
-.Xr pathconf 2 ,
-.Xr lpathconf 2 ,
-and
-.Xr fpathconf 2
-system calls
+.Nm confstr
+.Nd Lua binding for
+.Xr confstr 3
+libc routine
 .Sh SYNOPSIS
 .Bd -literal
-pc = require('pathconf')
+cs = require('confstr')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv value, errmsg, errcode = pc.pathconf(path , name )
-.It Dv value, errmsg, errcode = pc.lpathconf(path , name )
-.It Dv value, errmsg, errcode = pc.fpathconf(fd | file , name )
-.It Dv pc.LINK_MAX
-.It Dv pc.MAX_CANON
-.It Dv pc.MAX_INPUT
-.It Dv pc.NAME_MAX
-.It Dv pc.PATH_MAX
-.It Dv pc.PIPE_BUF
-.It Dv pc.CHOWN_RESTRICTED
-.It Dv pc.NO_TRUNC
-.It Dv pc.VDISABLE
-.It Dv pc.ASYNC_IO
-.It Dv pc.PRIO_IO
-.It Dv pc.SYNC_IO
-.It Dv pc.ALLOC_SIZE_MIN
-.It Dv pc.FILESIZEBITS
-.It Dv pc.REC_INCR_XFER_SIZE
-.It Dv pc.REC_MAX_XFER_SIZE
-.It Dv pc.REC_MIN_XFER_SIZE
-.It Dv pc.REC_XFER_ALIGN
-.It Dv pc.SYMLINK_MAX
-.It Dv pc.ACL_EXTENDED
-.It Dv pc.ACL_PATH_MAX
-.It Dv pc.CAP_PRESENT
-.It Dv pc.INF_PRESENT
-.It Dv pc.MAC_PRESENT
-.It Dv pc.ACL_NFS4
-.It Dv pc.DEALLOC_PRESENT
-.It Dv pc.NAMEDATTR_ENABLED
-.It Dv pc.HAS_NAMEDATTR
-.It Dv pc.HAS_HIDDENSYSTEM
-.It Dv pc.CLONE_BLKSIZE
-.It Dv pc.CASE_INSENSITIVE
-.It Dv pc.MIN_HOLE_SIZE
+.It Dv value, errmsg, errcode = cs.confstr(name )
+.It Dv cs.PATH
+.It Dv cs.POSIX_V6_ILP32_OFF32_CFLAGS
+.It Dv cs.POSIX_V6_ILP32_OFF32_LDFLAGS
+.It Dv cs.POSIX_V6_ILP32_OFF32_LIBS
+.It Dv cs.POSIX_V6_ILP32_OFFBIG_CFLAGS
+.It Dv cs.POSIX_V6_ILP32_OFFBIG_LDFLAGS
+.It Dv cs.POSIX_V6_ILP32_OFFBIG_LIBS
+.It Dv cs.POSIX_V6_LP64_OFF64_CFLAGS
+.It Dv cs.POSIX_V6_LP64_OFF64_LDFLAGS
+.It Dv cs.POSIX_V6_LP64_OFF64_LIBS
+.It Dv cs.POSIX_V6_LPBIG_OFFBIG_CFLAGS
+.It Dv cs.POSIX_V6_LPBIG_OFFBIG_LDFLAGS
+.It Dv cs.POSIX_V6_LPBIG_OFFBIG_LIBS
+.It Dv cs.POSIX_V6_WIDTH_RESTRICTED_ENVS
 .El
 .Sh DESCRIPTION
 The
-.Nm pathconf
-module provides bindings for the
-.Xr pathconf 2 ,
-.Xr lpathconf 2 ,
-and
-.Xr fpathconf 2
-system calls.
+.Nm confstr
+module provides a binding for the
+.Xr confstr 3
+libc routine.
 .Bl -tag -width XXXX
-.It Dv value, errmsg, errcode = pc.pathconf(path , name )
+.It Dv value, errmsg, errcode = cs.confstr(name )
 Wraps
-.Xr pathconf 2 .
-.It Dv value, errmsg, errcode = pc.lpathconf(path , name )
-Wraps
-.Xr lpathconf 2 .
-.It Dv value, errmsg, errcode = pc.fpathconf(fd | file , name )
-Wraps
-.Xr fpathconf 2 .
+.Xr confstr 3 .
 .El
 .Sh EXAMPLES
-Check the block alignment required for
-.Xr copy_file_range 2 :
+Get a minimal POSIX utility PATH environment variable:
 .Bd -literal -offset indent
-local pc = require('pathconf')
+local cs = require('confstr')
 
-print(assert(pc.pathconf('/COPYRIGHT', pc.CLONE_BLKSIZE)))
+print(assert(cs.confstr(cs.PATH)))
 .Ed
 .Sh SEE ALSO
-.Xr confstr 3lua ,
+.Xr pathconf 3lua ,
 .Xr sysconf 3lua ,
 .Xr sysctl 3lua
 .Sh AUTHORS
