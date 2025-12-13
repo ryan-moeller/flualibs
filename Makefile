@@ -9,6 +9,7 @@ SUBDIR= \
 	chflags \
 	clock \
 	confstr \
+	copy_file_range \
 	cpuset \
 	dirent \
 	extattr \
