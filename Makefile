@@ -10,6 +10,7 @@ SUBDIR= \
 	clock \
 	confstr \
 	cpuset \
+	dirent \
 	extattr \
 	fileno \
 	kldstat \
