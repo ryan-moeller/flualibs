@@ -21,6 +21,7 @@ SUBDIR= \
 	libmagic \
 	libmd \
 	libnv \
+	libpathconv \
 	libpthread \
 	mac \
 	mq \
