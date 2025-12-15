@@ -1,15 +1,10 @@
 SHLIB_NAME=	ifconfig.so
-SHLIBDIR=	${LIBDIR}/flua
-
-SRCS+=		lua_ifconfig.c
-
-CFLAGS+= \
-	-I${SRCTOP}/contrib/lua/src \
-	-I${SRCTOP}/lib/liblua \
-
+SRCS+=	lua_ifconfig.c
+CFLAGS+=${FLUA_CFLAGS}
 LDADD+=	-lsysdecode
-
 MAN=	ifconfig.3lua
+
+.include "../Makefile.inc"
 
 # XXX: libifconfig is an internal library, so we build it in as a workaround.
 # If this seems to be picking up files from the wrong SRCTOP, make cleandepend.

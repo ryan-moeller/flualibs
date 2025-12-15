@@ -21,9 +21,9 @@
 #include <lualib.h>
 
 #include "refcount.h"
-#include "../cpuset/lua_cpuset.h"
-#include "../luaerror.h"
-#include "../utils.h"
+#include "freebsd/sys/cpuset/lua_cpuset.h"
+#include "luaerror.h"
+#include "utils.h"
 
 int luaopen_pthread(lua_State *);
 

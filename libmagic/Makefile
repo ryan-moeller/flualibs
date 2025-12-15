@@ -1,14 +1,8 @@
 SHLIB_NAME=	magic.so
-SHLIBDIR=	${LIBDIR}/flua
-
-SRCS+=		lua_magic.c
-
-CFLAGS+= \
-	-I${SRCTOP}/contrib/lua/src \
-	-I${SRCTOP}/lib/liblua \
-
+SRCS+=	lua_magic.c
+CFLAGS+=${FLUA_CFLAGS}
 LDADD+=	-lmagic
-
 MAN=	magic.3lua
 
+.include "../Makefile.inc"
 .include <bsd.lib.mk>

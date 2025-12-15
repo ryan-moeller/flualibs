@@ -1,0 +1,84 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 15, 2025
+.Dt CLOCK 3lua
+.Os
+.Sh NAME
+.Nm freebsd.time
+.Nd Lua bindings for
+.Xr clock_getcpuclockid 3 ,
+.Xr clock_getres 2 ,
+.Xr clock_gettime 2 ,
+.Xr clock_nanosleep 2 ,
+.Xr clock_settime 2
+.Sh SYNOPSIS
+.Bd -literal
+local time = require('freebsd.time')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv clock_id, err, code = time.clock_getcpuclockid(pid )
+.It Dv sec, nsec_or_err, code = time.clock_getres(clock_id )
+.It Dv sec, nsec_or_err, code = time.clock_gettime(clock_id )
+.It Dv msec, mnsec_or_err, code = time.clock_nanosleep(clock_id , flags , sec[ , nsec ] )
+.It Dv _, err, code = time.clock_settime(clock_id , sec[ , nsec ] )
+.El
+.Sh DESCRIPTION
+The
+.Nm freebsd.time
+module provides bindings for the
+.Xr clock_getcpuclockid 3
+function and
+.Xr clock_getres 2 ,
+.Xr clock_gettime 2 ,
+.Xr clock_nanosleep 2 ,
+and
+.Xr clock_settime 2
+system calls in libc.
+.Bl -tag -width XXXX
+.It Dv clock_id, err, code = time.clock_getcpuclockid(pid )
+Wraps
+.Xr clock_getcpuclockid 3 .
+.It Dv sec, nsec_or_err, code = time.clock_getres(clock_id )
+Wraps
+.Xr clock_getres 2 .
+.It Dv sec, nsec_or_err, code = time.clock_gettime(clock_id )
+Wraps
+.Xr clock_gettime 2 .
+.It Dv msec, mnsec_or_err, code = time.clock_nanosleep(clock_id , flags , sec[ , nsec ] )
+Wraps
+.Xr clock_nanosleep 2 .
+If successful, nothing is returned.
+If interrupted, the remaining seconds and nanoseconds are returned.
+.It Dv _, err, code = time.clock_settime(clock_id , sec[ , nsec ] )
+Wraps
+.Xr clock_settime 2 .
+.El
+.Sh EXAMPLES
+Sleep the thread for ten seconds:
+.Bd -literal -offset indent
+local time = require('freebsd.time')
+
+local sec, nsec, code = assert(time.clock_gettime(time.CLOCK_REALTIME))
+local msec, mnsec, code = time.clock_nanosleep(time.CLOCK_REALTIME,
+    time.TIMER_ABSTIME, sec + 10, nsec)
+if code then
+	local err = mnsec
+	assert(false, err, code)
+end
+if msec then
+	assert(false, ('interrupted with %d sec + %d nsec remaining'):format(
+	    msec, mnsec))
+end
+.Ed
+.Sh SEE ALSO
+.Xr clock_getres 2 ,
+.Xr clock_gettime 2 ,
+.Xr clock_nanosleep 2 ,
+.Xr clock_settime 2 ,
+.Xr clock_getcpuclockid 3
+.Sh AUTHORS
+.An Ryan Moeller

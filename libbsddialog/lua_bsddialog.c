@@ -16,7 +16,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "../luaerror.h"
+#include "luaerror.h"
 
 #define BSDDIALOG_CONF_METATABLE "struct bsddialog_conf *"
 

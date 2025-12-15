@@ -16,7 +16,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "../utils.h"
+#include "utils.h"
 
 #define NVLIST_METATABLE "nvlist_t"
 #define CONST_NVLIST_METATABLE "const nvlist_t"

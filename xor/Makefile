@@ -1,12 +1,7 @@
 SHLIB_NAME=	xor.so
-SHLIBDIR=	${LIBDIR}/flua
-
-SRCS+=		lua_xor.c
-
-CFLAGS+= \
-	-I${SRCTOP}/contrib/lua/src \
-	-I${SRCTOP}/lib/liblua \
-
+SRCS+=	lua_xor.c
+CFLAGS+=${FLUA_CFLAGS}
 MAN=	xor.3lua
 
+.include "../Makefile.inc"
 .include <bsd.lib.mk>

@@ -12,7 +12,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "../utils.h"
+#include "utils.h"
 
 int luaopen_pathconv(lua_State *);
 

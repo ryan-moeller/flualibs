@@ -1,12 +1,7 @@
 SHLIB_NAME=	b64.so
-SHLIBDIR=	${LIBDIR}/flua
-
-SRCS+=		lua_b64.c
-
-CFLAGS+= \
-	-I${SRCTOP}/contrib/lua/src \
-	-I${SRCTOP}/lib/liblua \
-
+SRCS+=	lua_b64.c
+CFLAGS+=${FLUA_CFLAGS}
 MAN=	b64.3lua
 
+.include "../Makefile.inc"
 .include <bsd.lib.mk>

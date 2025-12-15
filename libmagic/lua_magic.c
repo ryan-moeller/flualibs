@@ -14,8 +14,8 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "../luaerror.h"
-#include "../utils.h"
+#include "luaerror.h"
+#include "utils.h"
 
 #define MAGIC_METATABLE "magic_t"
 

@@ -1,0 +1,89 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 15, 2025
+.Dt CHFLAGS 3lua
+.Os
+.Sh NAME
+.Nm freebsd.sys.stat
+.Nd Lua bindings for
+file flags manipulation system calls and utility functions in libc
+.Sh SYNOPSIS
+.Bd -literal
+stat = require('freebsd.sys.stat')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv ok, errmsg, errcode = stat.chflags(path , flags )
+.It Dv ok, errmsg, errcode = stat.lchflags(path , flags )
+.It Dv ok, errmsg, errcode = stat.fchflags(fd | file , flags )
+.It Dv ok, errmsg, errcode = stat.chflagsat(fd , path , flags , atflag )
+.It Dv str, errmsg, errcode = stat.fflagstostr(flags )
+.It Dv flags, errstr = stat.strtofflags(str )
+.It Dv stat.AT_SYMLINK_FOLLOW
+.It Dv stat.AT_RESOLVE_BENEATH
+.It Dv stat.AT_EMPTY_PATH
+.It Dv stat.AT_FDCWD
+.It Dv stat.UF_SETTABLE
+.It Dv stat.UF_NODUMP
+.It Dv stat.UF_IMMUTABLE
+.It Dv stat.UF_APPEND
+.It Dv stat.UF_OPAQUE
+.It Dv stat.UF_NOUNLINK
+.It Dv stat.UF_SYSTEM
+.It Dv stat.UF_SPARSE
+.It Dv stat.UF_OFFLINE
+.It Dv stat.UF_REPARSE
+.It Dv stat.UF_ARCHIVE
+.It Dv stat.UF_READONLY
+.It Dv stat.UF_HIDDEN
+.It Dv stat.SF_SETTABLE
+.It Dv stat.SF_ARCHIVED
+.It Dv stat.SF_IMMUTABLE
+.It Dv stat.SF_APPEND
+.It Dv stat.SF_NOUNLINK
+.It Dv stat.SF_SNAPSHOT
+.El
+.Sh DESCRIPTION
+The
+.Nm freebsd.sys.stat
+module provides bindings for libc file flags manipulation system calls and
+utility functions.
+.Bl -tag -width XXXX
+.It Dv ok, errmsg, errcode = stat.chflags(path , flags )
+Wraps
+.Xr chflags 2 .
+.It Dv ok, errmsg, errcode = stat.lchflags(path , flags )
+Wraps
+.Xr lchflags 2 .
+.It Dv ok, errmsg, errcode = stat.fchflags(fd | file , flags )
+Wraps
+.Xr fchflags 2 .
+.It Dv ok, errmsg, errcode = stat.chflagsat(fd , path , flags , atflag )
+Wraps
+.Xr chflagsat 2 .
+.It Dv str, errmsg, errcode = stat.fflagstostr(flags )
+Wraps
+.Xr fflagstostr 3 .
+.It Dv flags, errstr = stat.strtofflags(str )
+Wraps
+.Xr strtofflags 3 .
+.El
+.Sh EXAMPLES
+Clear all flags on a file:
+.Bd -literal -offset indent
+local stat = require('freebsd.sys.stat')
+
+assert(stat.chflags('/COPYRIGHT', 0))
+.Ed
+.Sh SEE ALSO
+.Xr chflags 1 ,
+.Xr chflags 2 ,
+.Xr acl 3lua ,
+.Xr extattr 3lua ,
+.Xr mac 3lua ,
+.Xr stat 3lua
+.Sh AUTHORS
+.An Ryan Moeller

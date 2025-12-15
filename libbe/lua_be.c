@@ -21,7 +21,7 @@ typedef uint64_t hrtime_t;
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "../luaerror.h"
+#include "luaerror.h"
 
 #define LIBBE_METATABLE "libbe_handle_t *"
 

@@ -1,21 +1,6 @@
-# NOTE: Must make cleandepend when changing SRCTOP between builds.
-SRCTOP?= /usr/src
-.export SRCTOP
-
 SUBDIR= \
-	acl \
 	b64 \
-	capsicum \
-	chflags \
-	clock \
-	confstr \
-	copy_file_range \
-	cpuset \
-	dirent \
-	extattr \
-	fileno \
-	kldstat \
-	kqueue \
+	freebsd \
 	libfetch \
 	libifconfig \
 	libmagic \
@@ -23,14 +8,9 @@ SUBDIR= \
 	libnv \
 	libpathconv \
 	libpthread \
-	mac \
-	mq \
-	pathconf \
-	sendfile \
-	stat \
-	sysconf \
-	sysctl \
 	xor \
+
+.include "Makefile.inc"
 
 .if exists(${SRCTOP}/contrib/bsddialog/lib/bsddialog.h)
 SUBDIR+=libbsddialog

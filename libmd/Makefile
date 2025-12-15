@@ -1,14 +1,8 @@
 SHLIB_NAME=	md.so
-SHLIBDIR=	${LIBDIR}/flua
-
-SRCS+=		lua_md.c
-
-CFLAGS+= \
-	-I${SRCTOP}/contrib/lua/src \
-	-I${SRCTOP}/lib/liblua \
-
+SRCS+=	lua_md.c
+CFLAGS+=${FLUA_CFLAGS}
 LDADD+=	-lmd
-
 MAN=	md.3lua
 
+.include "../Makefile.inc"
 .include <bsd.lib.mk>

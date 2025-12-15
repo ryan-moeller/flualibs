@@ -1,14 +1,8 @@
 SHLIB_NAME=	dpv.so
-SHLIBDIR=	${LIBDIR}/flua
-
-SRCS+=		lua_dpv.c
-
-CFLAGS+= \
-	-I${SRCTOP}/contrib/lua/src \
-	-I${SRCTOP}/lib/liblua \
-
+SRCS+=	lua_dpv.c
+CFLAGS+=${FLUA_CFLAGS}
 LDADD+=	-ldpv
-
 MAN=	dpv.3lua
 
+.include "../Makefile.inc"
 .include <bsd.lib.mk>

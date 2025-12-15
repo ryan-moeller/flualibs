@@ -11,8 +11,8 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "../luaerror.h"
-#include "../utils.h"
+#include "luaerror.h"
+#include "utils.h"
 
 int luaopen_xor(lua_State *);
 

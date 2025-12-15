@@ -26,4 +26,3 @@ $ make
 - more modules
 - improve tests, samples, and documentation
 - enable targetting Lua from ports instead of flua
-- improve module organizaton (e.g. grouping by libc header)

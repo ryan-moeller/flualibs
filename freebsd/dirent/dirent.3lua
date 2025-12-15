@@ -1,0 +1,109 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 13, 2025
+.Dt DIRENT 3lua
+.Os
+.Sh NAME
+.Nm freebsd.dirent
+.Nd Lua bindings for
+.Xr directory 3
+libc routines
+.Sh SYNOPSIS
+.Bd -literal
+dirent = require('freebsd.dirent')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv dir, errmsg, errcode = dirent.opendir(path )
+.It Dv dir, errmsg, errcode = dirent.fdopendir(fd )
+.It Dv ent, errmsg, errcode = dir:read( )
+.It Dv loc, errmsg, errcode = dir:tell( )
+.It Dv dir:seek(loc )
+.It Dv dir:rewind( )
+.It Dv dt = dirent.iftodt(mode )
+.It Dv mode = dirent.dttoif(dt )
+.It Dv dirent.DT_UNKNOWN
+.It Dv dirent.DT_FIFO
+.It Dv dirent.DT_CHR
+.It Dv dirent.DT_DIR
+.It Dv dirent.DT_BLK
+.It Dv dirent.DT_REG
+.It Dv dirent.DT_LNK
+.It Dv dirent.DT_SOCK
+.It Dv dirent.DT_WHT
+.El
+.Sh DESCRIPTION
+The
+.Nm freebsd.dirent
+module provides bindings for the
+.Xr directory 3
+libc routines.
+.Bl -tag -width XXXX
+.It Dv dir, errmsg, errcode = dirent.opendir(path )
+Wraps
+.Xr opendir 3 .
+The returned
+.Va dir
+object implements
+.Va __close .
+.It Dv dir, errmsg, errcode = dirent.fdopendir(fd )
+Wraps
+.Xr fdopendir 3 .
+The returned
+.Va dir
+object implements
+.Va __close .
+.It Dv ent, errmsg, errcode = dir:read( )
+Wraps
+.Xr readdir 3 .
+The returned
+.Va ent
+object is a table of the form
+.Bd -literal -offset indent
+{
+	fileno = <integer>,
+	type = <integer>,
+	name = <string>
+}
+.Ed
+.It Dv loc, errmsg, errcode = dir:tell( )
+Wraps
+.Xr telldir 3 .
+.It Dv dir:seek(loc )
+Wraps
+.Xr seekdir 3 .
+.It Dv dir:rewind( )
+Wraps
+.Xr rewinddir 3 .
+.It Dv dt = dirent.iftodt(mode )
+Wraps
+.Fn IFTODT .
+.It Dv mode = dirent.dttoif(dt )
+Wraps
+.Fn DTTOIF .
+.El
+.Sh EXAMPLES
+Search a directory for entry ``name'':
+.Bd -literal -offset indent
+local dirent = require('freebsd.dirent')
+
+local dir = dirent.opendir('.')
+repeat
+	local ent = dir:read()
+	if not ent then
+		break
+	end
+	if ent.name == "name" then
+		os.exit(0)
+	end
+until false
+os.exit(1)
+.Ed
+.Sh SEE ALSO
+.Xr directory 3 ,
+.Xr stat 3lua
+.Sh AUTHORS
+.An Ryan Moeller

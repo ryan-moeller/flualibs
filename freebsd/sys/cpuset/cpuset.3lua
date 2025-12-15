@@ -1,0 +1,198 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 15, 2025
+.Dt CPUSET 3lua
+.Os
+.Sh NAME
+.Nm freebsd.sys.cpuset
+.Nd Lua bindings for
+.Xr cpuset 9
+.Sh SYNOPSIS
+.Bd -literal
+cpuset = require('freebsd.sys.cpuset')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv set = cpuset.copy(otherset )
+.It Dv set = cpuset.fill( )
+.It Dv set = cpuset.only(cpu_idx )
+.It Dv set = cpuset.or(set1 , set2 )
+.It Dv set = cpuset.ornot(set1 , set2 )
+.It Dv set = cpuset.and(set1 , set2 )
+.It Dv set = cpuset.andnot(set1 , set2 )
+.It Dv set = cpuset.xor(set1 , set2 )
+.It Dv set = cpuset.zero( )
+.It Dv [set = ] set:clr(cpu_idx )
+.It Dv [set = ] set:copy(otherset )
+.It Dv isset = set:isset(cpu_idx )
+.It Dv [set = ] set:set(cpu_idx )
+.It Dv [set = ] set:zero( )
+.It Dv [set = ] set:fill( )
+.It Dv [set = ] set:setof(cpu_idx )
+.It Dv isempty = set:empty( )
+.It Dv isfullset = set:isfullset( )
+.It Dv cpu_idx = set:ffs( )
+.It Dv count = set:count( )
+.It Dv issubset = set:subset(otherset )
+.It Dv doesoverlap = set:overlap(otherset )
+.It Dv notsame = set:cmp(otherset )
+.It Dv issame = set:equal(otherset )
+.It Dv [set = ] set:or(otherset )
+.It Dv [set = ] set:ornot(otherset )
+.It Dv [set = ] set:and(otherset )
+.It Dv [set = ] set:andnot(otherset )
+.It Dv [set = ] set:xor(otherset )
+.It Dv cpuset.CPU_SETSIZE
+.El
+.Sh DESCRIPTION
+The
+.Nm freebsd.sys.cpuset
+module provides bindings for the
+.Xr cpuset 9
+cpuset manipulation macros.
+.Bl -tag -width XXXX
+.It Dv set = cpuset.copy(otherset )
+Create a copy of an existing cpuset.
+.It Dv set = cpuset.fill( )
+Create a new cpuset with every CPU set.
+.It Dv set = cpuset.only(cpu_idx )
+Create a new cpuset with only the given CPU set.
+.It Dv set = cpuset.or(set1 , set2 )
+Create a new cpuset from the union of two existing cpusets.
+.It Dv set = cpuset.ornot(set1 , set2 )
+Create a new cpuset from the equivalent of the scalar operation
+.Fa set1
+| ~
+.Fa set2 .
+.It Dv set = cpuset.and(set1 , set2 )
+Create a new cpuset from the intersection of two existing cpusets.
+.It Dv set = cpuset.andnot(set1 , set2 )
+Create a new cpuset from the equivalent of the scalar operation
+.Fa set1
+& ~
+.Fa set2 .
+.It Dv set = cpuset.xor(set1 , set2 )
+Create a new cpuset from the symmetric difference of two existing cpusets.
+.It Dv set = cpuset.zero( )
+Create a new cpuset with no CPUs set.
+.It Dv [set = ] set:clr(cpu_idx )
+Remove the given CPU from
+.Va set .
+Returns the same cpuset object, modified in place.
+.It Dv [set = ] set:copy(otherset )
+Copy the contents of a different cpuset.
+Returns the same cpuset object, modified in place.
+.It Dv isset = set:isset(cpu_idx )
+Test if the given CPU is present in
+.Va set .
+.It Dv [set = ] set:set(cpu_idx )
+Set the given CPU in
+.Va set .
+Returns the same cpuset object, modified in place.
+.It Dv [set = ] set:zero( )
+Remove all CPUs from
+.Va set .
+Returns the same cpuset object, modified in place.
+.It Dv [set = ] set:fill( )
+Set all CPUs in
+.Va set .
+Returns the same cpuset object, modified in place.
+.It Dv [set = ] set:setof(cpu_idx )
+Set only the given CPU and clear all others in
+.Va set .
+Returns the same cpuset object, modified in place.
+.It Dv isempty = set:empty( )
+Test if
+.Va set
+is empty.
+.It Dv isfullset = set:isfullset( )
+Test if
+.Va set
+contains all possible CPUs.
+.It Dv cpu_idx = set:ffs( )
+Get the lowest CPU in
+.Va set .
+Unlike
+.Xr CPU_FFS 9 ,
+this method returns zero-based CPU indices like the rest of the functions, or
+.Dv nil
+if no CPU is set.
+.It Dv count = set:count( )
+Get the number of CPUs present in
+.Va set .
+.It Dv issubset = set:subset(otherset )
+Test whether
+.Fa otherset
+is a subset of
+.Va set .
+.It Dv doesoverlap = set:overlap(otherset )
+Test whether
+.Va set
+and
+.Fa otherset
+overlap.
+.It Dv notsame = set:cmp(otherset )
+Compare
+.Va set
+with
+.Fa otherset ,
+returning
+.Dv true
+if they are logically different,
+otherwise
+.Dv false .
+.It Dv issame = set:equal(otherset )
+Test logical equality of
+.Va set
+to
+.Fa otherset .
+.It Dv [set = ] set:or(otherset )
+Evaluate
+.Va set
+|=
+.Fa otherset .
+Returns the same cpuset object, modified in place.
+.It Dv [set = ] set:ornot(otherset )
+Evaluate
+.Va set
+| ~
+.Fa otherset .
+Returns the same cpuset object, modified in place.
+.It Dv [set = ] set:and(otherset )
+Evaluate
+.Va set
+&=
+.Fa otherset .
+Returns the same cpuset object, modified in place.
+.It Dv [set = ] set:andnot(otherset )
+Evaluate
+.Va set
+&= ~
+.Fa otherset .
+Returns the same cpuset object, modified in place.
+.It Dv [set = ] set:xor(otherset )
+Evaluate
+.Va set
+^=
+.Fa otherset .
+Returns the same cpuset object, modified in place.
+.It Dv cpuset.CPU_SETSIZE
+The maximum number of CPUs in a cpuset.
+.El
+.Sh EXAMPLES
+Test how big a cpuset is:
+.Bd -literal -offset indent
+cpuset = require('freebsd.sys.cpuset')
+
+assert(#cpuset.fill() == cpuset.CPU_SETSIZE)
+.Ed
+.Sh SEE ALSO
+.Xr cpuset 1 ,
+.Xr cpuset 2 ,
+.Xr cpuset 3 ,
+.Xr cpuset 9
+.Sh AUTHORS
+.An Ryan Moeller
