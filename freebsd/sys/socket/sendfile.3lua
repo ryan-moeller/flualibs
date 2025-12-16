@@ -48,9 +48,9 @@ the form
 }
 .Ed
 where
-.Nm headers
+.Va headers
 and
-.Nm trailers
+.Va trailers
 are lists of strings to be sent before and after the file data.
 .El
 .Sh EXAMPLES
