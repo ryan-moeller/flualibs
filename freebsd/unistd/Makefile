@@ -6,6 +6,7 @@ MAN=	\
 	copy_file_range.3lua \
 	pathconf.3lua \
 	sysconf.3lua \
+	truncate.3lua \
 
 .include "../Makefile.inc"
 .include <bsd.lib.mk>

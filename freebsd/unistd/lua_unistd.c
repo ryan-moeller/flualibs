@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#include <sys/param.h>
+#include <sys/types.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -204,6 +205,38 @@ l_sysconf(lua_State *L)
 	return (1);
 }
 
+static int
+l_truncate(lua_State *L)
+{
+	const char *path;
+	off_t length;
+
+	path = luaL_checkstring(L, 1);
+	length = luaL_checkinteger(L, 2);
+
+	if (truncate(path, length) == -1) {
+		return (fail(L, errno));
+	}
+	lua_pushboolean(L, true);
+	return (1);
+}
+
+static int
+l_ftruncate(lua_State *L)
+{
+	off_t length;
+	int fd;
+
+	fd = checkfd(L, 1);
+	length = luaL_checkinteger(L, 2);
+
+	if (ftruncate(fd, length) == -1) {
+		return (fail(L, errno));
+	}
+	lua_pushboolean(L, true);
+	return (1);
+}
+
 static const struct luaL_Reg l_unistd_funcs[] = {
 	{"confstr", l_confstr},
 	{"copy_file_range", l_copy_file_range},
@@ -211,6 +244,8 @@ static const struct luaL_Reg l_unistd_funcs[] = {
 	{"lpathconf", l_lpathconf},
 	{"fpathconf", l_fpathconf},
 	{"sysconf", l_sysconf},
+	{"truncate", l_truncate},
+	{"ftruncate", l_ftruncate},
 	{NULL, NULL}
 };
 
