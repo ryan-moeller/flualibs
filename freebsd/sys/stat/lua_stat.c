@@ -285,10 +285,6 @@ luaopen_freebsd_sys_stat(lua_State *L)
 	lua_pushinteger(L, ident); \
 	lua_setfield(L, -2, #ident); \
 })
-	SETCONST(AT_SYMLINK_FOLLOW);
-	SETCONST(AT_RESOLVE_BENEATH);
-	SETCONST(AT_EMPTY_PATH);
-	SETCONST(AT_FDCWD);
 	SETCONST(S_ISUID);
 	SETCONST(S_ISGID);
 	SETCONST(S_ISTXT);

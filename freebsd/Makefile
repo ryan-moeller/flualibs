@@ -1,5 +1,6 @@
 SUBDIR=	\
 	dirent \
+	fcntl \
 	mqueue \
 	stdio \
 	sys \

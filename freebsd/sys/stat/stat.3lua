@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 15, 2025
+.Dd December 16, 2025
 .Dt STAT 3lua
 .Os
 .Sh NAME
@@ -28,10 +28,6 @@ stat = require('freebsd.sys.stat')
 .It Dv islnk = stat.islnk(mode )
 .It Dv issock = stat.issock(mode )
 .It Dv iswht = stat.iswht(mode )
-.It Dv stat.AT_SYMLINK_FOLLOW
-.It Dv stat.AT_RESOLVE_BENEATH
-.It Dv stat.AT_EMPTY_PATH
-.It Dv stat.AT_FDCWD
 .It Dv stat.S_ISUID
 .It Dv stat.S_ISGID
 .It Dv stat.S_ISTXT
@@ -181,6 +177,7 @@ print(assert(stat.fflagstostr(st.flags)))
 .Xr acl 3lua ,
 .Xr chflags 3lua ,
 .Xr extattr 3lua ,
+.Xr fcntl 3lua ,
 .Xr mac 3lua
 .Sh AUTHORS
 .An Ryan Moeller
