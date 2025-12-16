@@ -7,7 +7,6 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -18,23 +17,6 @@
 #include "utils.h"
 
 int luaopen_freebsd_unistd(lua_State *);
-
-static inline int
-checkfd(lua_State *L, int idx)
-{
-	luaL_Stream *s;
-	int fd;
-
-	if (lua_isinteger(L, idx)) {
-		return (lua_tointeger(L, idx));
-	}
-	s = luaL_checkudata(L, idx, LUA_FILEHANDLE);
-
-	if ((fd = fileno(s->f)) == -1) {
-		return (fatal(L, "fileno", errno));
-	}
-	return (fd);
-}
 
 static int
 l_confstr(lua_State *L)
@@ -163,16 +145,7 @@ l_fpathconf(lua_State *L)
 	long value;
 	int fd, name;
 
-	if (lua_isinteger(L, 1)) {
-		fd = lua_tointeger(L, 1);
-	} else {
-		luaL_Stream *s;
-
-		s = luaL_checkudata(L, 1, LUA_FILEHANDLE);
-		if ((fd = fileno(s->f)) == -1) {
-			return (fatal(L, "fileno", errno));
-		}
-	}
+	fd = checkfd(L, 1);
 	name = luaL_checkinteger(L, 2);
 
 	errno = 0;

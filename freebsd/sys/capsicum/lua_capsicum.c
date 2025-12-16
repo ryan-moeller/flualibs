@@ -10,7 +10,6 @@
 #include <sys/capsicum.h>
 #include <errno.h>
 #include <stdbool.h>
-#include <stdio.h>
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -62,16 +61,7 @@ l_cap_rights_get(lua_State *L)
 	cap_rights_t *rights;
 	int fd;
 
-	if (lua_isinteger(L, 1)) {
-		fd = lua_tointeger(L, 1);
-	} else {
-		luaL_Stream *s;
-
-		s = luaL_checkudata(L, 1, LUA_FILEHANDLE);
-		if ((fd = fileno(s->f)) == -1) {
-			return (fatal(L, "fileno", errno));
-		}
-	}
+	fd = checkfd(L, 1);
 
 	rights = lua_newuserdatauv(L, sizeof(*rights), 0);
 	luaL_setmetatable(L, CAP_RIGHTS_METATABLE);
@@ -218,16 +208,8 @@ l_cap_rights_limit(lua_State *L)
 	int fd;
 
 	rights = luaL_checkudata(L, 1, CAP_RIGHTS_METATABLE);
-	if (lua_isinteger(L, 2)) {
-		fd = lua_tointeger(L, 2);
-	} else {
-		luaL_Stream *s;
+	fd = checkfd(L, 2);
 
-		s = luaL_checkudata(L, 2, LUA_FILEHANDLE);
-		if ((fd = fileno(s->f)) == -1) {
-			return (fatal(L, "fileno", errno));
-		}
-	}
 	if (cap_rights_limit(fd, rights) == -1) {
 		return (fail(L, errno));
 	}
@@ -241,16 +223,7 @@ l_cap_fcntls_limit(lua_State *L)
 	uint32_t fcntlrights;
 	int fd;
 
-	if (lua_isinteger(L, 1)) {
-		fd = lua_tointeger(L, 1);
-	} else {
-		luaL_Stream *s;
-
-		s = luaL_checkudata(L, 1, LUA_FILEHANDLE);
-		if ((fd = fileno(s->f)) == -1) {
-			return (fatal(L, "fileno", errno));
-		}
-	}
+	fd = checkfd(L, 1);
 	fcntlrights = luaL_checkinteger(L, 2);
 
 	if (cap_fcntls_limit(fd, fcntlrights) == -1) {
@@ -266,16 +239,7 @@ l_cap_fcntls_get(lua_State *L)
 	uint32_t fcntlrights;
 	int fd;
 
-	if (lua_isinteger(L, 1)) {
-		fd = lua_tointeger(L, 1);
-	} else {
-		luaL_Stream *s;
-
-		s = luaL_checkudata(L, 1, LUA_FILEHANDLE);
-		if ((fd = fileno(s->f)) == -1) {
-			return (fatal(L, "fileno", errno));
-		}
-	}
+	fd = checkfd(L, 1);
 
 	if (cap_fcntls_get(fd, &fcntlrights) == -1) {
 		return (fail(L, errno));
@@ -293,16 +257,7 @@ l_cap_ioctls_limit(lua_State *L)
 	lua_Integer n;
 	int fd, top;
 
-	if (lua_isinteger(L, 1)) {
-		fd = lua_tointeger(L, 1);
-	} else {
-		luaL_Stream *s;
-
-		s = luaL_checkudata(L, 1, LUA_FILEHANDLE);
-		if ((fd = fileno(s->f)) == -1) {
-			return (fatal(L, "fileno", errno));
-		}
-	}
+	fd = checkfd(L, 1);
 	top = lua_gettop(L);
 	if (top - 1 > CAP_IOCTLS_LIMIT_MAX) {
 		return (luaL_error(L, "too many cmds (max %d)",
@@ -326,16 +281,7 @@ l_cap_ioctls_get(lua_State *L)
 	ssize_t n;
 	int fd;
 
-	if (lua_isinteger(L, 1)) {
-		fd = lua_tointeger(L, 1);
-	} else {
-		luaL_Stream *s;
-
-		s = luaL_checkudata(L, 1, LUA_FILEHANDLE);
-		if ((fd = fileno(s->f)) == -1) {
-			return (fatal(L, "fileno", errno));
-		}
-	}
+	fd = checkfd(L, 1);
 
 	if ((n = cap_ioctls_get(fd, cmds, nitems(cmds))) == -1) {
 		return (fail(L, errno));

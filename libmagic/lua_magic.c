@@ -7,7 +7,6 @@
 #include <magic.h>
 #include <errno.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <string.h>
 
 #include <lua.h>
@@ -64,20 +63,11 @@ static int
 l_magic_descriptor(lua_State *L)
 {
 	magic_t *cookiep;
-	luaL_Stream *stream;
 	const char *magic;
 	int fd;
 
 	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
-	if (lua_type(L, 2) == LUA_TNUMBER) {
-		fd = lua_tointeger(L, 2);
-	} else {
-		stream = luaL_checkudata(L, 2, LUA_FILEHANDLE);
-		luaL_argcheck(L, stream->f != NULL, 2,
-		    "invalid file handle (closed)");
-		fd = fileno(stream->f);
-	}
-	luaL_argcheck(L, fd >= 0, 2, "invalid file descriptor");
+	fd = checkfd(L, 2);
 
 	magic = magic_descriptor(*cookiep, fd);
 	if (magic == NULL) {

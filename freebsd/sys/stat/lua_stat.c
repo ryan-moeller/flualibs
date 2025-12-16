@@ -11,7 +11,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h> /* TODO: move these parts to freebsd.unistd? */
 
@@ -103,16 +102,7 @@ l_fchflags(lua_State *L)
 	unsigned long flags;
 	int fd;
 
-	if (lua_isinteger(L, 1)) {
-		fd = lua_tointeger(L, 1);
-	} else {
-		luaL_Stream *s;
-
-		s = luaL_checkudata(L, 1, LUA_FILEHANDLE);
-		if ((fd = fileno(s->f)) == -1) {
-			return (fatal(L, "fileno", errno));
-		}
-	}
+	fd = checkfd(L, 1);
 	flags = luaL_checkinteger(L, 2);
 
 	if (fchflags(fd, flags) == -1) {
@@ -217,16 +207,7 @@ l_fstat(lua_State *L)
 	struct stat sb;
 	int fd;
 
-	if (lua_isinteger(L, 1)) {
-		fd = lua_tointeger(L, 1);
-	} else {
-		luaL_Stream *s;
-
-		s = luaL_checkudata(L, 1, LUA_FILEHANDLE);
-		if ((fd = fileno(s->f)) == -1) {
-			return (fatal(L, "fileno", errno));
-		}
-	}
+	fd = checkfd(L, 1);
 
 	if (fstat(fd, &sb) == -1) {
 		return (fail(L, errno));

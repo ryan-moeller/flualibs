@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd February 11, 2025
+.Dd December 15, 2025
 .Dt BE 3lua
 .Os
 .Sh NAME
@@ -103,8 +103,8 @@ be = require('be')
 .It Dv err = handle:validate_name(name )
 .It Dv err = handle:validate_snap(snapshot )
 .It Dv exists = handle:exists(name )
-.It Dv handle:export(name , fd )
-.It Dv handle:import(name , fd )
+.It Dv handle:export(name , fd | file )
+.It Dv handle:import(name , fd | file )
 .It Dv handle:close( )
 .It Dv strnum = be.nicenum(number )
 .El
@@ -232,13 +232,15 @@ Validate the given boot environment name.
 Validate the given snapshot name.
 .It Dv exists = handle:exists(name )
 Check whether the given boot environment exists and has a mountpoint of '/'.
-.It Dv handle:export(name , fd )
+.It Dv handle:export(name , fd | file )
 Export the given boot environment to the file specified by
-.Fa fd .
+.Fa fd |
+.Fa file .
 A snapshot of the boot environment will be created prior to export.
-.It Dv handle:import(name , fd )
+.It Dv handle:import(name , fd | file )
 Import a boot environment from the file specified by
-.Fa fd
+.Fa fd |
+.Fa file
 with the given name.
 .It Dv handle:close( )
 Close the libbe handle.

@@ -22,6 +22,7 @@ typedef uint64_t hrtime_t;
 #include <lualib.h>
 
 #include "luaerror.h"
+#include "utils.h"
 
 #define LIBBE_METATABLE "libbe_handle_t *"
 
@@ -806,7 +807,7 @@ l_be_export(lua_State *L)
 
 	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
-	fd = luaL_checkinteger(L, 3);
+	fd = checkfd(L, 3);
 
 	if (be_export(*hdlp, name, fd) != 0) {
 		/* TODO: error details */
@@ -824,7 +825,7 @@ l_be_import(lua_State *L)
 
 	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
-	fd = luaL_checkinteger(L, 3);
+	fd = checkfd(L, 3);
 
 	if (be_import(*hdlp, name, fd) != 0) {
 		/* TODO: error details */

@@ -6,7 +6,9 @@
 
 #pragma once
 
+#include <errno.h>
 #include <limits.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <lua.h>
@@ -120,6 +122,24 @@ checkcookie(lua_State *L, int idx, const char *metatable)
 	cookie = checkcookienull(L, idx, metatable);
 	luaL_argcheck(L, cookie != NULL, idx, "cookie expired");
 	return (cookie);
+}
+
+static inline int
+checkfd(lua_State *L, int idx)
+{
+	luaL_Stream *s;
+	int fd;
+
+	if (lua_isinteger(L, idx)) {
+		return (lua_tointeger(L, idx));
+	}
+	s = luaL_checkudata(L, idx, LUA_FILEHANDLE);
+	luaL_argcheck(L, s->f != NULL, idx, "invalid file handle (closed)");
+
+	if ((fd = fileno(s->f)) == -1) {
+		fatal(L, "fileno", errno);
+	}
+	return (fd);
 }
 
 static inline void
