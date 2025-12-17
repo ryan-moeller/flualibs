@@ -3,8 +3,8 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 16, 2025
-.Dt CLOCK 3lua
+.Dd December 17, 2025
+.Dt TIME 3lua
 .Os
 .Sh NAME
 .Nm time
