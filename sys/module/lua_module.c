@@ -5,12 +5,8 @@
  */
 
 #include <sys/param.h>
-#include <sys/linker.h>
 #include <sys/module.h>
 #include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -21,73 +17,51 @@
 int luaopen_sys_module(lua_State *);
 
 static int
-l_kldstat_iter_next(lua_State *L)
+l_modnext(lua_State *L)
 {
-	struct kld_file_stat stat;
-	int nextid;
+	int modid, nextid;
 
-	nextid = luaL_checkinteger(L, lua_upvalueindex(1));
+	modid = luaL_optinteger(L, 1, 0);
+
+	if ((nextid = modnext(modid)) == -1) {
+		return (fatal(L, "modnext", errno));
+	}
 	if (nextid == 0) {
 		return (0);
 	}
-	stat.version = sizeof(stat);
-	if (kldstat(nextid, &stat) == -1) {
-		return (fatal(L, "kldstat", errno));
-	}
-	nextid = kldnext(nextid);
 	lua_pushinteger(L, nextid);
-	lua_replace(L, lua_upvalueindex(1));
-
-	lua_newtable(L);
-	lua_pushstring(L, stat.name);
-	lua_setfield(L, -2, "name");
-	lua_pushinteger(L, stat.refs);
-	lua_setfield(L, -2, "refs");
-	lua_pushinteger(L, stat.id);
-	lua_setfield(L, -2, "id");
-	{
-		char *s = NULL;
-		if (asprintf(&s, "%p", stat.address) == -1) {
-			return (fatal(L, "asprintf", errno));
-		}
-		lua_pushstring(L, s);
-		free(s);
-	}
-	lua_setfield(L, -2, "address");
-	lua_pushinteger(L, stat.size);
-	lua_setfield(L, -2, "size");
-	lua_pushstring(L, stat.pathname);
-	lua_setfield(L, -2, "pathname");
 	return (1);
 }
 
 static int
-l_kldstat(lua_State *L)
+l_modfnext(lua_State *L)
 {
+	int modid, nextid;
 
-	lua_pushinteger(L, kldnext(0));
-	lua_pushcclosure(L, l_kldstat_iter_next, 1);
+	modid = luaL_checkinteger(L, 1);
+
+	if ((nextid = modfnext(modid)) == -1) {
+		return (fatal(L, "modfnext", errno));
+	}
+	if (nextid == 0) {
+		return (0);
+	}
+	lua_pushinteger(L, nextid);
 	return (1);
 }
 
 static int
-l_modstat_next(lua_State *L)
+l_modstat(lua_State *L)
 {
 	struct module_stat stat;
-	int nextid;
+	int modid;
 
-	nextid = luaL_checkinteger(L, lua_upvalueindex(1));
-	if (nextid == 0) {
-		return (0);
-	}
+	modid = luaL_checkinteger(L, 1);
+
 	stat.version = sizeof(stat);
-	if (modstat(nextid, &stat) == -1) {
-		return (fatal(L, "modstat", errno));
+	if (modstat(modid, &stat) == -1) {
+		return (fail(L, errno));
 	}
-	nextid = modfnext(nextid);
-	lua_pushinteger(L, nextid);
-	lua_replace(L, lua_upvalueindex(1));
-
 	lua_newtable(L);
 	lua_pushstring(L, stat.name);
 	lua_setfield(L, -2, "name");
@@ -101,21 +75,25 @@ l_modstat_next(lua_State *L)
 }
 
 static int
-l_modstat(lua_State *L)
+l_modfind(lua_State *L)
 {
-	int fileid;
+	const char *modname;
+	int modid;
 
-	fileid = luaL_checkinteger(L, 1);
-	lua_pushinteger(L, kldfirstmod(fileid));
-	lua_pushcclosure(L, l_modstat_next, 1);
+	modname = luaL_checkstring(L, 1);
+
+	if ((modid = modfind(modname)) == -1) {
+		return (fail(L, errno));
+	}
+	lua_pushinteger(L, modid);
 	return (1);
 }
 
 static const struct luaL_Reg l_module_funcs[] = {
-	/* Iterate kernel module files, yielding stats for each. */
-	{"kldstat", l_kldstat}, /* TODO: belongs in sys.linker */
-	/* Iterate modules in a file given fileid, yielding stats for each. */
+	{"modnext", l_modnext},
+	{"modfnext", l_modfnext},
 	{"modstat", l_modstat},
+	{"modfind", l_modfind},
 	{NULL, NULL}
 };
 

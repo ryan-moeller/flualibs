@@ -1,7 +1,7 @@
-SHLIB_NAME=	module.so
-SRCS+=	lua_module.c
+SHLIB_NAME=	linker.so
+SRCS+=	lua_linker.c
 CFLAGS+=${FLUA_CFLAGS}
-MAN=	module.3lua
+MAN=	linker.3lua
 
 .include "../Makefile.inc"
 .include <bsd.lib.mk>

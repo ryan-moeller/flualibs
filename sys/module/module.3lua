@@ -1,0 +1,86 @@
+.\"
+.\" Copyright (c) 2023-2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 17, 2025
+.Dt MODULE 3lua
+.Os
+.Sh NAME
+.Nm sys.module
+.Nd Lua bindings for
+.Xr modnext 2 ,
+.Xr modfnext 2 ,
+.Xr modstat 2 ,
+.Xr modfind 2
+.Sh SYNOPSIS
+.Bd -literal
+local module = require('sys.module')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv nextid = module.modnext([modid ] )
+.It Dv nextid = module.modfnext(modid )
+.It Dv stat, errmsg, errcode = module.modstat(modid )
+.It Dv modid, errmsg, errcode = module.modfind(modname )
+.El
+.Sh DESCRIPTION
+The
+.Nm sys.module
+module provides bindings for kernel module status, search, and iteration system
+calls.
+.Bl -tag -width XXXX
+.It Dv nextid = module.modnext([modid ] )
+Wraps
+.Xr modnext 2 .
+Errors are raised.
+.It Dv nextid = module.modfnext(modid )
+Wraps
+.Xr modfnext 2 .
+Errors are raised.
+.It Dv stat, errmsg, errcode = module.modstat(modid )
+Wraps
+.Xr modstat 2 .
+.It Dv modid, errmsg, errcode = module.modfind(modname )
+Wraps
+.Xr modfind 2 .
+.El
+.Sh EXAMPLES
+Describe all kld files and modules as JSON:
+.Bd -literal -offset indent
+local linker = require('sys.linker')
+local module = require('sys.module')
+local ucl = require('ucl')
+
+local function iter_klds()
+	return function (_, fileid)
+		return linker.kldnext(fileid)
+	end, nil, 0
+end
+
+local function iter_mods(fileid)
+	return function (_, modid)
+		if modid then
+			return module.modfnext(modid)
+		end
+	end, nil, linker.kldfirstmod(fileid)
+end
+
+local klds = {}
+for fileid in iter_klds() do
+	local kld = assert(linker.kldstat(fileid))
+	kld.address = tostring(kld.address):match(' (.*)')
+	kld.modules = {}
+	for modid in iter_mods(fileid) do
+		local mod = assert(module.modstat(modid))
+		table.insert(kld.modules, mod)
+	end
+	table.insert(klds, kld)
+end
+print(ucl.to_json(klds))
+.Ed
+.Sh SEE ALSO
+.Xr linker 3lua ,
+.Xr kldstat 8
+.Sh AUTHORS
+.An Ryan Moeller

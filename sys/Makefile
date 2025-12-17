@@ -9,6 +9,7 @@ SUBDIR=	\
 	cpuset \
 	event \
 	extattr \
+	linker \
 	mac \
 	module \
 	socket \

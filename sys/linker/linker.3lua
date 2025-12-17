@@ -1,0 +1,100 @@
+.\"
+.\" Copyright (c) 2023-2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 17, 2025
+.Dt LINKER 3lua
+.Os
+.Sh NAME
+.Nm sys.linker
+.Nd Lua bindings for
+.Xr kldload 2 ,
+.Xr kldunload 2 ,
+.Xr kldfind 2 ,
+.Xr kldnext 2 ,
+.Xr kldstat 2 ,
+.Xr kldfirstmod 2
+.Sh SYNOPSIS
+.Bd -literal
+local linker = require('sys.linker')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv fileid, errmsg, errcode = linker.kldload(filename )
+.It Dv ok, errmsg, errcode = linker.kldunload(fileid[ , flags ] )
+.It Dv fileid, errmsg, errcode = linker.kldfind(filename )
+.It Dv nextid = linker.kldnext([fileid ] )
+.It Dv stat, errmsg, errcode = linker.kldstat(fileid )
+.It Dv modid, errmsg, errcode = linker.kldfirstmod(fileid )
+.It Dv linker.UNLOAD_NORMAL
+.It Dv linker.UNLOAD_FORCE
+.El
+.Sh DESCRIPTION
+The
+.Nm sys.linker
+module provides bindings for kernel module linker system calls.
+.Bl -tag -width XXXX
+.It Dv fileid, errmsg, errcode = linker.kldload(filename )
+Wraps
+.Xr kldload 2 .
+.It Dv ok, errmsg, errcode = linker.kldunload(fileid[ , flags ] )
+Wraps
+.Xr kldunload 2
+and
+.Xr kldunloadf 2 .
+.It Dv fileid, errmsg, errcode = linker.kldfind(filename )
+Wraps
+.Xr kldfind 2 .
+.It Dv nextid = linker.kldnext([fileid ] )
+Wraps
+.Xr kldnext 2 .
+Errors are raised.
+.It Dv stat, errmsg, errcode = linker.kldstat(fileid )
+Wraps
+.Xr kldstat 2 .
+.It Dv modid, errmsg, errcode = linker.kldfirstmod(fileid )
+Wraps
+.Xr kldfirstmod 2 .
+.El
+.Sh EXAMPLES
+Describe all kld files and modules as JSON:
+.Bd -literal -offset indent
+local linker = require('sys.linker')
+local module = require('sys.module')
+local ucl = require('ucl')
+
+local function iter_klds()
+	return function (_, fileid)
+		return linker.kldnext(fileid)
+	end, nil, 0
+end
+
+local function iter_mods(fileid)
+	return function (_, modid)
+		if modid then
+			return module.modfnext(modid)
+		end
+	end, nil, linker.kldfirstmod(fileid)
+end
+
+local klds = {}
+for fileid in iter_klds() do
+	local kld = assert(linker.kldstat(fileid))
+	kld.address = tostring(kld.address):match(' (.*)')
+	kld.modules = {}
+	for modid in iter_mods(fileid) do
+		local mod = assert(module.modstat(modid))
+		table.insert(kld.modules, mod)
+	end
+	table.insert(klds, kld)
+end
+print(ucl.to_json(klds))
+.Ed
+.Sh SEE ALSO
+.Xr module 3lua ,
+.Xr kldload 8 ,
+.Xr kldstat 8 ,
+.Xr kldunload 8
+.Sh AUTHORS
+.An Ryan Moeller
