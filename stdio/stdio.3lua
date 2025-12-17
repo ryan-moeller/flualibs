@@ -3,8 +3,8 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 16, 2025
-.Dt FILENO 3lua
+.Dd December 17, 2025
+.Dt STDIO 3lua
 .Os
 .Sh NAME
 .Nm stdio
@@ -70,6 +70,6 @@ kq:close()
 .Ed
 .Sh SEE ALSO
 .Xr fileno 3 ,
-.Xr kqueue 3lua Pq Pa https://github.com/ryan-moeller/flualibs
+.Xr event 3lua
 .Sh AUTHORS
 .An Ryan Moeller

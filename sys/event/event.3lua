@@ -3,8 +3,8 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 16, 2025
-.Dt KQUEUE 3lua
+.Dd December 17, 2025
+.Dt EVENT 3lua
 .Os
 .Sh NAME
 .Nm sys.event
@@ -122,6 +122,6 @@ kq:close()
 .Ed
 .Sh SEE ALSO
 .Xr kqueue 2 ,
-.Xr fileno 3lua Pq Pa https://github.com/ryan-moeller/flualibs
+.Xr stdio 3lua
 .Sh AUTHORS
 .An Ryan Moeller
