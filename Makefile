@@ -1,6 +1,7 @@
 SUBDIR= \
 	b64 \
-	freebsd \
+	dirent \
+	fcntl \
 	libfetch \
 	libifconfig \
 	libmagic \
@@ -8,6 +9,11 @@ SUBDIR= \
 	libnv \
 	libpathconv \
 	libpthread \
+	mqueue \
+	stdio \
+	sys \
+	time \
+	unistd \
 	xor \
 
 .include "Makefile.inc"

@@ -27,8 +27,6 @@ task:
     ARCHIVES_BASE: https://download.freebsd.org/${CIRRUS_TASK_NAME}
   build_setup_script:
     - test -e /usr/src/contrib/lua/src/lua.h || fetch -o - ${ARCHIVES_BASE}/src.txz | tar x -C /
-    # XXX: make install won't create this directory (missing on older branches)
-    - mkdir -p /usr/lib/flua/freebsd/sys
   build_script:
     - make -j${CIRRUS_CPU}
     - make install

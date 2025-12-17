@@ -1,0 +1,75 @@
+.\"
+.\" Copyright (c) 2024-2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 16, 2025
+.Dt FILENO 3lua
+.Os
+.Sh NAME
+.Nm stdio
+.Nd Lua binding for
+.Xr fileno 3
+.Sh SYNOPSIS
+.Bd -literal
+stdio = require('stdio')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv fd = stdio.fileno(file )
+.It Dv fd = file:fileno( )
+.El
+.Sh DESCRIPTION
+The
+.Nm stdio
+module provides bindings for the
+.Xr fileno 3
+library routine.
+.Bl -tag -width XXXX
+.It Dv fd = stdio.fileno(file )
+Wraps
+.Xr fileno 3 .
+.It Dv fd = file:fileno( )
+Get the fileno of a Lua
+.Vt file
+handle.
+.El
+.Sh EXAMPLES
+Wait for stdin to be readable using kqueue:
+.Bd -literal -offset indent
+require('stdio')
+local event = require('sys.event')
+local ucl = require('ucl')
+
+local kq = event.kqueue()
+
+local changelist = {
+	{
+		ident = io.stdin:fileno(),
+		filter = event.EVFILT_READ,
+		flags = event.EV_ADD,
+		fflags = 0,
+		data = 0,
+		udata = coroutine.create(function (ev) repeat
+			print("stdin is readable: ", ucl.to_json(ev))
+			local len = ev.data
+			local data = io.stdin:read(len)
+			io.stdout:write(data)
+			ev = coroutine.yield()
+		until false end)
+	}
+}
+
+local ev = kq:kevent(changelist)
+repeat
+	coroutine.resume(ev.udata, ev)
+	ev = kq:kevent()
+until false
+
+kq:close()
+.Ed
+.Sh SEE ALSO
+.Xr fileno 3 ,
+.Xr kqueue 3lua Pq Pa https://github.com/ryan-moeller/flualibs
+.Sh AUTHORS
+.An Ryan Moeller

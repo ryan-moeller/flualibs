@@ -1,0 +1,221 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 16, 2025
+.Dt CAPSICUM 3lua
+.Os
+.Sh NAME
+.Nm sys.capsicum
+.Nd Lua bindings for the
+.Xr capsicum 4
+lightweight OS capability and sandbox framework
+.Sh SYNOPSIS
+.Bd -literal
+cap = require('sys.capsicum')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv cap.enter( )
+.It Dv sandboxed = cap.sandboxed( )
+.It Dv rights = cap.rights.new(... )
+.It Dv rights, errmsg, errcode = cap.rights.get(fd | file )
+.It Dv rights = rights:init(... )
+.It Dv rights = rights:set(... )
+.It Dv rights = rights:clear(... )
+.It Dv set = rights:is_set(... )
+.It Dv empty = rights:is_empty( )
+.It Dv valid = rights:is_valid( )
+.It Dv rights = rights:merge(other )
+.It Dv rights = rights:remove(other )
+.It Dv contains = rights:contains(other )
+.It Dv ok, errmsg, errcode = rights:limit(fd | file )
+.It Dv ok, errmsg, errcode = cap.fcntls.limit(fd | file )
+.It Dv fcntlrights, errmsg, errcode = cap.fcntls.get(fd | file )
+.It Dv ok, errmsg, errcode = cap.ioctls.limit(fd | file )
+.It Dv cmds, errmsg, errcode = cap.ioctls.get(fd | file )
+.It Dv cap.READ
+.It Dv cap.WRITE
+.It Dv cap.SEEK_TELL
+.It Dv cap.SEEK
+.It Dv cap.PREAD
+.It Dv cap.PWRITE
+.It Dv cap.MMAP
+.It Dv cap.MMAP_R
+.It Dv cap.MMAP_W
+.It Dv cap.MMAP_X
+.It Dv cap.MMAP_RW
+.It Dv cap.MMAP_RX
+.It Dv cap.MMAP_WX
+.It Dv cap.MMAP_RWX
+.It Dv cap.CREATE
+.It Dv cap.FEXECVE
+.It Dv cap.FSYNC
+.It Dv cap.FTRUNCATE
+.It Dv cap.LOOKUP
+.It Dv cap.FCHDIR
+.It Dv cap.FCHFLAGS
+.It Dv cap.CHFLAGSAT
+.It Dv cap.FCHMOD
+.It Dv cap.FCHMODAT
+.It Dv cap.FCHOWN
+.It Dv cap.FCHOWNAT
+.It Dv cap.FCNTL
+.It Dv cap.FLOCK
+.It Dv cap.FPATHCONF
+.It Dv cap.FSCK
+.It Dv cap.FSTAT
+.It Dv cap.FSTATAT
+.It Dv cap.FSTATFS
+.It Dv cap.FUTIMES
+.It Dv cap.FUTIMESAT
+.It Dv cap.LINKAT_TARGET
+.It Dv cap.MKDIRAT
+.It Dv cap.MKFIFOAT
+.It Dv cap.MKNODAT
+.It Dv cap.RENAMEAT_SOURCE
+.It Dv cap.SYMLINKAT
+.It Dv cap.UNLINKAT
+.It Dv cap.ACCEPT
+.It Dv cap.BIND
+.It Dv cap.CONNECT
+.It Dv cap.GETPEERNAME
+.It Dv cap.GETSOCKNAME
+.It Dv cap.GETSOCKOPT
+.It Dv cap.LISTEN
+.It Dv cap.PEELOFF
+.It Dv cap.RECV
+.It Dv cap.SEND
+.It Dv cap.SETSOCKOPT
+.It Dv cap.SHUTDOWN
+.It Dv cap.BINDAT
+.It Dv cap.CONNECTAT
+.It Dv cap.LINKAT_SOURCE
+.It Dv cap.RENAMEAT_TARGET
+.It Dv cap.FCHROOT
+.It Dv cap.SOCK_CLIENT
+.It Dv cap.SOCK_SERVER
+.It Dv cap.ALL0
+.It Dv cap.UNUSED0_57
+.It Dv cap.MAC_GET
+.It Dv cap.MAC_SET
+.It Dv cap.SEM_GETVALUE
+.It Dv cap.SEM_POST
+.It Dv cap.SEM_WAIT
+.It Dv cap.EVENT
+.It Dv cap.KQUEUE_EVENT
+.It Dv cap.IOCTL
+.It Dv cap.TTYHOOK
+.It Dv cap.PDGETPID
+.It Dv cap.PDWAIT
+.It Dv cap.PDKILL
+.It Dv cap.EXTATTR_DELETE
+.It Dv cap.EXTATTR_GET
+.It Dv cap.EXTATTR_LIST
+.It Dv cap.EXTATTR_SET
+.It Dv cap.ACL_CHECK
+.It Dv cap.ACL_DELETE
+.It Dv cap.ACL_GET
+.It Dv cap.ACL_SET
+.It Dv cap.KQUEUE_CHANGE
+.It Dv cap.KQUEUE
+.It Dv cap.INOTIFY_ADD
+.It Dv cap.INOTIFY_RM
+.It Dv cap.ALL1
+.It Dv cap.UNUSED1_22
+.It Dv cap.UNUSED1_57
+.It Dv cap.FCNTL_GETFL
+.It Dv cap.FCNTL_SETFL
+.It Dv cap.FCNTL_GETOWN
+.It Dv cap.FCNTL_SETOWN
+.It Dv cap.FCNTL_ALL
+.El
+.Sh DESCRIPTION
+The
+.Nm sys.capsicum
+module provides bindings for the
+.Xr capsicum 4
+lightweight OS capability and sandbox framework.
+.Bl -tag -width XXXX
+.It Dv cap.enter( )
+Wraps
+.Xr cap_enter 2 .
+.It Dv sandboxed = cap.sandboxed( )
+Wraps
+.Xr cap_sandboxed 3 .
+.It Dv rights = cap.rights.new(... )
+Allocates a
+.Vt cap_rights_t
+in Lua and initializes it with
+.Xr cap_rights_init 3 .
+Any arguments are capabilities to be set by
+.Xr cap_rights_set 3 .
+.It Dv rights, errmsg, errcode = cap.rights.get(fd | file )
+Wraps
+.Xr cap_rights_get 3 .
+.It Dv rights = rights:init(... )
+Wraps
+.Xr cap_rights_init 3 .
+Any arguments are capabilities to be set by
+.Xr cap_rights_set 3 .
+.It Dv rights = rights:set(... )
+Wraps
+.Xr cap_rights_set 3 .
+.It Dv rights = rights:clear(... )
+Wraps
+.Xr cap_rights_clear 3 .
+.It Dv set = rights:is_set(... )
+Wraps
+.Xr cap_rights_is_set 3 .
+.It Dv empty = rights:is_empty( )
+Wraps
+.Xr cap_rights_is_empty 3 .
+.It Dv valid = rights:is_valid( )
+Wraps
+.Xr cap_rights_is_valid 3 .
+.It Dv rights = rights:merge(other )
+Wraps
+.Xr cap_rights_merge 3 .
+.It Dv rights = rights:remove(other )
+Wraps
+.Xr cap_rights_remove 3 .
+.It Dv contains = rights:contains(other )
+Wraps
+.Xr cap_rights_contains 3 .
+.It Dv ok, errmsg, errcode = rights:limit(fd | file )
+Wraps
+.Xr cap_rights_limit 2 .
+.It Dv ok, errmsg, errcode = cap.fcntls.limit(fd | file , fcntlrights )
+Wraps
+.Xr cap_fcntls_limit 2 .
+.It Dv fcntlrights, errmsg, errcode = cap.fcntls.get(fd | file )
+Wraps
+.Xr cap_fcntls_get 2 .
+.It Dv ok, errmsg, errcode = cap.ioctls.limit(fd | file , ... )
+Wraps
+.Xr cap_ioctls_limit 2 .
+.It Dv cmds, errmsg, errcode = cap.ioctls.get(fd | file )
+Wraps
+.Xr cap_ioctls_get 2 .
+When successful, returns
+.Dv false
+if ioctls have not been limited,
+otherwise a
+.Vt table
+of allowed
+.Xr ioctl 2
+commands.
+.El
+.Sh EXAMPLES
+Enter and confirm a capability sandbox:
+.Bd -literal -offset indent
+local cap = require('sys.capsicum')
+
+cap.enter()
+assert(cap.sandboxed())
+.Ed
+.Sh SEE ALSO
+.Xr capsicum 4
+.Sh AUTHORS
+.An Ryan Moeller

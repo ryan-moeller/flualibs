@@ -20,8 +20,8 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+#include "sys/cpuset/lua_cpuset.h"
 #include "refcount.h"
-#include "freebsd/sys/cpuset/lua_cpuset.h"
 #include "luaerror.h"
 #include "utils.h"
 

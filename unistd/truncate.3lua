@@ -1,0 +1,60 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 16, 2025
+.Dt TRUNCATE 3lua
+.Os
+.Sh NAME
+.Nm unistd
+.Nd Lua bindings for
+.Xr truncate 2
+and
+.Xr ftruncate 2
+system calls
+.Sh SYNOPSIS
+.Bd -literal
+unistd = require('unistd')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv ok, errmsg, errcode = unistd.truncate(path , name )
+.It Dv ok, errmsg, errcode = unistd.ftruncate(fd | file , name )
+.It Dv unistd.STDIN_FILENO
+.It Dv unistd.STDOUT_FILENO
+.It Dv unistd.STDERR_FILENO
+.El
+.Sh DESCRIPTION
+The
+.Nm unistd
+module provides bindings for the
+.Xr truncate 2
+and
+.Xr ftruncate 2
+system calls.
+.Bl -tag -width XXXX
+.It Dv ok, errmsg, errcode = unistd.truncate(path , name )
+Wraps
+.Xr truncate 2 .
+.It Dv ok, errmsg, errcode = unistd.ftruncate(fd | file , name )
+Wraps
+.Xr ftruncate 2 .
+.El
+.Sh EXAMPLES
+Create a zero-filled file:
+.Bd -literal -offset indent
+local unistd = require('unistd')
+
+local path = os.tmpname()
+local size = 4096
+print(path)
+assert(unistd.truncate(path, size))
+.Ed
+.Sh SEE ALSO
+.Xr confstr 3lua ,
+.Xr pathconf 3lua ,
+.Xr sysconf 3lua ,
+.Xr sysctl 3lua
+.Sh AUTHORS
+.An Ryan Moeller
