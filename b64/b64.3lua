@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd September 6, 2025
+.Dd December 21, 2025
 .Dt B64 3lua
 .Os
 .Sh NAME
@@ -15,22 +15,25 @@ base64 = require('b64')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv str = base64.encode(data )
-.It Dv data = base64.decode(str )
+.It Dv encoded = base64.encode(data )
+.It Dv data, errmsg, errcode = base64.decode(encoded )
 .El
 .Sh DESCRIPTION
 The
 .Nm b64
 module provides bindings for the libc base64 encode and decode functions.
 .Bl -tag -width XXXX
-.It Dv str = base64.encode(data )
+.It Dv encoded = base64.encode(data )
 Encode the given
 .Pq data
 string to a base64 string.
-.It Dv data = base64.decode(str )
+.It Dv data, errmsg, errcode = base64.decode(encoded )
 Decode the given base64-encoded string
-.Pq str
+.Pq encoded
 to the original plain data string.
+Returns
+.Dv nil
+followed by an error message and code if the input is invalid.
 .El
 .Sh EXAMPLES
 Encode and decode a string as base64:
@@ -39,7 +42,7 @@ base64 = require('b64')
 
 input = "Hello, FreeBSD!"
 encoded = base64.encode(input)
-output = base64.decode(encoded)
+output = assert(base64.decode(encoded))
 assert(output == input)
 .Ed
 .Sh SEE ALSO

@@ -4,73 +4,69 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <sys/types.h>
+#include <assert.h>
+#include <errno.h>
 #include <resolv.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "luaerror.h"
+#include "utils.h"
 
 int luaopen_b64(lua_State *);
 
 static int
-l_base64_encode(lua_State *L)
+l_b64_encode(lua_State *L)
 {
 	const u_char *data;
-	size_t len, strlen;
-	char *str;
-	int res;
+	char *buf;
+	size_t datalen, buflen;
+	int len;
 
-	data = (const u_char *)luaL_checklstring(L, 1, &len);
+	data = (const u_char *)luaL_checklstring(L, 1, &datalen);
 
 	/* Base64 encodes 3 bytes into 4 characters. */
-	strlen = 4 * (len + 2) / 3 + 1; /* len + 2 to round up */
-	str = malloc(strlen);
-	if (str == NULL)
-		return (luaL_error(L, "malloc failed"));
-
-	res = b64_ntop(data, len, str, strlen);
-	if (res == -1) {
-		free(str);
-		return (luaL_error(L, "b64_ntop failed"));
+	buflen = 4 * (datalen + 2) / 3 + 1; /* datalen + 2 to round up */
+	if ((buf = malloc(buflen)) == NULL) {
+		return (fatal(L, "malloc", ENOMEM));
 	}
-	lua_pushlstring(L, str, res);
-	free(str);
+	len = b64_ntop(data, datalen, buf, buflen);
+	assert(len != -1); /* Only error cases are for buflen too small. */
+	lua_pushlstring(L, buf, len);
+	free(buf);
 	return (1);
 }
 
 static int
-l_base64_decode(lua_State *L)
+l_b64_decode(lua_State *L)
 {
-	const char *str;
-	size_t len;
-	u_char *data;
-	int res;
+	const char *encoded;
+	u_char *buf;
+	size_t enclen, buflen;
+	int len;
 
-	str = luaL_checklstring(L, 1, &len);
+	encoded = luaL_checklstring(L, 1, &enclen);
 
-	/* Each char represents 6 bits, so the data is 3/4 * len bytes long. */
-	len = 3 * len / 4;
-	data = malloc(len);
-	if (data == NULL)
-		return (luaL_error(L, "malloc failed"));
-
-	res = b64_pton(str, data, len);
-	if (res == -1) {
-		free(data);
-		return (luaL_error(L, "b64_pton failed"));
+	/* Each char encodes 6 bits, so the data is 3/4 * enclen bytes long. */
+	buflen = 3 * enclen / 4;
+	if ((buf = malloc(buflen)) == NULL) {
+		return (fatal(L, "malloc", ENOMEM));
 	}
-	lua_pushlstring(L, (char *)data, res);
-	free(data);
+	if ((len = b64_pton(encoded, buf, buflen)) == -1) {
+		free(buf);
+		return (fail(L, EINVAL));
+	}
+	lua_pushlstring(L, (char *)buf, len);
+	free(buf);
 	return (1);
 }
 
 static const struct luaL_Reg l_b64_funcs[] = {
-	{"encode", l_base64_encode},
-	{"decode", l_base64_decode},
+	{"encode", l_b64_encode},
+	{"decode", l_b64_decode},
 	{NULL, NULL}
 };
 
