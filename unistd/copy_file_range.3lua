@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 16, 2025
+.Dd December 21, 2025
 .Dt COPY_FILE_RANGE 3lua
 .Os
 .Sh NAME
@@ -42,6 +42,6 @@ copy_file_range(io.stdin, nil, io.stdout, nil, unistd.SSIZE_MAX, 0)
 .Ed
 .Sh SEE ALSO
 .Xr copy_file_range 2 ,
-.Xr sendfile 3lua
+.Xr socket 3lua
 .Sh AUTHORS
 .An Ryan Moeller
