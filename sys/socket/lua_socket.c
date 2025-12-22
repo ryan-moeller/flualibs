@@ -11,49 +11,16 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
 
+#include "lua_socket.h"
 #include "luaerror.h"
 #include "utils.h"
 
 int luaopen_sys_socket(lua_State *);
-
-static inline void
-pushaddr(lua_State *L, const struct sockaddr_storage *ss)
-{
-	const struct sockaddr *addr = (const struct sockaddr *)ss;
-
-	lua_createtable(L, 0, 2);
-	lua_pushinteger(L, addr->sa_family);
-	lua_setfield(L, -2, "family");
-	lua_pushlstring(L, addr->sa_data,
-	    addr->sa_len - offsetof(struct sockaddr, sa_data));
-	lua_setfield(L, -2, "data");
-}
-
-static inline void
-checkaddr(lua_State *L, int idx, struct sockaddr_storage *ss)
-{
-	struct sockaddr *addr = (struct sockaddr *)ss;
-	const char *data;
-	size_t datalen;
-
-	memset(ss, 0, sizeof(*ss));
-	luaL_checktype(L, idx, LUA_TTABLE);
-	lua_getfield(L, idx, "family");
-	luaL_argcheck(L, lua_isinteger(L, -1), idx, "invalid address family");
-	addr->sa_family = lua_tointeger(L, -1);
-	lua_getfield(L, idx, "data");
-	luaL_argcheck(L, lua_isstring(L, -1), idx, "invalid address data");
-	data = lua_tolstring(L, -1, &datalen);
-	memcpy(addr->sa_data, data, datalen);
-	addr->sa_len = datalen + offsetof(struct sockaddr, sa_data);
-	lua_pop(L, 2);
-}
 
 static int
 l_accept(lua_State *L)
@@ -81,7 +48,7 @@ l_accept(lua_State *L)
 	}
 	assert(ss.ss_len == addrlen);
 	lua_pushinteger(L, new_s);
-	pushaddr(L, &ss);
+	pushaddr(L, addr);
 	return (2);
 }
 
@@ -179,7 +146,7 @@ l_getpeername(lua_State *L)
 	if (getpeername(s, name, &namelen) == -1) {
 		return (fail(L, errno));
 	}
-	pushaddr(L, &ss);
+	pushaddr(L, name);
 	return (1);
 }
 
@@ -199,7 +166,7 @@ l_getsockname(lua_State *L)
 	if (getsockname(s, name, &namelen) == -1) {
 		return (fail(L, errno));
 	}
-	pushaddr(L, &ss);
+	pushaddr(L, name);
 	return (1);
 }
 
@@ -288,7 +255,7 @@ l_recvfrom(lua_State *L)
 	}
 	assert(ss.ss_len == fromlen);
 	luaL_pushresultsize(&b, len);
-	pushaddr(L, &ss);
+	pushaddr(L, from);
 	return (1);
 }
 
