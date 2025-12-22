@@ -10,6 +10,7 @@ SUBDIR= \
 	libpathconv \
 	libpthread \
 	mqueue \
+	netdb \
 	stdio \
 	sys \
 	time \

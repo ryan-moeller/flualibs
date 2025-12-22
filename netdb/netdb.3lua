@@ -1,0 +1,141 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 22, 2025
+.Dt NETDB 3lua
+.Os
+.Sh NAME
+.Nm netdb
+.Nd Lua binding for
+.Xr getaddrinfo 3 ,
+.Xr getnameinfo 3
+.Sh SYNOPSIS
+.Bd -literal
+netdb = require('netdb')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv addrs, errmsg, errcode = netdb.getaddrinfo(hostname , servname[ , hints ] )
+.It Dv host, serv_or_errmsg, errcode = netdb.getnameinfo(addr[ , flags ] )
+.It Dv netdb._PATH_HEQUIV
+.It Dv netdb._PATH_HOSTS
+.It Dv netdb._PATH_NETWORKS
+.It Dv netdb._PATH_PROTOCOLS
+.It Dv netdb._PATH_SERVICES
+.It Dv netdb._PATH_SERVICES_DB
+.It Dv netdb.IPPORT_RESERVED
+.It Dv netdb.NETDB_INTERNAL
+.It Dv netdb.NETDB_SUCCESS
+.It Dv netdb.HOST_NOT_FOUND
+.It Dv netdb.TRY_AGAIN
+.It Dv netdb.NO_RECOVERY
+.It Dv netdb.NO_DATA
+.It Dv netdb.NO_ADDRESS
+.It Dv netdb.EAI_ADDRFAMILY
+.It Dv netdb.EAI_AGAIN
+.It Dv netdb.EAI_BADFLAGS
+.It Dv netdb.EAI_FAIL
+.It Dv netdb.EAI_FAMILY
+.It Dv netdb.EAI_MEMORY
+.It Dv netdb.EAI_NODATA
+.It Dv netdb.EAI_NONAME
+.It Dv netdb.EAI_SERVICE
+.It Dv netdb.EAI_SOCKTYPE
+.It Dv netdb.EAI_SYSTEM
+.It Dv netdb.EAI_BADHINTS
+.It Dv netdb.EAI_PROTOCOL
+.It Dv netdb.EAI_OVERFLOW
+.It Dv netdb.EAI_MAX
+.It Dv netdb.AI_PASSIVE
+.It Dv netdb.AI_CANONNAME
+.It Dv netdb.AI_NUMERICHOST
+.It Dv netdb.AI_NUMERICSERV
+.It Dv netdb.AI_MASK
+.It Dv netdb.AI_ALL
+.It Dv netdb.AI_V4MAPPED_CFG
+.It Dv netdb.AI_ADDRCONFIG
+.It Dv netdb.AI_V4MAPPED
+.It Dv netdb.AI_DEFAULT
+.It Dv netdb.NI_MAXHOST
+.It Dv netdb.NI_MAXSERV
+.It Dv netdb.NI_NOFQDN
+.It Dv netdb.NI_NUMERICHOST
+.It Dv netdb.NI_NAMEREQD
+.It Dv netdb.NI_NUMERICSERV
+.It Dv netdb.NI_DGRAM
+.It Dv netdb.NI_NUMERICSCOPE
+.El
+.Sh DESCRIPTION
+The
+.Nm netdb
+module provides bindings for the
+.Xr getaddrinfo 3
+and
+.Xr getnameinfo 3
+library routines.
+.Pp
+.Vt sockaddr
+socket addresses are represented as tables of the form
+.Bd -literal -compact
+{
+	family = <integer>,
+	data = <string>,
+}
+.Ed
+where
+.Va data
+is the unformatted address as raw bytes.
+.Bl -tag -width XXXX
+.It Dv addrs, errmsg, errcode = netdb.getaddrinfo(hostname , servname[ , hints ] )
+Wraps
+.Xr getaddrinfo 3 .
+.Fa hints
+takes a table of the form
+.Bd -literal -compact
+{
+	flags = <integer>,
+	family = <integer>,
+	socktype = <integer>,
+	protocol = <integer>,
+}
+.Ed
+where each field is optional.
+.Pp
+Returns addresses in a table of the form
+.Bd -literal -compact
+{
+	{
+		flags = <integer>,
+		family = <integer>,
+		socktype = <integer>,
+		protocol = <integer>,
+		canonname = <string>,
+		addr = <sockaddr>,
+	},
+	...
+}
+.Ed
+.It Dv host, serv_or_errmsg, errcode = netdb.getnameinfo(addr[ , flags ] )
+Wraps
+.Xr getnameinfo 3 .
+.El
+.Sh EXAMPLES
+Look up addresses for a web server:
+.Bd -literal -offset indent
+local socket = require('sys.socket')
+local netdb = require('netdb')
+
+local hints = {socktype=socket.SOCK_STREAM}
+local addrs = assert(netdb.getaddrinfo('freebsd.org', 'http', hints))
+local flags = netdb.NI_NUMERICHOST | netdb.NI_NUMERICSERV
+for _, ai in ipairs(addrs) do
+	local host, port = assert(netdb.getnameinfo(ai.addr, flags))
+	print(('%s:%s'):format(host, port))
+end
+.Ed
+.Sh SEE ALSO
+.Xr socket 3lua
+.Sh AUTHORS
+.An Ryan Moeller
