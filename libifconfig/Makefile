@@ -21,6 +21,10 @@ SRCS+=	\
 	libifconfig_media.c \
 	libifconfig_sfp.c \
 
+.if exists(libifconfig_nl.c)
+SRCS+=	libifconfig_nl.c
+.endif
+
 GEN=	\
 	libifconfig_sfp_tables.h \
 	libifconfig_sfp_tables.c \
