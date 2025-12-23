@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd September 16, 2025
+.Dd December 23, 2025
 .Dt IFCONFIG 3lua
 .Os
 .Sh NAME
@@ -641,13 +641,38 @@ The
 .Vt struct ifaddrs *
 userdata type describes an interface and various address types associated with
 it.
-An object of this type provides two address-agnostic methods:
+An object of this type provides the following address-agnostic methods:
 .Bl -tag -width XXXX
 .It Dv name = ifaddr:name( )
 Get the name of the interface to which this address is assigned.
 .It Dv flags = ifaddr:flags( )
 Get the flags set on the interface to which this address is assigned.
+.It Dv addr = ifaddr:addr( )
+Get a
+.Vt sockaddr
+table for the address assigned to this interface.
+.It Dv netmask = ifaddr:netmask( )
+Get a
+.Vt sockaddr
+table for the netmask assigned to this interface.
+.It Dv dstaddr = ifaddr:dstaddr( )
+Get a
+.Vt sockaddr
+table for the destination address assigned to this interface.
 .El
+A
+.Vt sockaddr
+table has the form
+.Bd -literal -compact
+{
+	family = #,
+	data = "",
+}
+.Ed
+where
+.Va data
+is the unformatted address as raw bytes.
+.Pp
 Address-specific information is obtained by passing a
 .Vt struct ifaddrs *
 userdata object to the

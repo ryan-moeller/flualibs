@@ -43,6 +43,8 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+#include "sys/socket/lua_socket.h"
+
 #define IFCONFIG_HANDLE_META "ifconfig_handle_t"
 #define STRUCT_IFADDRS_META "struct ifaddrs *"
 #define SFP_DUMP_META "struct ifconfig_sfp_dump"
@@ -2042,9 +2044,54 @@ l_struct_ifaddrs_flags(lua_State *L)
 	return (1);
 }
 
+/** Get interface address
+ * @return	Table describing a sockaddr
+ */
+static int
+l_struct_ifaddrs_addr(lua_State *L)
+{
+	const struct ifaddrs *ifa;
+
+	ifa = l_ifconfig_checkifaddrs(L, 1);
+
+	pushaddr(L, ifa->ifa_addr);
+	return (1);
+}
+
+/** Get interface netmask
+ * @return	Table describing a sockaddr
+ */
+static int
+l_struct_ifaddrs_netmask(lua_State *L)
+{
+	const struct ifaddrs *ifa;
+
+	ifa = l_ifconfig_checkifaddrs(L, 1);
+
+	pushaddr(L, ifa->ifa_netmask);
+	return (1);
+}
+
+/** Get interface destination address
+ * @return	Table describing a sockaddr
+ */
+static int
+l_struct_ifaddrs_dstaddr(lua_State *L)
+{
+	const struct ifaddrs *ifa;
+
+	ifa = l_ifconfig_checkifaddrs(L, 1);
+
+	pushaddr(L, ifa->ifa_dstaddr);
+	return (1);
+}
+
 static const struct luaL_Reg l_struct_ifaddrs[] = {
 	{"name", l_struct_ifaddrs_name},
 	{"flags", l_struct_ifaddrs_flags},
+	{"addr", l_struct_ifaddrs_addr},
+	{"netmask", l_struct_ifaddrs_netmask},
+	{"dstaddr", l_struct_ifaddrs_dstaddr},
 	{NULL, NULL}
 };
 
