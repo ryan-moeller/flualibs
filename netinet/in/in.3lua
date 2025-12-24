@@ -1,0 +1,594 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 23, 2025
+.Dt IN 3lua
+.Os
+.Sh NAME
+.Nm netinet.in
+.Nd Lua binding for Internet Protocol definitions and utilities
+.Sh SYNOPSIS
+.Bd -literal
+netin = require('netinet.in')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv sin = netin.sockaddr_in(sockaddr )
+.It Dv sin6 = netin.sockaddr_in6(sockaddr )
+.It Dv ismulticast = netin.in_multicast(inaddr )
+.It Dv isexperimental = netin.in_experimental(inaddr )
+.It Dv isbadclass = netin.in_badclass(inaddr )
+.It Dv islinklocal = netin.in_linklocal(inaddr )
+.It Dv isloopback = netin.in_loopback(inaddr )
+.It Dv iszeronet = netin.in_zeronet(inaddr )
+.It Dv isprivate = netin.in_private(inaddr )
+.It Dv islocalgroup = netin.in_local_group(inaddr )
+.It Dv isanylocal = netin.in_any_local(inaddr )
+.It Dv same = netin.in6_are_addr_equal(in6addr_a , in6addr_b )
+.It Dv isunspecified = netin.in6_is_addr_unspecified(in6addr )
+.It Dv isloopback = netin.in6_is_addr_loopback(in6addr )
+.It Dv isv4compat = netin.in6_is_addr_v4compat(in6addr )
+.It Dv isv4mapped = netin.in6_is_addr_v4mapped(in6addr )
+.It Dv islinklocal = netin.in6_is_addr_linklocal(in6addr )
+.It Dv issitelocal = netin.in6_is_addr_sitelocal(in6addr )
+.It Dv ismulticast = netin.in6_is_addr_multicast(in6addr )
+.It Dv ismcnodelocal = netin.in6_is_addr_mc_nodelocal(in6addr )
+.It Dv ismclinklocal = netin.in6_is_addr_mc_linklocal(in6addr )
+.It Dv ismcsitelocal = netin.in6.is_addr_mc_sitelocal(in6addr )
+.It Dv ismcorglocal = netin.in6_is_addr_mc_orglocal(in6addr )
+.It Dv ismcglobal = netin.in6_is_addr_mc_global(in6addr )
+.It Dv ok, errmsg, errcode = netin.setsourcefilter(s , interface , group , fmode , slist )
+.It Dv fmode, slist_or_errmsg, errcode = netin.getsourcefilter(s , interface , group )
+.It Dv exthdr = netin.inet6_opts_ext(options )
+.It Dv options = netin.inet6_ext_opts(exthdr )
+.It Dv exthdr, errmsg, errcode = netin.inet6_rth_ext(type , segments )
+.It Dv revexthdr, errmsg, errcode = netin.inet6_rth_reverse(exthdr )
+.It Dv segments, errmsg, errcode = netin.inet6_ext_rth(exthdr )
+.It Dv netin.IPPROTO_IP
+.It Dv netin.IPPROTO_ICMP
+.It Dv netin.IPPROTO_TCP
+.It Dv netin.IPPROTO_UDP
+.It Dv netin.INADDR_ANY
+.It Dv netin.INADDR_BROADCAST
+.It Dv netin.IPPROTO_IPV6
+.It Dv netin.IPPROTO_RAW
+.It Dv netin.INET_ADDRSTRLEN
+.It Dv netin.IPPROTO_HOPOPTS
+.It Dv netin.IPPROTO_IGMP
+.It Dv netin.IPPROTO_GGP
+.It Dv netin.IPPROTO_IPV4
+.It Dv netin.IPPROTO_ST
+.It Dv netin.IPPROTO_EGP
+.It Dv netin.IPPROTO_PIGP
+.It Dv netin.IPPROTO_RCCMON
+.It Dv netin.IPPROTO_NVPII
+.It Dv netin.IPPROTO_PUP
+.It Dv netin.IPPROTO_ARGUS
+.It Dv netin.IPPROTO_EMCON
+.It Dv netin.IPPROTO_XNET
+.It Dv netin.IPPROTO_CHAOS
+.It Dv netin.IPPROTO_MUX
+.It Dv netin.IPPROTO_MEAS
+.It Dv netin.IPPROTO_HMP
+.It Dv netin.IPPROTO_PRM
+.It Dv netin.IPPROTO_IDP
+.It Dv netin.IPPROTO_TRUNK1
+.It Dv netin.IPPROTO_TRUNK2
+.It Dv netin.IPPROTO_LEAF1
+.It Dv netin.IPPROTO_LEAF2
+.It Dv netin.IPPROTO_RDP
+.It Dv netin.IPPROTO_IRTP
+.It Dv netin.IPPROTO_TP
+.It Dv netin.IPPROTO_BLT
+.It Dv netin.IPPROTO_NSP
+.It Dv netin.IPPROTO_INP
+.It Dv netin.IPPROTO_DCCP
+.It Dv netin.IPPROTO_3PC
+.It Dv netin.IPPROTO_CMTP
+.It Dv netin.IPPROTO_TPXX
+.It Dv netin.IPPROTO_IL
+.It Dv netin.IPPROTO_SDRP
+.It Dv netin.IPPROTO_ROUTING
+.It Dv netin.IPPROTO_FRAGMENT
+.It Dv netin.IPPROTO_IDRP
+.It Dv netin.IPPROTO_RSVP
+.It Dv netin.IPPROTO_GRE
+.It Dv netin.IPPROTO_MHRP
+.It Dv netin.IPPROTO_BHA
+.It Dv netin.IPPROTO_ESP
+.It Dv netin.IPPROTO_AH
+.It Dv netin.IPPROTO_INLSP
+.It Dv netin.IPPROTO_SWIPE
+.It Dv netin.IPPROTO_NHRP
+.It Dv netin.IPPROTO_MOBILE
+.It Dv netin.IPPROTO_TLSP
+.It Dv netin.IPPROTO_SKIP
+.It Dv netin.IPPROTO_ICMPV6
+.It Dv netin.IPPROTO_NONE
+.It Dv netin.IPPROTO_DSTOPTS
+.It Dv netin.IPPROTO_AHIP
+.It Dv netin.IPPROTO_CFTP
+.It Dv netin.IPPROTO_HELLO
+.It Dv netin.IPPROTO_SATEXPAK
+.It Dv netin.IPPROTO_KRYPTOLAN
+.It Dv netin.IPPROTO_RVD
+.It Dv netin.IPPROTO_IPPC
+.It Dv netin.IPPROTO_ADFS
+.It Dv netin.IPPROTO_SATMON
+.It Dv netin.IPPROTO_VISA
+.It Dv netin.IPPROTO_IPCV
+.It Dv netin.IPPROTO_CPNX
+.It Dv netin.IPPROTO_CPHB
+.It Dv netin.IPPROTO_WSN
+.It Dv netin.IPPROTO_PVP
+.It Dv netin.IPPROTO_BRSATMON
+.It Dv netin.IPPROTO_ND
+.It Dv netin.IPPROTO_WBMON
+.It Dv netin.IPPROTO_WBEXPAK
+.It Dv netin.IPPROTO_EON
+.It Dv netin.IPPROTO_VMTP
+.It Dv netin.IPPROTO_SVMTP
+.It Dv netin.IPPROTO_VINES
+.It Dv netin.IPPROTO_TTP
+.It Dv netin.IPPROTO_IGP
+.It Dv netin.IPPROTO_DGP
+.It Dv netin.IPPROTO_TCF
+.It Dv netin.IPPROTO_IGRP
+.It Dv netin.IPPROTO_OSPFIGP
+.It Dv netin.IPPROTO_SRPC
+.It Dv netin.IPPROTO_LARP
+.It Dv netin.IPPROTO_MTP
+.It Dv netin.IPPROTO_AX25
+.It Dv netin.IPPROTO_IPEIP
+.It Dv netin.IPPROTO_MICP
+.It Dv netin.IPPROTO_SCCSP
+.It Dv netin.IPPROTO_ETHERIP
+.It Dv netin.IPPROTO_ENCAP
+.It Dv netin.IPPROTO_APES
+.It Dv netin.IPPROTO_GMTP
+.It Dv netin.IPPROTO_IPCOMP
+.It Dv netin.IPPROTO_SCTP
+.It Dv netin.IPPROTO_MH
+.It Dv netin.IPPROTO_UDPLITE
+.It Dv netin.IPPROTO_HIP
+.It Dv netin.IPPROTO_HIP
+.It Dv netin.IPPROTO_SHIM6
+.It Dv netin.IPPROTO_PIM
+.It Dv netin.IPPROTO_CARP
+.It Dv netin.IPPROTO_PGM
+.It Dv netin.IPPROTO_MPLS
+.It Dv netin.IPPROTO_PFSYNC
+.It Dv netin.IPPROTO_RESERVED_253
+.It Dv netin.IPPROTO_RESERVED_254
+.It Dv netin.IPPROTO_OLD_DIVERT
+.It Dv netin.IPPROTO_MAX
+.It Dv netin.IPPROTO_DIVERT
+.It Dv netin.IPPROTO_SEND
+.It Dv netin.IPPROTO_SPACER
+.It Dv netin.IPPORT_RESERVED
+.It Dv netin.IPPORT_EPHEMERALFIRST
+.It Dv netin.IPPORT_EPHEMERALLAST
+.It Dv netin.IPPORT_HIFIRSTAUTO
+.It Dv netin.IPPORT_HILASTAUTO
+.It Dv netin.IPPORT_RESERVEDSTART
+.It Dv netin.IPPORT_MAX
+.It Dv netin.IN_NETMASK_DEFAULT
+.It Dv netin.INADDR_LOOPBACK
+.It Dv netin.INADDR_NONE
+.It Dv netin.INADDR_UNSPEC_GROUP
+.It Dv netin.INADDR_ALLHOSTS_GROUP
+.It Dv netin.INADDR_ALLRTRS_GROUP
+.It Dv netin.INADDR_ALLRPTS_GROUP
+.It Dv netin.INADDR_CARP_GROUP
+.It Dv netin.INADDR_PFSYNC_GROUP
+.It Dv netin.INADDR_ALLMDNS_GROUP
+.It Dv netin.INADDR_MAX_LOCAL_GROUP
+.It Dv netin.IN_RFC3021_MASK
+.It Dv netin.IP_OPTIONS
+.It Dv netin.IP_HDRINCL
+.It Dv netin.IP_TOS
+.It Dv netin.IP_TTL
+.It Dv netin.IP_RECVOPTS
+.It Dv netin.IP_RECVRETOPTS
+.It Dv netin.IP_RECVDSTADDR
+.It Dv netin.IP_SENDSRCADDR
+.It Dv netin.IP_RETOPTS
+.It Dv netin.IP_MULTICAST_IF
+.It Dv netin.IP_MULTICAST_TTL
+.It Dv netin.IP_MULTICAST_LOOP
+.It Dv netin.IP_ADD_MEMBERSHIP
+.It Dv netin.IP_DROP_MEMBERSHIP
+.It Dv netin.IP_MULTICAST_VIF
+.It Dv netin.IP_RSVP_ON
+.It Dv netin.IP_RSVP_OFF
+.It Dv netin.IP_RSVP_VIF_ON
+.It Dv netin.IP_RSVP_VIF_OFF
+.It Dv netin.IP_PORTRANGE
+.It Dv netin.IP_RECVIF
+.It Dv netin.IP_IPSEC_POLICY
+.It Dv netin.IP_ONESBCAST
+.It Dv netin.IP_BINDANY
+.It Dv netin.IP_ORIGDSTADDR
+.It Dv netin.IP_RECVORIGDSTADDR
+.It Dv netin.IP_FW3
+.It Dv netin.IP_DUMMYNET3
+.It Dv netin.IP_RECVTTL
+.It Dv netin.IP_MINTTL
+.It Dv netin.IP_DONTFRAG
+.It Dv netin.IP_RECVTOS
+.It Dv netin.IP_ADD_SOURCE_MEMBERSHIP
+.It Dv netin.IP_DROP_SOURCE_MEMBERSHIP
+.It Dv netin.IP_BLOCK_SOURCE
+.It Dv netin.IP_UNBLOCK_SOURCE
+.It Dv netin.IP_MSFILTER
+.It Dv netin.IP_VLAN_PCP
+.It Dv netin.MCAST_JOIN_GROUP
+.It Dv netin.MCAST_LEAVE_GROUP
+.It Dv netin.MCAST_JOIN_SOURCE_GROUP
+.It Dv netin.MCAST_LEAVE_SOURCE_GROUP
+.It Dv netin.MCAST_BLOCK_SOURCE
+.It Dv netin.MCAST_UNBLOCK_SOURCE
+.It Dv netin.IP_FLOWID
+.It Dv netin.IP_FLOWTYPE
+.It Dv netin.IP_RSSBUCKETID
+.It Dv netin.IP_RECVFLOWID
+.It Dv netin.IP_RECVRSSBUCKETID
+.It Dv netin.IP_DEFAULT_MULTICAST_TTL
+.It Dv netin.IP_DEFAULT_MULTICAST_LOOP
+.It Dv netin.IP_MAX_MEMBERSHIPS
+.It Dv netin.IP_MAX_GROUP_SRC_FILTER
+.It Dv netin.IP_MAX_SOCK_SRC_FILTER
+.It Dv netin.IP_MAX_SOCK_MUTE_FILTER
+.It Dv netin.MCAST_UNDEFINED
+.It Dv netin.MCAST_INCLUDE
+.It Dv netin.MCAST_EXCLUDE
+.It Dv netin.IP_PORTRANGE_DEFAULT
+.It Dv netin.IP_PORTRANGE_HIGH
+.It Dv netin.IP_PORTRANGE_LOW
+.It Dv netin.IPCTL_FORWARDING
+.It Dv netin.IPCTL_SENDREDIRECTS
+.It Dv netin.IPCTL_DEFTTL
+.It Dv netin.IPCTL_SOURCEROUTE
+.It Dv netin.IPCTL_DIRECTEDBROADCAST
+.It Dv netin.IPCTL_INTRQMAXLEN
+.It Dv netin.IPCTL_INTRQDROPS
+.It Dv netin.IPCTL_STATS
+.It Dv netin.IPCTL_ACCEPTSOURCEROUTE
+.It Dv netin.IPCTL_FASTFORWARDING
+.It Dv netin.IPCTL_GIF_TTL
+.It Dv netin.IPCTL_INTRDQMAXLEN
+.It Dv netin.IPCTL_INTRDQDROPS
+.It Dv netin.IPV6PORT_RESERVED
+.It Dv netin.IPV6PORT_ANONMIN
+.It Dv netin.IPV6PORT_ANONMAX
+.It Dv netin.IPV6PORT_RESERVEDMIN
+.It Dv netin.IPV6PORT_RESERVEDMAX
+.It Dv netin.INET6_ADDRSTRLEN
+.It Dv netin.IPV6_SOCKOPT_RESERVED1
+.It Dv netin.IPV6_UNICAST_HOPS
+.It Dv netin.IPV6_MULTICAST_IF
+.It Dv netin.IPV6_MULTICAST_HOPS
+.It Dv netin.IPV6_MULTICAST_LOOP
+.It Dv netin.IPV6_JOIN_GROUP
+.It Dv netin.IPV6_LEAVE_GROUP
+.It Dv netin.IPV6_PORTRANGE
+.It Dv netin.ICMP6_FILTER
+.It Dv netin.IPV6_CHECKSUM
+.It Dv netin.IPV6_V6ONLY
+.It Dv netin.IPV6_BINDV6ONLY
+.It Dv netin.IPV6_IPSEC_POLICY
+.It Dv netin.IPV6_RTHDRDSTOPTS
+.It Dv netin.IPV6_RECVPKTINFO
+.It Dv netin.IPV6_RECVHOPLIMIT
+.It Dv netin.IPV6_RECVRTHDR
+.It Dv netin.IPV6_RECVHOPOPTS
+.It Dv netin.IPV6_RECVDSTOPTS
+.It Dv netin.IPV6_USE_MIN_MTU
+.It Dv netin.IPV6_RECVPATHMTU
+.It Dv netin.IPV6_PATHMTU
+.It Dv netin.IPV6_PKTINFO
+.It Dv netin.IPV6_HOPLIMIT
+.It Dv netin.IPV6_NEXTHOP
+.It Dv netin.IPV6_HOPOPTS
+.It Dv netin.IPV6_DSTOPTS
+.It Dv netin.IPV6_RTHDR
+.It Dv netin.IPV6_RECVTCLASS
+.It Dv netin.IPV6_AUTOFLOWLABEL
+.It Dv netin.IPV6_TCLASS
+.It Dv netin.IPV6_DONTFRAG
+.It Dv netin.IPV6_PREFER_TEMPADDR
+.It Dv netin.IPV6_BINDANY
+.It Dv netin.IPV6_FLOWID
+.It Dv netin.IPV6_FLOWTYPE
+.It Dv netin.IPV6_RSSBUCKETID
+.It Dv netin.IPV6_RECVFLOWID
+.It Dv netin.IPV6_RECVRSSBUCKETID
+.It Dv netin.IPV6_ORIGDSTADDR
+.It Dv netin.IPV6_RECVORIGDSTADDR
+.It Dv netin.IPV6_VLAN_PCP
+.It Dv netin.IPV6_RTHDR_LOOSE
+.It Dv netin.IPV6_RTHDR_STRICT
+.It Dv netin.IPV6_RTHDR_TYPE_0
+.It Dv netin.IPV6_DEFAULT_MULTICAST_HOPS
+.It Dv netin.IPV6_DEFAULT_MULTICAST_LOOP
+.It Dv netin.IPV6_MAX_MEMBERSHIPS
+.It Dv netin.IPV6_MAX_GROUP_SRC_FILTER
+.It Dv netin.IPV6_MAX_SOCK_SRC_FILTER
+.It Dv netin.IPV6_PORTRANGE_DEFAULT
+.It Dv netin.IPV6_PORTRANGE_HIGH
+.It Dv netin.IPV6_PORTRANGE_LOW
+.It Dv netin.IPV6PROTO_MAXID
+.It Dv netin.IPV6CTL_FORWARDING
+.It Dv netin.IPV6CTL_SENDREDIRECTS
+.It Dv netin.IPV6CTL_DEFHLIM
+.It Dv netin.IPV6CTL_FORWSRCRT
+.It Dv netin.IPV6CTL_STATS
+.It Dv netin.IPV6CTL_MRTSTATS
+.It Dv netin.IPV6CTL_MRTPROTO
+.It Dv netin.IPV6CTL_MAXFRAGPACKETS
+.It Dv netin.IPV6CTL_SOURCECHECK
+.It Dv netin.IPV6CTL_SOURCECHECK_LOGINT
+.It Dv netin.IPV6CTL_ACCEPT_RTADV
+.It Dv netin.IPV6CTL_LOG_INTERVAL
+.It Dv netin.IPV6CTL_HDRNESTLIMIT
+.It Dv netin.IPV6CTL_DAD_COUNT
+.It Dv netin.IPV6CTL_AUTO_FLOWLABEL
+.It Dv netin.IPV6CTL_DEFMCASTHLIM
+.It Dv netin.IPV6CTL_GIF_HLIM
+.It Dv netin.IPV6CTL_KAME_VERSION
+.It Dv netin.IPV6CTL_USE_DEPRECATED
+.It Dv netin.IPV6CTL_RR_PRUNE
+.It Dv netin.IPV6CTL_V6ONLY
+.It Dv netin.IPV6CTL_STABLEADDR_NETIFSRC
+.It Dv netin.IPV6CTL_STABLEADDR_MAXRETRIES
+.It Dv netin.IPV6CTL_USETEMPADDR
+.It Dv netin.IPV6CTL_TEMPPLTIME
+.It Dv netin.IPV6CTL_TEMPVLTIME
+.It Dv netin.IPV6CTL_AUTO_LINKLOCAL
+.It Dv netin.IPV6CTL_RIP6STATS
+.It Dv netin.IPV6CTL_PREFER_TEMPADDR
+.It Dv netin.IPV6CTL_ADDRCTLPOLICY
+.It Dv netin.IPV6CTL_USE_DEFAULTZONE
+.It Dv netin.IPV6CTL_USESTABLEADDR
+.It Dv netin.IPV6CTL_MAXFRAGS
+.It Dv netin.IPV6CTL_MCAST_PMTU
+.It Dv netin.IPV6CTL_STEALTH
+.It Dv netin.ICMPV6CTL_ND6_ONLINKNSRFC4861
+.It Dv netin.IPV6CTL_NO_RADR
+.It Dv netin.IPV6CTL_NORBIT_RAIF
+.It Dv netin.IPV6CTL_RFC6204W3
+.It Dv netin.IPV6CTL_INTRQMAXLEN
+.It Dv netin.IPV6CTL_INTRDQMAXLEN
+.It Dv netin.IPV6CTL_MAXFRAGSPERPACKET
+.It Dv netin.IPV6CTL_MAXFRAGBUCKETSIZE
+.It Dv netin.IPV6CTL_MAXID
+.It Dv netin.in6addr_any
+.It Dv netin.in6addr_loopback
+.It Dv netin.in6addr_intfacelocal_allnodes
+.It Dv netin.in6addr_nodelocal_allnodes
+.It Dv netin.in6addr_linklocal_allnodes
+.It Dv netin.in6addr_linklocal_allrouters
+.It Dv netin.in6addr_linklocal_allv2routers
+.El
+.Sh DESCRIPTION
+The
+.Nm netinet.in
+module provides bindings for Internet Protocol definitions and utilities.
+.Pp
+.Vt sockaddr
+socket addresses are represented as tables of the form
+.Bd -literal -compact
+{
+	family = <integer>,
+	data = <string>,
+}
+.Ed
+where
+.Va data
+is the unformatted address as raw bytes.
+.Bl -tag -width XXXX
+.It Dv sin = netin.sockaddr_in(sockaddr )
+Interpret a
+.Vt sockaddr
+table as
+.Vt sockaddr_in ,
+returning a table of the form
+.Bd -literal -compact
+{
+	port = <integer>,
+	addr = <integer>,
+}
+.Ed
+where
+.Va port
+and
+.Va addr
+are in host-endian byte order.
+.It Dv sin6 = netin.sockaddr_in6(sockaddr )
+Interpret a
+.Vt sockaddr
+table as
+.Vt sockaddr_in ,
+returning a table of the form
+.Bd -literal -compact
+{
+	port = <integer>,
+	flowinfo = <integer>,
+	addr = <in6_addr>,
+	scope_id = <integer>,
+}
+.Ed
+where
+.Va port ,
+.Va flowinfo ,
+and
+.Va scope_id
+are in host-endian byte order and
+.Vt in6_addr addr
+is encoded as a string of octets.
+.It Dv ismulticast = netin.in_multicast(inaddr )
+Wraps
+.Fn IN_MULTICAST .
+.It Dv isexperimental = netin.in_experimental(inaddr )
+Wraps
+.Fn IN_EXPERIMENTAL .
+.It Dv isbadclass = netin.in_badclass(inaddr )
+Wraps
+.Fn IN_BADCLASS .
+.It Dv islinklocal = netin.in_linklocal(inaddr )
+Wraps
+.Fn IN_LINKLOCAL .
+.It Dv isloopback = netin.in_loopback(inaddr )
+Wraps
+.Fn IN_LOOPBACK
+.It Dv iszeronet = netin.in_zeronet(inaddr )
+Wraps
+.Fn IN_ZERONET .
+.It Dv isprivate = netin.in_private(inaddr )
+Wraps
+.Fn IN_PRIVATE .
+.It Dv islocalgroup = netin.in_local_group(inaddr )
+Wraps
+.Fn IN_LOCAL_GROUP .
+.It Dv isanylocal = netin.in_any_local(inaddr )
+Wraps
+.Fn IN_ANY_LOCAL .
+.It Dv same = netin.in6_are_addr_equal(in6addr_a , in6addr_b )
+Wraps
+.Fn IN6_ARE_ADDR_EQUAL .
+.It Dv isunspecified = netin.in6_is_addr_unspecified(in6addr )
+Wraps
+.Fn IN6_IS_ADDR_UNSPECIFIED .
+.It Dv isloopback = netin.in6_is_addr_loopback(in6addr )
+Wraps
+.Fn IN6_IS_ADDR_LOOPBACK .
+.It Dv isv4compat = netin.in6_is_addr_v4compat(in6addr )
+Wraps
+.Fn IN6_IS_ADDR_V4COMPAT .
+.It Dv isv4mapped = netin.in6_is_addr_v4mapped(in6addr )
+Wraps
+.Fn IN6_IS_ADDR_V4MAPPED .
+.It Dv islinklocal = netin.in6_is_addr_linklocal(in6addr )
+Wraps
+.Fn IN6_IS_ADDR_LINKLOCAL .
+.It Dv issitelocal = netin.in6_is_addr_sitelocal(in6addr )
+Wraps
+.Fn IN6_IS_ADDR_SITELOCAL .
+.It Dv ismulticast = netin.in6_is_addr_multicast(in6addr )
+Wraps
+.Fn IN6_IS_ADDR_MULTICAST .
+.It Dv ismcnodelocal = netin.in6_is_addr_mc_nodelocal(in6addr )
+Wraps
+.Fn IN6_IS_ADDR_MC_NODELOCAL .
+.It Dv ismclinklocal = netin.in6_is_addr_mc_linklocal(in6addr )
+Wraps
+.Fn IN6_IS_ADDR_MC_LINKLOCAL .
+.It Dv ismcsitelocal = netin.in6.is_addr_mc_sitelocal(in6addr )
+Wraps
+.Fn IN6_IS_ADDR_MC_SITELOCAL .
+.It Dv ismcorglocal = netin.in6_is_addr_mc_orglocal(in6addr )
+Wraps
+.Fn IN6_IS_ADDR_MC_ORGLOCAL .
+.It Dv ismcglobal = netin.in6_is_addr_mc_global(in6addr )
+Wraps
+.Fn IN6_IS_ADDR_MC_GLOBAL .
+.It Dv ok, errmsg, errcode = netin.setsourcefilter(s , interface , group , fmode , slist )
+Wraps
+.Xr setsourcefilter 3 .
+.It Dv fmode, slist_or_errmsg, errcode = netin.getsourcefilter(s , interface , group )
+Wraps
+.Xr getsourcefilter 3 .
+.It Dv exthdr = netin.inet6_opts_ext(options )
+Build an extension header for IPv6 hop-by-hop and destination options, returning
+a
+.Vt string .
+.Fa options
+is a table of the form
+.Bd -literal -compact
+{
+	{
+		type = <integer>,
+		align = <integer>,
+		value = <string>,
+	},
+	...
+}
+.Ed
+.It Dv options = netin.inet6_ext_opts(exthdr )
+Parse an extension header as a list of IPv6 hop-by-hop and destination options,
+returning a table of the form
+.Bd -literal -compact
+{
+	{
+		type = <integer>,
+		value = <integer>,
+	},
+	...
+}
+.Ed
+.It Dv exthdr, errmsg, errcode = netin.inet6_rth_ext(type , segments )
+Build an IPv6 routing options extension header, returning a
+.Vt string .
+.Fa segments is a table of the form
+.Bd -literal -compact
+{
+	<in6_addr>,
+	...
+}
+.Ed
+where
+.Vt in6_addr
+is encoded as a string of octets.
+.It Dv revexthdr, errmsg, errcode = netin.inet6_rth_reverse(exthdr )
+Reverse the route segments in an IPv6 routing options extension header,
+returning the new extension header as a
+.Vt string .
+.It Dv segments, errmsg, errcode = netin.inet6_ext_rth(exthdr )
+Parse the segments list in an IPv6 routing options extension header, returning
+a table of the form
+.Bd -literal -compact
+{
+	<in6_addr>,
+	...
+}
+.Ed
+where
+.Vt in6_addr
+is encoded as a string of octets.
+.El
+.Sh EXAMPLES
+List configured IPv4 loopback addresses:
+.Bd -literal -offset indent
+local socket = require('sys.socket')
+local netin = require('netinet.in')
+local ifcfg = require('ifconfig').open()
+local ucl = require('ucl')
+
+local function is_loopback(addr)
+	local sa = addr:addr()
+	if sa.family == socket.AF_INET then
+		return netin.in_loopback(netin.sockaddr_in(sa).addr)
+	elseif sa.family == socket.AF_INET6 then
+		return netin.in6_is_addr_loopback(netin.sockaddr_in6(sa).addr)
+	end
+end
+
+local addrs = {}
+ifcfg:foreach_iface(function(_, iface)
+	ifcfg:foreach_ifaddr(iface, function(_, addr)
+		if is_loopback(addr) then
+			local info = ifcfg:addr_info(addr)
+			info.iface = addr:name()
+			table.insert(addrs, info)
+		end
+	end)
+end)
+print(ucl.to_json(addrs))
+.Ed
+.Sh SEE ALSO
+.Xr ifconfig 3lua ,
+.Xr socket 3lua
+.Sh AUTHORS
+.An Ryan Moeller

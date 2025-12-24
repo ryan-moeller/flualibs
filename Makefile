@@ -11,6 +11,7 @@ SUBDIR= \
 	libpthread \
 	mqueue \
 	netdb \
+	netinet \
 	stdio \
 	sys \
 	time \
