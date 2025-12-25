@@ -192,19 +192,19 @@ luaopen_dirent(lua_State *L)
 	luaL_setfuncs(L, l_dir_meta, 0);
 
 	luaL_newlib(L, l_dirent_funcs);
-#define SETCONST(ident) ({ \
+#define DEFINE(ident) ({ \
 	lua_pushinteger(L, ident); \
 	lua_setfield(L, -2, #ident); \
 })
-	SETCONST(DT_UNKNOWN);
-	SETCONST(DT_FIFO);
-	SETCONST(DT_CHR);
-	SETCONST(DT_DIR);
-	SETCONST(DT_BLK);
-	SETCONST(DT_REG);
-	SETCONST(DT_LNK);
-	SETCONST(DT_SOCK);
-	SETCONST(DT_WHT);
-#undef SETCONST
+	DEFINE(DT_UNKNOWN);
+	DEFINE(DT_FIFO);
+	DEFINE(DT_CHR);
+	DEFINE(DT_DIR);
+	DEFINE(DT_BLK);
+	DEFINE(DT_REG);
+	DEFINE(DT_LNK);
+	DEFINE(DT_SOCK);
+	DEFINE(DT_WHT);
+#undef DEFINE
 	return (1);
 }

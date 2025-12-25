@@ -536,13 +536,13 @@ int
 luaopen_sys_extattr(lua_State *L)
 {
 	luaL_newlib(L, l_extattr_funcs);
-#define SETCONST(ident) ({ \
+#define DEFINE(ident) ({ \
 	lua_pushinteger(L, EXTATTR_ ## ident); \
 	lua_setfield(L, -2, #ident); \
 })
-	SETCONST(NAMESPACE_EMPTY);
-	SETCONST(NAMESPACE_USER);
-	SETCONST(NAMESPACE_SYSTEM);
-#undef SETCONST
+	DEFINE(NAMESPACE_EMPTY);
+	DEFINE(NAMESPACE_USER);
+	DEFINE(NAMESPACE_SYSTEM);
+#undef DEFINE
 	return (1);
 }

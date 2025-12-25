@@ -486,14 +486,14 @@ luaopen_sys_mac(lua_State *L)
 	luaL_setfuncs(L, l_mac_meta, 0);
 
 	luaL_newlib(L, l_mac_funcs);
-#define SETCONST(ident) ({ \
+#define DEFINE(ident) ({ \
 	lua_pushinteger(L, MAC_ ## ident); \
 	lua_setfield(L, -2, #ident); \
 })
-	SETCONST(MAX_POLICY_NAME);
-	SETCONST(MAX_LABEL_ELEMENT_NAME);
-	SETCONST(MAX_LABEL_ELEMENT_DATA);
-	SETCONST(MAX_LABEL_BUF_LEN);
-#undef SETCONST
+	DEFINE(MAX_POLICY_NAME);
+	DEFINE(MAX_LABEL_ELEMENT_NAME);
+	DEFINE(MAX_LABEL_ELEMENT_DATA);
+	DEFINE(MAX_LABEL_BUF_LEN);
+#undef DEFINE
 	return (1);
 }

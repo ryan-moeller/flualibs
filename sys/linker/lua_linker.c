@@ -143,12 +143,12 @@ int
 luaopen_sys_linker(lua_State *L)
 {
 	luaL_newlib(L, l_linker_funcs);
-#define SETCONST(ident) ({ \
+#define DEFINE(ident) ({ \
 	lua_pushinteger(L, LINKER_ ## ident); \
 	lua_setfield(L, -2, #ident); \
 })
-	SETCONST(UNLOAD_NORMAL);
-	SETCONST(UNLOAD_FORCE);
-#undef SETCONST
+	DEFINE(UNLOAD_NORMAL);
+	DEFINE(UNLOAD_FORCE);
+#undef DEFINE
 	return (1);
 }
