@@ -5,5 +5,7 @@ FLUA_NETINET=	${LIBDIR}/flua/netinet
 
 SUBDIR=	\
 	in \
+	ip \
+	ip6 \
 
 .include <bsd.subdir.mk>

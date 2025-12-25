@@ -1,0 +1,116 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 25, 2025
+.Dt IP 3lua
+.Os
+.Sh NAME
+.Nm netinet.ip
+.Nd Lua binding for Internet Protocol version 4 definitions and utilities
+.Sh SYNOPSIS
+.Bd -literal
+ip = require('netinet.ip')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv iscopied = ip.ipopt_copied(ipopt )
+.It Dv class = ip.ipopt_class(ipopt )
+.It Dv number = ip.ipopt_number(ipopt )
+.It Dv ip.IPVERSION
+.It Dv ip.IP_MAXPACKET
+.It Dv ip.IPTOS_LOWDELAY
+.It Dv ip.IPTOS_THROUGHPUT
+.It Dv ip.IPTOS_RELIABILITY
+.It Dv ip.IPTOS_MINCOST
+.It Dv ip.IPTOS_DSCP_OFFSET
+.It Dv ip.IPTOS_DSCP_CS0
+.It Dv ip.IPTOS_DSCP_CS1
+.It Dv ip.IPTOS_DSCP_AF11
+.It Dv ip.IPTOS_DSCP_AF12
+.It Dv ip.IPTOS_DSCP_AF13
+.It Dv ip.IPTOS_DSCP_CS2
+.It Dv ip.IPTOS_DSCP_AF21
+.It Dv ip.IPTOS_DSCP_AF22
+.It Dv ip.IPTOS_DSCP_AF23
+.It Dv ip.IPTOS_DSCP_CS3
+.It Dv ip.IPTOS_DSCP_AF31
+.It Dv ip.IPTOS_DSCP_AF32
+.It Dv ip.IPTOS_DSCP_AF33
+.It Dv ip.IPTOS_DSCP_CS4
+.It Dv ip.IPTOS_DSCP_AF41
+.It Dv ip.IPTOS_DSCP_AF42
+.It Dv ip.IPTOS_DSCP_AF43
+.It Dv ip.IPTOS_DSCP_CS5
+.It Dv ip.IPTOS_DSCP_VA
+.It Dv ip.IPTOS_DSCP_EF
+.It Dv ip.IPTOS_DSCP_CS6
+.It Dv ip.IPTOS_DSCP_CS7
+.It Dv ip.IPTOS_ECN_NOTECT
+.It Dv ip.IPTOS_ECN_ECT1
+.It Dv ip.IPTOS_ECN_ECT0
+.It Dv ip.IPTOS_ECN_CE
+.It Dv ip.IPTOS_ECN_MASK
+.It Dv ip.IPOPT_CONTROL
+.It Dv ip.IPOPT_RESERVED1
+.It Dv ip.IPOPT_DEBMEAS
+.It Dv ip.IPOPT_RESERVED2
+.It Dv ip.IPOPT_EOL
+.It Dv ip.IPOPT_NOP
+.It Dv ip.IPOPT_RR
+.It Dv ip.IPOPT_TS
+.It Dv ip.IPOPT_SECURITY
+.It Dv ip.IPOPT_LSRR
+.It Dv ip.IPOPT_ESO
+.It Dv ip.IPOPT_CIPSO
+.It Dv ip.IPOPT_SATID
+.It Dv ip.IPOPT_SSRR
+.It Dv ip.IPOPT_RA
+.It Dv ip.IPOPT_OPTVAL
+.It Dv ip.IPOPT_OLEN
+.It Dv ip.IPOPT_OFFSET
+.It Dv ip.IPOPT_MINOFF
+.It Dv ip.IPOPT_TS_TSONLY
+.It Dv ip.IPOPT_TS_TSANDADDR
+.It Dv ip.IPOPT_TS_PRESPEC
+.It Dv ip.IPOPT_SECUR_UNCLASS
+.It Dv ip.IPOPT_SECUR_CONFID
+.It Dv ip.IPOPT_SECUR_EFTO
+.It Dv ip.IPOPT_SECUR_MMMM
+.It Dv ip.IPOPT_SECUR_RESTR
+.It Dv ip.IPOPT_SECUR_SECRET
+.It Dv ip.IPOPT_SECUR_TOPSECRET
+.It Dv ip.MAXTTL
+.It Dv ip.IPDEFTTL
+.It Dv ip.IPTTLDEC
+.It Dv ip.IP_MSS
+.El
+.Sh DESCRIPTION
+The
+.Nm netinet.ip
+module provides bindings for Internet Protocol version 4 definitions and
+utilities.
+.Bl -tag -width XXXX
+.It Dv iscopied = ip.ipopt_copied(ipopt )
+Wraps
+.Fn IPOPT_COPIED .
+.It Dv class = ip.ipopt_class(ipopt )
+Wraps
+.Fn IPOPT_CLASS .
+.It Dv number = ip.ipopt_number(ipopt )
+Wraps
+.Fn IPOPT_NUMBER .
+.El
+.Sh EXAMPLES
+TODO:
+.Bd -literal -offset indent
+-- TODO
+.Ed
+.Sh SEE ALSO
+.Xr ifconfig 3lua ,
+.Xr in 3lua ,
+.Xr ip6 3lua ,
+.Xr socket 3lua
+.Sh AUTHORS
+.An Ryan Moeller

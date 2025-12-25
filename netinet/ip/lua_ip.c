@@ -1,0 +1,146 @@
+/*
+ * Copyright (c) 2025 Ryan Moeller
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
+#include <netinet/ip.h>
+
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+
+int luaopen_netinet_ip(lua_State *);
+
+static int
+l_ipopt_copied(lua_State *L)
+{
+	lua_Integer o;
+
+	o = luaL_checkinteger(L, 1);
+
+	lua_pushboolean(L, IPOPT_COPIED(o) != 0);
+	return (1);
+}
+
+static int
+l_ipopt_class(lua_State *L)
+{
+	lua_Integer o;
+
+	o = luaL_checkinteger(L, 1);
+
+	lua_pushinteger(L, IPOPT_CLASS(o));
+	return (1);
+}
+
+static int
+l_ipopt_number(lua_State *L)
+{
+	lua_Integer o;
+
+	o = luaL_checkinteger(L, 1);
+
+	lua_pushinteger(L, IPOPT_NUMBER(o));
+	return (1);
+}
+
+static const struct luaL_Reg l_ip_funcs[] = {
+	{"ipopt_copied", l_ipopt_copied},
+	{"ipopt_class", l_ipopt_class},
+	{"ipopt_number", l_ipopt_number},
+	{NULL, NULL}
+};
+
+int
+luaopen_netinet_ip(lua_State *L)
+{
+	luaL_newlib(L, l_ip_funcs);
+#define SETCONST(ident) ({ \
+	lua_pushinteger(L, ident); \
+	lua_setfield(L, -2, #ident); \
+})
+	SETCONST(IPVERSION);
+
+	SETCONST(IP_MAXPACKET);
+
+	SETCONST(IPTOS_LOWDELAY);
+	SETCONST(IPTOS_THROUGHPUT);
+	SETCONST(IPTOS_RELIABILITY);
+	SETCONST(IPTOS_MINCOST);
+
+	/* Deprecated IP precedence definitions omitted. */
+
+	SETCONST(IPTOS_DSCP_OFFSET);
+
+	SETCONST(IPTOS_DSCP_CS0);
+	SETCONST(IPTOS_DSCP_CS1);
+	SETCONST(IPTOS_DSCP_AF11);
+	SETCONST(IPTOS_DSCP_AF12);
+	SETCONST(IPTOS_DSCP_AF13);
+	SETCONST(IPTOS_DSCP_CS2);
+	SETCONST(IPTOS_DSCP_AF21);
+	SETCONST(IPTOS_DSCP_AF22);
+	SETCONST(IPTOS_DSCP_AF23);
+	SETCONST(IPTOS_DSCP_CS3);
+	SETCONST(IPTOS_DSCP_AF31);
+	SETCONST(IPTOS_DSCP_AF32);
+	SETCONST(IPTOS_DSCP_AF33);
+	SETCONST(IPTOS_DSCP_CS4);
+	SETCONST(IPTOS_DSCP_AF41);
+	SETCONST(IPTOS_DSCP_AF42);
+	SETCONST(IPTOS_DSCP_AF43);
+	SETCONST(IPTOS_DSCP_CS5);
+	SETCONST(IPTOS_DSCP_VA);
+	SETCONST(IPTOS_DSCP_EF);
+	SETCONST(IPTOS_DSCP_CS6);
+	SETCONST(IPTOS_DSCP_CS7);
+
+	SETCONST(IPTOS_ECN_NOTECT);
+	SETCONST(IPTOS_ECN_ECT1);
+	SETCONST(IPTOS_ECN_ECT0);
+	SETCONST(IPTOS_ECN_CE);
+	SETCONST(IPTOS_ECN_MASK);
+
+	SETCONST(IPOPT_CONTROL);
+	SETCONST(IPOPT_RESERVED1);
+	SETCONST(IPOPT_DEBMEAS);
+	SETCONST(IPOPT_RESERVED2);
+
+	SETCONST(IPOPT_EOL);
+	SETCONST(IPOPT_NOP);
+
+	SETCONST(IPOPT_RR);
+	SETCONST(IPOPT_TS);
+	SETCONST(IPOPT_SECURITY);
+	SETCONST(IPOPT_LSRR);
+	SETCONST(IPOPT_ESO);
+	SETCONST(IPOPT_CIPSO);
+	SETCONST(IPOPT_SATID);
+	SETCONST(IPOPT_SSRR);
+	SETCONST(IPOPT_RA);
+
+	SETCONST(IPOPT_OPTVAL);
+	SETCONST(IPOPT_OLEN);
+	SETCONST(IPOPT_OFFSET);
+	SETCONST(IPOPT_MINOFF);
+
+	SETCONST(IPOPT_TS_TSONLY);
+	SETCONST(IPOPT_TS_TSANDADDR);
+	SETCONST(IPOPT_TS_PRESPEC);
+
+	SETCONST(IPOPT_SECUR_UNCLASS);
+	SETCONST(IPOPT_SECUR_CONFID);
+	SETCONST(IPOPT_SECUR_EFTO);
+	SETCONST(IPOPT_SECUR_MMMM);
+	SETCONST(IPOPT_SECUR_RESTR);
+	SETCONST(IPOPT_SECUR_SECRET);
+	SETCONST(IPOPT_SECUR_TOPSECRET);
+
+	SETCONST(MAXTTL);
+	SETCONST(IPDEFTTL);
+	SETCONST(IPTTLDEC);
+	SETCONST(IP_MSS);
+#undef SETCONST
+	return (1);
+}

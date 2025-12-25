@@ -1,0 +1,94 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 25, 2025
+.Dt IP6 3lua
+.Os
+.Sh NAME
+.Nm netinet.ip6
+.Nd Lua binding for Internet Protocol version 6 definitions and utilities
+.Sh SYNOPSIS
+.Bd -literal
+ip6 = require('netinet.ip6')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv type = ip6.ip6opt_type(ip6hdr )
+.It Dv class = ip6.ipv6_traffic_class(ip6hdr )
+.It Dv dscp = ip6.ipv6_dscp(ip6hdr )
+.It Dv ecn = ip6.ipv6_ecn(ip6hdr )
+.It Dv ip6.IPV6_VERSION
+.It Dv ip6.IPV6_VERSION_MASK
+.It Dv ip6.IPV6_FLOWINFO_MASK
+.It Dv ip6.IPV6_FLOWLABEL_MASK
+.It Dv ip6.IPV6_ECN_MASK
+.It Dv ip6.IPV6_FLOWLABEL_LEN
+.It Dv ip6.IP6OPT_PAD1
+.It Dv ip6.IP6OPT_PADN
+.It Dv ip6.IP6OPT_JUMBO
+.It Dv ip6.IP6OPT_NSAP_ADDR
+.It Dv ip6.IP6OPT_TUNNEL_LIMIT
+.It Dv ip6.IP6OPT_ROUTER_ALERT
+.It Dv ip6.IP6OPT_RTALERT
+.It Dv ip6.IP6OPT_RTALERT_LEN
+.It Dv ip6.IP6OPT_RTALERT_MLD
+.It Dv ip6.IP6OPT_RTALERT_RSVP
+.It Dv ip6.IP6OPT_RTALERT_ACTNET
+.It Dv ip6.IP6OPT_MINLEN
+.It Dv ip6.IP6OPT_EID
+.It Dv ip6.IP6OPT_TYPE_SKIP
+.It Dv ip6.IP6OPT_TYPE_DISCARD
+.It Dv ip6.IP6OPT_TYPE_FORCEICMP
+.It Dv ip6.IP6OPT_TYPE_ICMP
+.It Dv ip6.IP6OPT_MUTABLE
+.It Dv ip6.IP6OPT_JUMBO_LEN
+.It Dv ip6.IP6_ALERT_MLD
+.It Dv ip6.IP6_ALERT_RSVP
+.It Dv ip6.IP6_ALERT_AN
+.It Dv ip6.IP6F_OFF_MASK
+.It Dv ip6.IP6F_RESERVED_MASK
+.It Dv ip6.IP6F_MORE_FRAG
+.It Dv ip6.IPV6_MAXHLIM
+.It Dv ip6.IPV6_DEFHLIM
+.It Dv ip6.IPV6_DEFFRAGTTL
+.It Dv ip6.IPV6_HLIMDEC
+.It Dv ip6.IPV6_MMTU
+.It Dv ip6.IPV6_MAXPACKET
+.It Dv ip6.IPV6_MAXOPTHDR
+.El
+.Sh DESCRIPTION
+The
+.Nm netinet.ip6
+module provides bindings for Internet Protocol version 6 definitions and
+utilities.
+.Pp
+.Vt ip6_hdr
+values are specified as raw byte strings.
+.Bl -tag -width XXXX
+.It Dv type = ip6.ip6opt_type(ip6hdr )
+Wraps
+.Fn IP6OPT_TYPE .
+.It Dv class = ip6.ipv6_traffic_class(ip6hdr )
+Wraps
+.Fn IPV6_TRAFFIC_CLASS .
+.It Dv dscp = ip6.ipv6_dscp(ip6hdr )
+Wraps
+.Fn IPV6_DSCP .
+.It Dv ecn = ip6.ipv6_ecn(ip6hdr )
+Wraps
+.Fn IPV6_ECN .
+.El
+.Sh EXAMPLES
+TODO:
+.Bd -literal -offset indent
+-- TODO
+.Ed
+.Sh SEE ALSO
+.Xr ifconfig 3lua ,
+.Xr in 3lua ,
+.Xr ip 3lua ,
+.Xr socket 3lua
+.Sh AUTHORS
+.An Ryan Moeller
