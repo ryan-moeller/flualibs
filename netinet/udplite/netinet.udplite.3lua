@@ -15,8 +15,8 @@ udplite = require('netinet.udplite')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv udplite.UDPLITE_SEND_CSCOV
-.It Dv udplite.UDPLITE_RECV_CSCOV
+.It Dv udplite.SEND_CSCOV
+.It Dv udplite.RECV_CSCOV
 .El
 .Sh DESCRIPTION
 The

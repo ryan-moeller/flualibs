@@ -18,11 +18,11 @@ luaopen_netinet_udplite(lua_State *L)
 {
 	lua_newtable(L);
 #define DEFINE(ident) ({ \
-	lua_pushinteger(L, ident); \
+	lua_pushinteger(L, UDPLITE_ ## ident); \
 	lua_setfield(L, -2, #ident); \
 })
-	DEFINE(UDPLITE_SEND_CSCOV);
-	DEFINE(UDPLITE_RECV_CSCOV);
+	DEFINE(SEND_CSCOV);
+	DEFINE(RECV_CSCOV);
 #undef DEFINE
 	return (1);
 }

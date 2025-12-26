@@ -15,12 +15,12 @@ udp = require('netinet.udp')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv udp.UDP_ENCAP
-.It Dv udp.UDP_VENDOR
-.It Dv udp.UDP_ENCAP_ESPINUDP_NON_IKE
-.It Dv udp.UDP_ENCAP_ESPINUDP
-.It Dv udp.UDP_ENCAP_ESPINUDP_PORT
-.It Dv udp.UDP_ENCAP_ESPINUDP_MAXFRAGLEN
+.It Dv udp.ENCAP
+.It Dv udp.VENDOR
+.It Dv udp.ENCAP_ESPINUDP_NON_IKE
+.It Dv udp.ENCAP_ESPINUDP
+.It Dv udp.ENCAP_ESPINUDP_PORT
+.It Dv udp.ENCAP_ESPINUDP_MAXFRAGLEN
 .El
 .Sh DESCRIPTION
 The

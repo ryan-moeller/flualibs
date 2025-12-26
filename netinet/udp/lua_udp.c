@@ -19,15 +19,15 @@ luaopen_netinet_udp(lua_State *L)
 {
 	lua_newtable(L);
 #define DEFINE(ident) ({ \
-	lua_pushinteger(L, ident); \
+	lua_pushinteger(L, UDP_ ## ident); \
 	lua_setfield(L, -2, #ident); \
 })
-	DEFINE(UDP_ENCAP);
-	DEFINE(UDP_VENDOR);
-	DEFINE(UDP_ENCAP_ESPINUDP_NON_IKE);
-	DEFINE(UDP_ENCAP_ESPINUDP);
-	DEFINE(UDP_ENCAP_ESPINUDP_PORT);
-	DEFINE(UDP_ENCAP_ESPINUDP_MAXFRAGLEN);
+	DEFINE(ENCAP);
+	DEFINE(VENDOR);
+	DEFINE(ENCAP_ESPINUDP_NON_IKE);
+	DEFINE(ENCAP_ESPINUDP);
+	DEFINE(ENCAP_ESPINUDP_PORT);
+	DEFINE(ENCAP_ESPINUDP_MAXFRAGLEN);
 #undef DEFINE
 	return (1);
 }
