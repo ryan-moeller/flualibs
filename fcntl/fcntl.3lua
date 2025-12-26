@@ -3,22 +3,23 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 25, 2025
+.Dd December 26, 2025
 .Dt FCNTL 3lua
 .Os
 .Sh NAME
 .Nm fcntl
-.Nd Lua bindings for
-.Xr posix_fadvise 2
-and
-.Xr posix_fallocate 2
-system calls
+.Nd Lua bindings for file control system calls
 .Sh SYNOPSIS
 .Bd -literal
 fcntl = require('fcntl')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
+.It Dv fd, errmsg, errcode = fcntl.open(path , flags[ , mode ] )
+.It Dv fd, errmsg, errcode = fcntl.openat(atfd , path , flags[ , mode ] )
+.It Dv result, errmsg, errcode = fcntl.fcntl(fd | file , cmd[ , arg ] )
+.It Dv ok, errmsg, errcode = fcntl.flock(fd | file , operation )
+.It Dv rmsr, errmsg, errcode = fcntl.fspacectl(fd | file , cmd , rqsr[ , flags ] )
 .It Dv ok, errmsg, errcode = fcntl.posix_fadvise(fd | file , offset , len , advice )
 .It Dv ok, errmsg, errcode = fcntl.posix_fallocate(fd | file , offset , len )
 .It Dv fcntl.O_RDONLY
@@ -57,22 +58,90 @@ fcntl = require('fcntl')
 .It Dv fcntl.AT_REMOVEDIR
 .It Dv fcntl.AT_RESOLVE_BENEATH
 .It Dv fcntl.AT_EMPTY_PATH
+.It Dv fcntl.F_DUPFD
+.It Dv fcntl.F_GETFD
+.It Dv fcntl.F_SETFD
+.It Dv fcntl.F_GETFL
+.It Dv fcntl.F_SETFL
+.It Dv fcntl.F_GETOWN
+.It Dv fcntl.F_SETOWN
+.It Dv fcntl.F_DUP2FD
+.It Dv fcntl.F_GETLK
+.It Dv fcntl.F_SETLK
+.It Dv fcntl.F_SETLK_REMOTE
+.It Dv fcntl.F_READAHEAD
+.It Dv fcntl.F_RDAHEAD
+.It Dv fcntl.F_DUPFD_CLOEXEC
+.It Dv fcntl.F_DUP2FD_CLOEXEC
+.It Dv fcntl.F_ADD_SEALS
+.It Dv fcntl.F_GET_SEALS
+.It Dv fcntl.F_ISUNIONSTACK
+.It Dv fcntl.F_KINFO
+.It Dv fcntl.F_DUPFD_CLOFORK
+.It Dv fcntl.F_SEAL_SEAL
+.It Dv fcntl.F_SEAL_SHRINK
+.It Dv fcntl.F_SEAL_GROW
+.It Dv fcntl.F_SEAL_WRITE
+.It Dv fcntl.FD_CLOEXEC
+.It Dv fcntl.FD_RESOLVE_BENEATH
+.It Dv fcntl.FD_CLOFORK
+.It Dv fcntl.F_RDLCK
+.It Dv fcntl.F_UNLCK
+.It Dv fcntl.F_WRLCK
+.It Dv fcntl.F_UNLCKSYS
+.It Dv fcntl.F_CANCEL
+.It Dv fcntl.LOCK_SH
+.It Dv fcntl.LOCK_EX
+.It Dv fcntl.LOCK_NB
+.It Dv fcntl.LOCK_UN
 .It Dv fcntl.POSIX_FADV_NORMAL
 .It Dv fcntl.POSIX_FADV_RANDOM
 .It Dv fcntl.POSIX_FADV_SEQUENTIAL
 .It Dv fcntl.POSIX_FADV_WILLNEED
 .It Dv fcntl.POSIX_FADV_DONTNEED
 .It Dv fcntl.POSIX_FADV_NOREUSE
+.It Dv fcntl.FD_NONE
+.It Dv fcntl.SPACECTL_DEALLOC
+.It Dv fcntl.SPACECTL_F_SUPPORTED
 .El
 .Sh DESCRIPTION
 The
 .Nm fcntl
-module provides bindings for the
-.Xr posix_fadvise 2
-and
-.Xr posix_fallocate 2
-system calls.
+module provides bindings for file control system calls.
 .Bl -tag -width XXXX
+.It Dv fd, errmsg, errcode = fcntl.open(path , flags[ , mode ] )
+Wraps
+.Xr open 2 .
+.It Dv fd, errmsg, errcode = fcntl.openat(atfd , path , flags[ , mode ] )
+Wraps
+.Xr openat 2 .
+.It Dv result, errmsg, errcode = fcntl.fcntl(fd | file , cmd[ , arg ] )
+Wraps
+.Xr fcntl 2 .
+.Fa arg
+and
+.Va result
+type vary depending on
+.Fa cmd .
+.\" TODO: elaborate on the type signatures
+.It Dv ok, errmsg, errcode = fcntl.flock(fd | file , operation )
+Wraps
+.Xr flock 2 .
+.It Dv rmsr, errmsg, errcode = fcntl.fspacectl(fd | file , cmd , rqsr[ , flags ] )
+Wraps
+.Xr fspacectl 2 .
+.Fa rqsr
+and
+.Va rmsr
+are
+.Vt spacectl_range
+tables of the form
+.Bd -literal -compact
+{
+	offset = <integer>,
+	len = <integer>,
+}
+.Ed
 .It Dv ok, errmsg, errcode = fcntl.posix_fadvise(fd | file , offset , len , advice )
 Wraps
 .Xr posix_fadvise 2 .
