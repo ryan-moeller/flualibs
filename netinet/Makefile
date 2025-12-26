@@ -7,6 +7,7 @@ SUBDIR=	\
 	in \
 	ip \
 	ip6 \
+	sctp \
 	udp \
 	udplite \
 

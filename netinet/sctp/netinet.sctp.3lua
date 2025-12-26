@@ -1,0 +1,481 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 26, 2025
+.Dt NETINET.SCTP 3lua
+.Os
+.Sh NAME
+.Nm netinet.sctp
+.Nd Lua binding for Internet Stream Control Transmission Protocol
+.Sh SYNOPSIS
+.Bd -literal
+sctp = require('netinet.sctp')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv isinvalid = sctp.invalid_sinfo_flag(flags )
+.It Dv policy = sctp.pr_sctp_policy(flags )
+.It Dv isenabled = sctp.pr_sctp_enabled(flags )
+.It Dv isenabled = sctp.pr_sctp_ttl_enabled(flags )
+.It Dv isenabled = sctp.pr_sctp_buf_enabled(flags )
+.It Dv isenabled = sctp.pr_sctp_rtx_enabled(flags )
+.It Dv isinvalid = sctp.pr_sctp_invalid_policy(flags )
+.It Dv isvalid = sctp.pr_sctp_valid_policy(flags )
+.It Dv new_s, errmsg, errcode = sctp.peeloff(s , associd )
+.It Dv ok, errmsg, errcode = sctp.bindx(s , addrs , type )
+.It Dv associd, errmsg, errcode = sctp.connectx(s , addrs )
+.It Dv len, errmsg, errcode = sctp.getaddrlen(family )
+.It Dv paddrs, errmsg, errcode = sctp.getpaddrs(s , associd )
+.It Dv laddrs, errmsg, errcode = sctp.getladdrs(s , associd )
+.It Dv associd, errmsg, errcode = sctp.getassocid(s , addr )
+.It Dv sctp.RTOINFO
+.It Dv sctp.ASSOCINFO
+.It Dv sctp.INITMSG
+.It Dv sctp.NODELAY
+.It Dv sctp.AUTOCLOSE
+.It Dv sctp.SET_PEER_PRIMARY_ADDR
+.It Dv sctp.PRIMARY_ADDR
+.It Dv sctp.ADAPTATION_LAYER
+.It Dv sctp.DISABLE_FRAGMENTS
+.It Dv sctp.PEER_ADDR_PARAMS
+.It Dv sctp.DEFAULT_SEND_PARAM
+.It Dv sctp.I_WANT_MAPPED_V4_ADDR
+.It Dv sctp.MAXSEG
+.It Dv sctp.DELAYED_SACK
+.It Dv sctp.FRAGMENT_INTERLEAVE
+.It Dv sctp.PARTIAL_DELIVERY_POINT
+.It Dv sctp.AUTH_CHUNK
+.It Dv sctp.AUTH_KEY
+.It Dv sctp.HMAC_IDENT
+.It Dv sctp.AUTH_ACTIVE_KEY
+.It Dv sctp.AUTH_DELETE_KEY
+.It Dv sctp.USE_EXT_RCVINFO
+.It Dv sctp.AUTO_ASCONF
+.It Dv sctp.MAX_BURST
+.It Dv sctp.CONTEXT
+.It Dv sctp.EXPLICIT_EOR
+.It Dv sctp.REUSE_PORT
+.It Dv sctp.AUTH_DEACTIVATE_KEY
+.It Dv sctp.EVENT
+.It Dv sctp.RECVRCVINFO
+.It Dv sctp.RECVNXTINFO
+.It Dv sctp.DEFAULT_SNDINFO
+.It Dv sctp.DEFAULT_PRINFO
+.It Dv sctp.PEER_ADDR_THLDS
+.It Dv sctp.REMOTE_UDP_ENCAPS_PORT
+.It Dv sctp.ECN_SUPPORTED
+.It Dv sctp.PR_SUPPORTED
+.It Dv sctp.AUTH_SUPPORTED
+.It Dv sctp.ASCONF_SUPPORTED
+.It Dv sctp.RECONFIG_SUPPORTED
+.It Dv sctp.NRSACK_SUPPORTED
+.It Dv sctp.PKTDROP_SUPPORTED
+.It Dv sctp.MAX_CWND
+.It Dv sctp.ACCEPT_ZERO_CHECKSUM
+.It Dv sctp.STATUS
+.It Dv sctp.GET_PEER_ADDR_INFO
+.It Dv sctp.PEER_AUTH_CHUNKS
+.It Dv sctp.LOCAL_AUTH_CHUNKS
+.It Dv sctp.GET_ASSOC_NUMBER
+.It Dv sctp.GET_ASSOC_ID_LIST
+.It Dv sctp.TIMEOUTS
+.It Dv sctp.PR_STREAM_STATUS
+.It Dv sctp.PR_ASSOC_STATUS
+.It Dv sctp.ENABLE_STREAM_RESET
+.It Dv sctp.RESET_STREAMS
+.It Dv sctp.RESET_ASSOC
+.It Dv sctp.ADD_STREAMS
+.It Dv sctp.ENABLE_RESET_STREAM_REQ
+.It Dv sctp.ENABLE_RESET_ASSOC_REQ
+.It Dv sctp.ENABLE_CHANGE_ASSOC_REQ
+.It Dv sctp.ENABLE_VALUE_MASK
+.It Dv sctp.STREAM_RESET_INCOMING
+.It Dv sctp.STREAM_RESET_OUTGOING
+.It Dv sctp.SET_DEBUG_LEVEL
+.It Dv sctp.CLR_STAT_LOG
+.It Dv sctp.CMT_ON_OFF
+.It Dv sctp.CMT_USE_DAC
+.It Dv sctp.PLUGGABLE_CC
+.It Dv sctp.STREAM_SCHEDULER
+.It Dv sctp.STREAM_SCHEDULER_VALUE
+.It Dv sctp.CC_OPTION
+.It Dv sctp.INTERLEAVING_SUPPORTED
+.It Dv sctp.GET_SNDBUF_USE
+.It Dv sctp.GET_STAT_LOG
+.It Dv sctp.PCB_STATUS
+.It Dv sctp.GET_NONCE_VALUES
+.It Dv sctp.SET_DYNAMIC_PRIMARY
+.It Dv sctp.VRF_ID
+.It Dv sctp.ADD_VRF_ID
+.It Dv sctp.GET_VRF_IDS
+.It Dv sctp.GET_ASOC_VRF
+.It Dv sctp.DEL_VRF_ID
+.It Dv sctp.GET_PACKET_LOG
+.It Dv sctp.CC_RFC2581
+.It Dv sctp.CC_HSTCP
+.It Dv sctp.CC_HTCP
+.It Dv sctp.CC_RTCC
+.It Dv sctp.CC_OPT_RTCC_SETMODE
+.It Dv sctp.CC_OPT_USE_DCCC_ECN
+.It Dv sctp.CC_OPT_STEADY_STEP
+.It Dv sctp.CMT_OFF
+.It Dv sctp.CMT_BASE
+.It Dv sctp.CMT_RPV1
+.It Dv sctp.CMT_RPV2
+.It Dv sctp.CMT_MPTCP
+.It Dv sctp.CMT_MAX
+.It Dv sctp.SS_DEFAULT
+.It Dv sctp.SS_RR
+.It Dv sctp.SS_RR_PKT
+.It Dv sctp.SS_PRIO
+.It Dv sctp.SS_FB
+.It Dv sctp.SS_FCFS
+.It Dv sctp.FRAG_LEVEL_0
+.It Dv sctp.FRAG_LEVEL_1
+.It Dv sctp.FRAG_LEVEL_2
+.It Dv sctp.CLOSED
+.It Dv sctp.BOUND
+.It Dv sctp.LISTEN
+.It Dv sctp.COOKIE_WAIT
+.It Dv sctp.COOKIE_ECHOED
+.It Dv sctp.ESTABLISHED
+.It Dv sctp.SHUTDOWN_SENT
+.It Dv sctp.SHUTDOWN_RECEIVED
+.It Dv sctp.SHUTDOWN_ACK_SENT
+.It Dv sctp.SHUTDOWN_PENDING
+.It Dv sctp.CAUSE_NO_ERROR
+.It Dv sctp.CAUSE_INVALID_STREAM
+.It Dv sctp.CAUSE_MISSING_PARAM
+.It Dv sctp.CAUSE_STALE_COOKIE
+.It Dv sctp.CAUSE_OUT_OF_RESC
+.It Dv sctp.CAUSE_UNRESOLVABLE_ADDR
+.It Dv sctp.CAUSE_UNRECOG_CHUNK
+.It Dv sctp.CAUSE_INVALID_PARAM
+.It Dv sctp.CAUSE_UNRECOG_PARAM
+.It Dv sctp.CAUSE_NO_USER_DATA
+.It Dv sctp.CAUSE_COOKIE_IN_SHUTDOWN
+.It Dv sctp.CAUSE_RESTART_W_NEWADDR
+.It Dv sctp.CAUSE_USER_INITIATED_ABT
+.It Dv sctp.CAUSE_PROTOCOL_VIOLATION
+.It Dv sctp.CAUSE_DELETING_LAST_ADDR
+.It Dv sctp.CAUSE_RESOURCE_SHORTAGE
+.It Dv sctp.CAUSE_DELETING_SRC_ADDR
+.It Dv sctp.CAUSE_ILLEGAL_ASCONF_ACK
+.It Dv sctp.CAUSE_REQUEST_REFUSED
+.It Dv sctp.CAUSE_NAT_COLLIDING_STATE
+.It Dv sctp.CAUSE_NAT_MISSING_STATE
+.It Dv sctp.CAUSE_UNSUPPORTED_HMACID
+.It Dv sctp.HAD_NO_TCB
+.It Dv sctp.FROM_MIDDLE_BOX
+.It Dv sctp.BADCRC
+.It Dv sctp.PACKET_TRUNCATED
+.It Dv sctp.CWR_REDUCE_OVERRIDE
+.It Dv sctp.CWR_IN_SAME_WINDOW
+.It Dv sctp.SAT_NETWORK_MIN
+.It Dv sctp.SAT_NETWORK_BURST_INCR
+.It Dv sctp.DATA_FRAG_MASK
+.It Dv sctp.DATA_MIDDLE_FRAG
+.It Dv sctp.DATA_LAST_FRAG
+.It Dv sctp.DATA_FIRST_FRAG
+.It Dv sctp.DATA_NOT_FRAG
+.It Dv sctp.DATA_UNORDERED
+.It Dv sctp.DATA_SACK_IMMEDIATELY
+.It Dv sctp.SACK_NONCE_SUM
+.It Dv sctp.SACK_CMT_DAC
+.It Dv sctp.PCB_FLAGS_UDPTYPE
+.It Dv sctp.PCB_FLAGS_TCPTYPE
+.It Dv sctp.PCB_FLAGS_BOUNDALL
+.It Dv sctp.PCB_FLAGS_ACCEPTING
+.It Dv sctp.PCB_FLAGS_UNBOUND
+.It Dv sctp.PCB_FLAGS_SND_ITERATOR_UP
+.It Dv sctp.PCB_FLAGS_CLOSE_IP
+.It Dv sctp.PCB_FLAGS_WAS_CONNECTED
+.It Dv sctp.PCB_FLAGS_WAS_ABORTED
+.It Dv sctp.PCB_FLAGS_CONNECTED
+.It Dv sctp.PCB_FLAGS_IN_TCPPOOL
+.It Dv sctp.PCB_FLAGS_DONT_WAKE
+.It Dv sctp.PCB_FLAGS_WAKEOUTPUT
+.It Dv sctp.PCB_FLAGS_WAKEINPUT
+.It Dv sctp.PCB_FLAGS_BOUND_V6
+.It Dv sctp.PCB_FLAGS_BLOCKING_IO
+.It Dv sctp.PCB_FLAGS_SOCKET_GONE
+.It Dv sctp.PCB_FLAGS_SOCKET_ALLGONE
+.It Dv sctp.PCB_FLAGS_SOCKET_CANT_READ
+.It Dv sctp.PCB_COPY_FLAGS
+.It Dv sctp.PCB_FLAGS_DO_NOT_PMTUD
+.It Dv sctp.PCB_FLAGS_DONOT_HEARTBEAT
+.It Dv sctp.PCB_FLAGS_FRAG_INTERLEAVE
+.It Dv sctp.PCB_FLAGS_INTERLEAVE_STRMS
+.It Dv sctp.PCB_FLAGS_DO_ASCONF
+.It Dv sctp.PCB_FLAGS_AUTO_ASCONF
+.It Dv sctp.PCB_FLAGS_NODELAY
+.It Dv sctp.PCB_FLAGS_AUTOCLOSE
+.It Dv sctp.PCB_FLAGS_RECVASSOCEVNT
+.It Dv sctp.PCB_FLAGS_RECVPADDREVNT
+.It Dv sctp.PCB_FLAGS_RECVPEERERR
+.It Dv sctp.PCB_FLAGS_RECVSHUTDOWNEVNT
+.It Dv sctp.PCB_FLAGS_ADAPTATIONEVNT
+.It Dv sctp.PCB_FLAGS_PDAPIEVNT
+.It Dv sctp.PCB_FLAGS_AUTHEVNT
+.It Dv sctp.PCB_FLAGS_STREAM_RESETEVNT
+.It Dv sctp.PCB_FLAGS_NO_FRAGMENT
+.It Dv sctp.PCB_FLAGS_EXPLICIT_EOR
+.It Dv sctp.PCB_FLAGS_NEEDS_MAPPED_V4
+.It Dv sctp.PCB_FLAGS_MULTIPLE_ASCONFS
+.It Dv sctp.PCB_FLAGS_PORTREUSE
+.It Dv sctp.PCB_FLAGS_DRYEVNT
+.It Dv sctp.PCB_FLAGS_RECVRCVINFO
+.It Dv sctp.PCB_FLAGS_RECVNXTINFO
+.It Dv sctp.PCB_FLAGS_ASSOC_RESETEVNT
+.It Dv sctp.PCB_FLAGS_STREAM_CHANGEEVNT
+.It Dv sctp.PCB_FLAGS_RECVNSENDFAILEVNT
+.It Dv sctp.MOBILITY_BASE
+.It Dv sctp.MOBILITY_FASTHANDOFF
+.It Dv sctp.MOBILITY_PRIM_DELETED
+.It Dv sctp.SMALLEST_PMTU
+.It Dv sctp.LARGEST_PMTU
+.It Dv sctp.FUTURE_ASSOC
+.It Dv sctp.CURRENT_ASSOC
+.It Dv sctp.ALL_ASSOC
+.It Dv sctp.INIT
+.It Dv sctp.SNDRCV
+.It Dv sctp.EXTRCV
+.It Dv sctp.SNDINFO
+.It Dv sctp.RCVINFO
+.It Dv sctp.NXTINFO
+.It Dv sctp.PRINFO
+.It Dv sctp.AUTHINFO
+.It Dv sctp.DSTADDRV4
+.It Dv sctp.DSTADDRV6
+.It Dv sctp.ALIGN_RESV_PAD
+.It Dv sctp.ALIGN_RESV_PAD_SHORT
+.It Dv sctp.NO_NEXT_MSG
+.It Dv sctp.NEXT_MSG_AVAIL
+.It Dv sctp.NEXT_MSG_ISCOMPLETE
+.It Dv sctp.NEXT_MSG_IS_UNORDERED
+.It Dv sctp.NEXT_MSG_IS_NOTIFICATION
+.It Dv sctp.RECVV_NOINFO
+.It Dv sctp.RECVV_RCVINFO
+.It Dv sctp.RECVV_NXTINFO
+.It Dv sctp.RECVV_RN
+.It Dv sctp.SENDV_NOINFO
+.It Dv sctp.SENDV_SNDINFO
+.It Dv sctp.SENDV_PRINFO
+.It Dv sctp.SENDV_AUTHINFO
+.It Dv sctp.SENDV_SPA
+.It Dv sctp.SEND_SNDINFO_VALID
+.It Dv sctp.SEND_PRINFO_VALID
+.It Dv sctp.SEND_AUTHINFO_VALID
+.It Dv sctp.NOTIFICATION
+.It Dv sctp.COMPLETE
+.It Dv sctp.EOF
+.It Dv sctp.ABORT
+.It Dv sctp.UNORDERED
+.It Dv sctp.ADDR_OVER
+.It Dv sctp.SENDALL
+.It Dv sctp.EOR
+.It Dv sctp.SACK_IMMEDIATELY
+.It Dv sctp.PR_SCTP_NONE
+.It Dv sctp.PR_SCTP_TTL
+.It Dv sctp.PR_SCTP_PRIO
+.It Dv sctp.PR_SCTP_BUF
+.It Dv sctp.PR_SCTP_RTX
+.It Dv sctp.PR_SCTP_MAX
+.It Dv sctp.PR_SCTP_ALL
+.It Dv sctp.COMM_UP
+.It Dv sctp.COMM_LOST
+.It Dv sctp.RESTART
+.It Dv sctp.SHUTDOWN_COMP
+.It Dv sctp.CANT_STR_ASSOC
+.It Dv sctp.ASSOC_SUPPORTS_PR
+.It Dv sctp.ASSOC_SUPPORTS_AUTH
+.It Dv sctp.ASSOC_SUPPORTS_ASCONF
+.It Dv sctp.ASSOC_SUPPORTS_MULTIBUF
+.It Dv sctp.ASSOC_SUPPORTS_RE_CONFIG
+.It Dv sctp.ASSOC_SUPPORTS_INTERLEAVING
+.It Dv sctp.ASSOC_SUPPORTS_MAX
+.It Dv sctp.ADDR_AVAILABLE
+.It Dv sctp.ADDR_UNREACHABLE
+.It Dv sctp.ADDR_REMOVED
+.It Dv sctp.ADDR_ADDED
+.It Dv sctp.ADDR_MADE_PRIM
+.It Dv sctp.ADDR_CONFIRMED
+.It Dv sctp.ACTIVE
+.It Dv sctp.INACTIVE
+.It Dv sctp.UNCONFIRMED
+.It Dv sctp.DATA_UNSENT
+.It Dv sctp.DATA_SENT
+.It Dv sctp.PARTIAL_DELIVERY_ABORTED
+.It Dv sctp.AUTH_NEW_KEY
+.It Dv sctp.AUTH_NO_AUTH
+.It Dv sctp.AUTH_FREE_KEY
+.It Dv sctp.STREAM_RESET_INCOMING_SSN
+.It Dv sctp.STREAM_RESET_OUTGOING_SSN
+.It Dv sctp.STREAM_RESET_DENIED
+.It Dv sctp.STREAM_RESET_FAILED
+.It Dv sctp.ASSOC_RESET_DENIED
+.It Dv sctp.ASSOC_RESET_FAILED
+.It Dv sctp.STREAM_CHANGE_DENIED
+.It Dv sctp.STREAM_CHANGE_FAILED
+.It Dv sctp.ASSOC_CHANGE
+.It Dv sctp.PEER_ADDR_CHANGE
+.It Dv sctp.REMOTE_ERROR
+.It Dv sctp.SEND_FAILED
+.It Dv sctp.SHUTDOWN_EVENT
+.It Dv sctp.ADAPTATION_INDICATION
+.It Dv sctp.PARTIAL_DELIVERY_EVENT
+.It Dv sctp.AUTHENTICATION_EVENT
+.It Dv sctp.STREAM_RESET_EVENT
+.It Dv sctp.SENDER_DRY_EVENT
+.It Dv sctp.NOTIFICATIONS_STOPPED_EVENT
+.It Dv sctp.ASSOC_RESET_EVENT
+.It Dv sctp.STREAM_CHANGE_EVENT
+.It Dv sctp.SEND_FAILED_EVENT
+.It Dv sctp.AUTH_HMAC_ID_RSVD
+.It Dv sctp.AUTH_HMAC_ID_SHA1
+.It Dv sctp.AUTH_HMAC_ID_SHA256
+.It Dv sctp.MAX_EXPLICT_STR_RESET
+.It Dv sctp.EDMID_NONE
+.It Dv sctp.EDMID_LOWER_LAYER_DTLS
+.It Dv sctp.MAX_LOGGING_SIZE
+.It Dv sctp.TRACE_PARAMS
+.It Dv sctp.PACKET_LOG_SIZE
+.It Dv sctp.MAX_SACK_DELAY
+.It Dv sctp.MAX_HB_INTERVAL
+.It Dv sctp.MIN_COOKIE_LIFE
+.It Dv sctp.MAX_COOKIE_LIFE
+.It Dv sctp.BLK_LOGGING_ENABLE
+.It Dv sctp.CWND_MONITOR_ENABLE
+.It Dv sctp.CWND_LOGGING_ENABLE
+.It Dv sctp.FLIGHT_LOGGING_ENABLE
+.It Dv sctp.FR_LOGGING_ENABLE
+.It Dv sctp.LOCK_LOGGING_ENABLE
+.It Dv sctp.MAP_LOGGING_ENABLE
+.It Dv sctp.MBCNT_LOGGING_ENABLE
+.It Dv sctp.MBUF_LOGGING_ENABLE
+.It Dv sctp.NAGLE_LOGGING_ENABLE
+.It Dv sctp.RECV_RWND_LOGGING_ENABLE
+.It Dv sctp.RTTVAR_LOGGING_ENABLE
+.It Dv sctp.SACK_LOGGING_ENABLE
+.It Dv sctp.SACK_RWND_LOGGING_ENABLE
+.It Dv sctp.SB_LOGGING_ENABLE
+.It Dv sctp.STR_LOGGING_ENABLE
+.It Dv sctp.WAKE_LOGGING_ENABLE
+.It Dv sctp.LOG_MAXBURST_ENABLE
+.It Dv sctp.LOG_RWND_ENABLE
+.It Dv sctp.LOG_SACK_ARRIVALS_ENABLE
+.It Dv sctp.LTRACE_CHUNK_ENABLE
+.It Dv sctp.LTRACE_ERROR_ENABLE
+.It Dv sctp.LAST_PACKET_TRACING
+.It Dv sctp.THRESHOLD_LOGGING
+.It Dv sctp.LOG_AT_SEND_2_SCTP
+.It Dv sctp.LOG_AT_SEND_2_OUTQ
+.It Dv sctp.LOG_TRY_ADVANCE
+.It Dv sctp.SPP_HB_ENABLE
+.It Dv sctp.SPP_HB_DISABLE
+.It Dv sctp.SPP_HB_DEMAND
+.It Dv sctp.SPP_PMTUD_ENABLE
+.It Dv sctp.SPP_PMTUD_DISABLE
+.It Dv sctp.SPP_HB_TIME_IS_ZERO
+.It Dv sctp.SPP_IPV6_FLOWLABEL
+.It Dv sctp.SPP_DSCP
+.It Dv sctp.SPP_IPV4_TOS
+.El
+.Sh DESCRIPTION
+The
+.Nm netinet.sctp
+module provides bindings for Internet Stream Control Transmission Protocol
+definitions, system calls, and utilities in libc.
+.Pp
+.Vt socket s
+parameters may be given either as an
+.Vt integer
+file descriptor number or a Lua
+.Vt file
+object.
+.Pp
+.Vt sockaddr
+socket addresses are represented as tables of the form
+.Bd -literal -compact
+{
+	family = <integer>,
+	data = <string>,
+}
+.Ed
+where
+.Va data
+is the unformatted address as raw bytes.
+.Bl -tag -width XXXX
+.It Dv isinvalid = sctp.invalid_sinfo_flag(flags )
+Wraps
+.Fn INVALID_SINFO_FLAG .
+.It Dv policy = sctp.pr_sctp_policy(flags )
+Wraps
+.Fn PR_SCTP_POLICY .
+.It Dv isenabled = sctp.pr_sctp_enabled(flags )
+Wraps
+.Fn PR_SCTP_ENABLED .
+.It Dv isenabled = sctp.pr_sctp_ttl_enabled(flags )
+Wraps
+.Fn PR_SCTP_TTL_ENABLED .
+.It Dv isenabled = sctp.pr_sctp_buf_enabled(flags )
+Wraps
+.Fn PR_SCTP_BUF_ENABLED .
+.It Dv isenabled = sctp.pr_sctp_rtx_enabled(flags )
+Wraps
+.Fn PR_SCTP_RTX_ENABLED .
+.It Dv isinvalid = sctp.pr_sctp_invalid_policy(flags )
+Wraps
+.Fn PR_SCTP_INVALILD_POLICY .
+.It Dv isvalid = sctp.pr_sctp_valid_policy(flags )
+Wraps
+.Fn PR_SCTP_VALID_POLICY .
+.It Dv new_s, errmsg, errcode = sctp.peeloff(s , associd )
+Wraps
+.Xr sctp_peeloff 2 .
+.It Dv ok, errmsg, errcode = sctp.bindx(s , addrs , type )
+Wraps
+.Xr sctp_bindx 3 .
+.Fa addrs
+expects an array of
+.Vt sockaddr
+tables.
+.It Dv associd, errmsg, errcode = sctp.connectx(s , addrs )
+Wraps
+.Xr sctp_connectx 3 .
+.Fa addrs
+expects an array of
+.Vt sockaddr
+tables.
+.It Dv len, errmsg, errcode = sctp.getaddrlen(family )
+Wraps
+.Xr sctp_getaddrlen 3 .
+.It Dv paddrs, errmsg, errcode = sctp.getpaddrs(s , associd )
+Wraps
+.Xr sctp_getpaddrs 3 .
+Returns an array of
+.Vt sockaddr
+tables.
+.It Dv laddrs, errmsg, errcode = sctp.getladdrs(s , associd )
+Wraps
+.Xr sctp_getladdrs 3 .
+Returns an array of
+.Vt sockaddr
+tables.
+.It Dv associd, errmsg, errcode = sctp.getassocid(s , addr )
+Wraps
+.Xr sctp_getassocid 3 .
+.El
+.Sh EXAMPLES
+TODO:
+.Bd -literal -offset indent
+-- TODO
+.Ed
+.Sh SEE ALSO
+.Xr ifconfig 3lua ,
+.Xr netinet.in 3lua ,
+.Xr sys.socket 3lua
+.Sh AUTHORS
+.An Ryan Moeller
