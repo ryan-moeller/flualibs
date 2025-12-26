@@ -7,5 +7,7 @@ SUBDIR=	\
 	in \
 	ip \
 	ip6 \
+	udp \
+	udplite \
 
 .include <bsd.subdir.mk>

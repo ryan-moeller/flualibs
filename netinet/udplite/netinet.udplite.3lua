@@ -1,0 +1,34 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 26, 2025
+.Dt NETINET.UDPLITE 3lua
+.Os
+.Sh NAME
+.Nm netinet.udplite
+.Nd Lua binding for Lightweight User Datagram Protocol definitions
+.Sh SYNOPSIS
+.Bd -literal
+udplite = require('netinet.udplite')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv udplite.UDPLITE_SEND_CSCOV
+.It Dv udplite.UDPLITE_RECV_CSCOV
+.El
+.Sh DESCRIPTION
+The
+.Nm netinet.udplite
+module provides bindings for Lightweight User Datagram Protocol definitions.
+.Sh SEE ALSO
+.Xr ifconfig 3lua ,
+.Xr netinet.in 3lua ,
+.Xr netinet.ip 3lua ,
+.Xr netinet.ip6 3lua ,
+.Xr netinet.udp 3lua ,
+.Xr sys.socket 3lua ,
+.Xr udplite 4
+.Sh AUTHORS
+.An Ryan Moeller

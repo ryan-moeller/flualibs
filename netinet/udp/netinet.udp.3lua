@@ -1,0 +1,38 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 26, 2025
+.Dt NETINET.UDP 3lua
+.Os
+.Sh NAME
+.Nm netinet.udp
+.Nd Lua binding for Internet User Datagram Protocol definitions
+.Sh SYNOPSIS
+.Bd -literal
+udp = require('netinet.udp')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv udp.UDP_ENCAP
+.It Dv udp.UDP_VENDOR
+.It Dv udp.UDP_ENCAP_ESPINUDP_NON_IKE
+.It Dv udp.UDP_ENCAP_ESPINUDP
+.It Dv udp.UDP_ENCAP_ESPINUDP_PORT
+.It Dv udp.UDP_ENCAP_ESPINUDP_MAXFRAGLEN
+.El
+.Sh DESCRIPTION
+The
+.Nm netinet.udp
+module provides bindings for Internet User Datagram Protocol definitions.
+.Sh SEE ALSO
+.Xr ifconfig 3lua ,
+.Xr netinet.in 3lua ,
+.Xr netinet.ip 3lua ,
+.Xr netinet.ip6 3lua ,
+.Xr netinet.udplite 3lua ,
+.Xr sys.socket 3lua ,
+.Xr udp 4
+.Sh AUTHORS
+.An Ryan Moeller
