@@ -4,7 +4,7 @@
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
 .Dd December 25, 2025
-.Dt IP6 3lua
+.Dt NETINET.IP6 3lua
 .Os
 .Sh NAME
 .Nm netinet.ip6
@@ -87,8 +87,8 @@ TODO:
 .Ed
 .Sh SEE ALSO
 .Xr ifconfig 3lua ,
-.Xr in 3lua ,
-.Xr ip 3lua ,
-.Xr socket 3lua
+.Xr netinet.in 3lua ,
+.Xr netinet.ip 3lua ,
+.Xr sys.socket 3lua
 .Sh AUTHORS
 .An Ryan Moeller

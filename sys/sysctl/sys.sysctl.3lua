@@ -3,8 +3,8 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 16, 2025
-.Dt SYSCTL 3lua
+.Dd December 25, 2025
+.Dt SYS.SYSCTL 3lua
 .Os
 .Sh NAME
 .Nm sys.sysctl
@@ -80,6 +80,7 @@ for mib in sysctl.sysctl('kstat.zfs'):iter_noskip() do
 end
 .Ed
 .Sh SEE ALSO
-.Xr sysctl 3
+.Xr sysctl 3 ,
+.Xr sysctl 8
 .Sh AUTHORS
 .An Ryan Moeller

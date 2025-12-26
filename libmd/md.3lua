@@ -54,7 +54,7 @@ sha1:update("Hello, FreeBSD!")
 hash = sha1:final()
 .Ed
 .Sh SEE ALSO
-.Xr b64 3lua Pq Pa https://github.com/ryan-moeller/flualibs ,
-.Xr xor 3lua Pq Pa https://github.com/ryan-moeller/flualibs
+.Xr b64 3lua ,
+.Xr xor 3lua
 .Sh AUTHORS
 .An Ryan Moeller

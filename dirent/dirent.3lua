@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 16, 2025
+.Dd December 25, 2025
 .Dt DIRENT 3lua
 .Os
 .Sh NAME
@@ -104,6 +104,6 @@ os.exit(1)
 .Ed
 .Sh SEE ALSO
 .Xr directory 3 ,
-.Xr stat 3lua
+.Xr sys.stat 3lua
 .Sh AUTHORS
 .An Ryan Moeller

@@ -3,8 +3,8 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 23, 2025
-.Dt IN 3lua
+.Dd December 25, 2025
+.Dt NETINET.IN 3lua
 .Os
 .Sh NAME
 .Nm netinet.in
@@ -589,6 +589,6 @@ print(ucl.to_json(addrs))
 .Ed
 .Sh SEE ALSO
 .Xr ifconfig 3lua ,
-.Xr socket 3lua
+.Xr sys.socket 3lua
 .Sh AUTHORS
 .An Ryan Moeller

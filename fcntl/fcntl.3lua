@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 16, 2025
+.Dd December 25, 2025
 .Dt FCNTL 3lua
 .Os
 .Sh NAME
@@ -91,7 +91,7 @@ local len = 4096
 assert(fcntl.posix_fallocate(f, offset, len))
 .Ed
 .Sh SEE ALSO
-.Xr copy_file_range 3lua ,
-.Xr truncate 3lua
+.Xr stdio 3lua ,
+.Xr unistd 3lua
 .Sh AUTHORS
 .An Ryan Moeller

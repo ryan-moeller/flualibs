@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 14, 2025
+.Dd December 25, 2025
 .Dt PATHCONV 3lua
 .Os
 .Sh NAME
@@ -46,6 +46,6 @@ assert(pathconv.rel2abs('.', sysdir) == sysdir)
 .Ed
 .Sh SEE ALSO
 .Xr dirent 3lua ,
-.Xr stat 3lua
+.Xr sys.stat 3lua
 .Sh AUTHORS
 .An Ryan Moeller

@@ -3,8 +3,8 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 16, 2025
-.Dt CPUSET 3lua
+.Dd December 25, 2025
+.Dt SYS.CPUSET 3lua
 .Os
 .Sh NAME
 .Nm sys.cpuset

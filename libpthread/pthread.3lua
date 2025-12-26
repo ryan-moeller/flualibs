@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 11, 2025
+.Dd December 25, 2025
 .Dt PTHREAD 3lua
 .Os
 .Sh NAME
@@ -404,14 +404,18 @@ field described above would be redundant and is not included.
 .It Dv cpuset, err, code = thread:getaffinity_np( )
 Wraps
 .Xr pthread_getaffinity_np 3 .
-Returns a cpuset object from
-.Xr cpuset 3lua .
+Returns a
+.Vt cpuset
+object from
+.Xr sys.cpuset 3lua .
 .It Dv ok, err, code = thread:setaffinity_np(cpuset )
 Wraps
 .Xr pthread_setaffinity_np 3 .
 .Fa cpuset
-is a cpuset object from
-.Xr cpuset 3lua .
+is a
+.Vt cpuset
+object from
+.Xr sys.cpuset 3lua .
 .It Dv ok, err, code = thread:resume_np( )
 Wraps
 .Xr pthread_resume_np 3 .
@@ -743,6 +747,6 @@ pthread.create(function(message) print(message) end), 'hello world'):join()
 .Sh SEE ALSO
 .Xr pthread 3 ,
 .Xr pthread_np 3 ,
-.Xr cpuset 3lua
+.Xr sys.cpuset 3lua
 .Sh AUTHORS
 .An Ryan Moeller

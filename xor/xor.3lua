@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd September 6, 2025
+.Dd December 25, 2025
 .Dt XOR 3lua
 .Os
 .Sh NAME
@@ -41,7 +41,7 @@ plaintext = xor.apply(ciphertext, key)
 assert(plaintext == input)
 .Ed
 .Sh SEE ALSO
-.Xr md 3lua Pq Pa https://github.com/ryan-moeller/flualibs ,
-.Xr b64 3lua Pq Pa https://github.com/ryan-moeller/flualibs
+.Xr b64 3lua ,
+.Xr md 3lua
 .Sh AUTHORS
 .An Ryan Moeller

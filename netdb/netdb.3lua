@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 22, 2025
+.Dd December 25, 2025
 .Dt NETDB 3lua
 .Os
 .Sh NAME
@@ -136,6 +136,6 @@ for _, ai in ipairs(addrs) do
 end
 .Ed
 .Sh SEE ALSO
-.Xr socket 3lua
+.Xr sys.socket 3lua
 .Sh AUTHORS
 .An Ryan Moeller

@@ -3,8 +3,8 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 17, 2025
-.Dt EVENT 3lua
+.Dd December 25, 2025
+.Dt SYS.EVENT 3lua
 .Os
 .Sh NAME
 .Nm sys.event

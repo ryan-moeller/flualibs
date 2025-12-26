@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 17, 2025
+.Dd December 25, 2025
 .Dt STDIO 3lua
 .Os
 .Sh NAME
@@ -70,6 +70,7 @@ kq:close()
 .Ed
 .Sh SEE ALSO
 .Xr fileno 3 ,
-.Xr event 3lua
+.Xr sys.event 3lua ,
+.Xr unistd 3lua
 .Sh AUTHORS
 .An Ryan Moeller

@@ -3,8 +3,8 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 16, 2025
-.Dt MAC 3lua
+.Dd December 25, 2025
+.Dt SYS.MAC 3lua
 .Os
 .Sh NAME
 .Nm sys.mac

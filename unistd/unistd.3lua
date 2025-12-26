@@ -3,20 +3,71 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 16, 2025
-.Dt SYSCONF 3lua
+.Dd December 25, 2025
+.Dt UNISTD 3lua
 .Os
 .Sh NAME
 .Nm unistd
-.Nd Lua binding for
-.Xr sysconf 3
-libc routine
+.Nd Lua binding for Unix-like operating system API
 .Sh SYNOPSIS
 .Bd -literal
 unistd = require('unistd')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
+.It Dv value, errmsg, errcode = unistd.confstr(name )
+.It Dv unistd._CS_PATH
+.It Dv unistd._CS_POSIX_V6_ILP32_OFF32_CFLAGS
+.It Dv unistd._CS_POSIX_V6_ILP32_OFF32_LDFLAGS
+.It Dv unistd._CS_POSIX_V6_ILP32_OFF32_LIBS
+.It Dv unistd._CS_POSIX_V6_ILP32_OFFBIG_CFLAGS
+.It Dv unistd._CS_POSIX_V6_ILP32_OFFBIG_LDFLAGS
+.It Dv unistd._CS_POSIX_V6_ILP32_OFFBIG_LIBS
+.It Dv unistd._CS_POSIX_V6_LP64_OFF64_CFLAGS
+.It Dv unistd._CS_POSIX_V6_LP64_OFF64_LDFLAGS
+.It Dv unistd._CS_POSIX_V6_LP64_OFF64_LIBS
+.It Dv unistd._CS_POSIX_V6_LPBIG_OFFBIG_CFLAGS
+.It Dv unistd._CS_POSIX_V6_LPBIG_OFFBIG_LDFLAGS
+.It Dv unistd._CS_POSIX_V6_LPBIG_OFFBIG_LIBS
+.It Dv unistd._CS_POSIX_V6_WIDTH_RESTRICTED_ENVS
+.It Dv copied, inoff_or_errmsg, outoff_or_errcode = unistd.copy_file_range(infd | infile , inoff , outfd | outfile , outoff , len , flags )
+.It Dv unistd.COPY_FILE_RANGE_CLONE
+.It Dv unistd.SSIZE_MAX
+.It Dv value, errmsg, errcode = unistd.pathconf(path , name )
+.It Dv value, errmsg, errcode = unistd.lpathconf(path , name )
+.It Dv value, errmsg, errcode = unistd.fpathconf(fd | file , name )
+.It Dv unistd._PC_LINK_MAX
+.It Dv unistd._PC_MAX_CANON
+.It Dv unistd._PC_MAX_INPUT
+.It Dv unistd._PC_NAME_MAX
+.It Dv unistd._PC_PATH_MAX
+.It Dv unistd._PC_PIPE_BUF
+.It Dv unistd._PC_CHOWN_RESTRICTED
+.It Dv unistd._PC_NO_TRUNC
+.It Dv unistd._PC_VDISABLE
+.It Dv unistd._PC_ASYNC_IO
+.It Dv unistd._PC_PRIO_IO
+.It Dv unistd._PC_SYNC_IO
+.It Dv unistd._PC_ALLOC_SIZE_MIN
+.It Dv unistd._PC_FILESIZEBITS
+.It Dv unistd._PC_REC_INCR_XFER_SIZE
+.It Dv unistd._PC_REC_MAX_XFER_SIZE
+.It Dv unistd._PC_REC_MIN_XFER_SIZE
+.It Dv unistd._PC_REC_XFER_ALIGN
+.It Dv unistd._PC_SYMLINK_MAX
+.It Dv unistd._PC_ACL_EXTENDED
+.It Dv unistd._PC_ACL_PATH_MAX
+.It Dv unistd._PC_CAP_PRESENT
+.It Dv unistd._PC_INF_PRESENT
+.It Dv unistd._PC_MAC_PRESENT
+.It Dv unistd._PC_ACL_NFS4
+.It Dv unistd._PC_DEALLOC_PRESENT
+.It Dv unistd._PC_NAMEDATTR_ENABLED
+.It Dv unistd._PC_HAS_NAMEDATTR
+.It Dv unistd._PC_HAS_HIDDENSYSTEM
+.It Dv unistd._PC_CLONE_BLKSIZE
+.It Dv unistd._PC_CASE_INSENSITIVE
+.It Dv unistd._PC_MIN_HOLE_SIZE
 .It Dv value, errmsg, errcode = unistd.sysconf(name )
 .It Dv unistd._SC_ARG_MAX
 .It Dv unistd._SC_CHILD_MAX
@@ -140,28 +191,86 @@ unistd = require('unistd')
 .It Dv unistd._SC_UEXTERR_MAXLEN
 .It Dv unistd._SC_NSIG
 .It Dv unistd._SC_PHYS_PAGES
+.It Dv ok, errmsg, errcode = unistd.truncate(path , name )
+.It Dv ok, errmsg, errcode = unistd.ftruncate(fd | file , name )
+.It Dv unistd.STDIN_FILENO
+.It Dv unistd.STDOUT_FILENO
+.It Dv unistd.STDERR_FILENO
 .El
 .Sh DESCRIPTION
 The
 .Nm unistd
-module provides a binding for the
-.Xr sysconf 3
-libc routine.
+module provides access to the Unix-like operating system API.
 .Bl -tag -width XXXX
+.It Dv value, errmsg, errcode = unistd.confstr(name )
+Wraps
+.Xr confstr 3 .
+.It Dv copied, inoff_or_errmsg, outoff_or_errcode = unistd.copy_file_range(infd | infile , inoff , outfd | outfile , outoff , len , flags )
+Wraps
+.Xr copy_file_range 2 .
+.It Dv value, errmsg, errcode = unistd.pathconf(path , name )
+Wraps
+.Xr pathconf 2 .
+.It Dv value, errmsg, errcode = unistd.lpathconf(path , name )
+Wraps
+.Xr lpathconf 2 .
+.It Dv value, errmsg, errcode = unistd.fpathconf(fd | file , name )
+Wraps
+.Xr fpathconf 2 .
 .It Dv value, errmsg, errcode = unistd.sysconf(name )
 Wraps
 .Xr sysconf 3 .
+.It Dv ok, errmsg, errcode = unistd.truncate(path , name )
+Wraps
+.Xr truncate 2 .
+.It Dv ok, errmsg, errcode = unistd.ftruncate(fd | file , name )
+Wraps
+.Xr ftruncate 2 .
 .El
 .Sh EXAMPLES
+Get a minimal POSIX utility PATH environment variable:
+.Bd -literal -offset indent
+local unistd = require('unistd')
+
+print(assert(unistd.confstr(unistd._CS_PATH)))
+.Ed
+.Pp
+Copy stdin to stdout
+.Pq must be files :
+.Bd -literal -offset indent
+local unistd = require('unistd')
+local copy_file_range = unistd.copy_file_range
+
+copy_file_range(io.stdin, nil, io.stdout, nil, unistd.SSIZE_MAX, 0)
+.Ed
+.Pp
+Check the block alignment required for
+.Xr copy_file_range 2 :
+.Bd -literal -offset indent
+local unistd = require('unistd')
+
+print(assert(unistd.pathconf('/COPYRIGHT', unistd._PC_CLONE_BLKSIZE)))
+.Ed
+.Pp
 Check the number of processors available to the process:
 .Bd -literal -offset indent
 local unistd = require('unistd')
 
 print(assert(unistd.sysconf(unistd._SC_NPROCESSORS_ONLN)))
 .Ed
+.Pp
+Create a zero-filled file:
+.Bd -literal -offset indent
+local unistd = require('unistd')
+
+local path = os.tmpname()
+local size = 4096
+print(path)
+assert(unistd.truncate(path, size))
+.Ed
 .Sh SEE ALSO
-.Xr confstr 3lua ,
-.Xr pathconf 3lua ,
-.Xr sysctl 3lua
+.Xr stdio 3lua ,
+.Xr sys.socket 3lua ,
+.Xr sys.sysctl 3lua
 .Sh AUTHORS
 .An Ryan Moeller

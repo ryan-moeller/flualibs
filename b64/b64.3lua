@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 21, 2025
+.Dd December 25, 2025
 .Dt B64 3lua
 .Os
 .Sh NAME
@@ -46,7 +46,7 @@ output = assert(base64.decode(encoded))
 assert(output == input)
 .Ed
 .Sh SEE ALSO
-.Xr md 3lua Pq Pa https://github.com/ryan-moeller/flualibs ,
-.Xr xor 3lua Pq Pa https://github.com/ryan-moeller/flualibs
+.Xr md 3lua ,
+.Xr xor 3lua
 .Sh AUTHORS
 .An Ryan Moeller

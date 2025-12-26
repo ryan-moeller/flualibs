@@ -3,8 +3,8 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 17, 2025
-.Dt LINKER 3lua
+.Dd December 25, 2025
+.Dt SYS.LINKER 3lua
 .Os
 .Sh NAME
 .Nm sys.linker
@@ -92,7 +92,7 @@ end
 print(ucl.to_json(klds))
 .Ed
 .Sh SEE ALSO
-.Xr module 3lua ,
+.Xr sys.module 3lua ,
 .Xr kldload 8 ,
 .Xr kldstat 8 ,
 .Xr kldunload 8

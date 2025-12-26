@@ -3,8 +3,8 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 16, 2025
-.Dt STAT 3lua
+.Dd December 25, 2025
+.Dt SYS.STAT 3lua
 .Os
 .Sh NAME
 .Nm sys.stat
@@ -16,6 +16,12 @@ stat = require('sys.stat')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
+.It Dv ok, errmsg, errcode = stat.chflags(path , flags )
+.It Dv ok, errmsg, errcode = stat.lchflags(path , flags )
+.It Dv ok, errmsg, errcode = stat.fchflags(fd | file , flags )
+.It Dv ok, errmsg, errcode = stat.chflagsat(fd , path , flags , atflag )
+.It Dv str, errmsg, errcode = stat.fflagstostr(flags )
+.It Dv flags, errstr = stat.strtofflags(str )
 .It Dv st, errmsg, errcode = stat.stat(path )
 .It Dv st, errmsg, errcode = stat.lstat(path )
 .It Dv st, errmsg, errcode = stat.fstat(fd | file )
@@ -126,6 +132,24 @@ type fields are tables of the form
 }
 .Ed
 .Bl -tag -width XXXX
+.It Dv ok, errmsg, errcode = stat.chflags(path , flags )
+Wraps
+.Xr chflags 2 .
+.It Dv ok, errmsg, errcode = stat.lchflags(path , flags )
+Wraps
+.Xr lchflags 2 .
+.It Dv ok, errmsg, errcode = stat.fchflags(fd | file , flags )
+Wraps
+.Xr fchflags 2 .
+.It Dv ok, errmsg, errcode = stat.chflagsat(fd , path , flags , atflag )
+Wraps
+.Xr chflagsat 2 .
+.It Dv str, errmsg, errcode = stat.fflagstostr(flags )
+Wraps
+.Xr fflagstostr 3 .
+.It Dv flags, errstr = stat.strtofflags(str )
+Wraps
+.Xr strtofflags 3 .
 .It Dv st, errmsg, errcode = stat.stat(path )
 Wraps
 .Xr stat 2 .
@@ -172,12 +196,13 @@ local st = assert(stat.stat('/COPYRIGHT'))
 print(assert(stat.fflagstostr(st.flags)))
 .Ed
 .Sh SEE ALSO
+.Xr chflags 1 ,
 .Xr stat 1 ,
+.Xr chflags 2 ,
 .Xr stat 2 ,
-.Xr acl 3lua ,
-.Xr chflags 3lua ,
-.Xr extattr 3lua ,
 .Xr fcntl 3lua ,
-.Xr mac 3lua
+.Xr sys.acl 3lua ,
+.Xr sys.extattr 3lua ,
+.Xr sys.mac 3lua
 .Sh AUTHORS
 .An Ryan Moeller
