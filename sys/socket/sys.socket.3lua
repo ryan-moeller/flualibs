@@ -1,0 +1,417 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 25, 2025
+.Dt SYS.SOCKET 3lua
+.Os
+.Sh NAME
+.Nm sys.socket
+.Nd Lua binding for socket system calls and related functions
+.Sh SYNOPSIS
+.Bd -literal
+socket = require('sys.socket')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv client, clientaddr_or_errmsg, errcode = socket.accept(s )
+.It Dv ok, errmsg, errcode = socket.bind(s , addr )
+.It Dv ok, errmsg, errcode = socket.connect(s , addr )
+.It Dv ok, errmsg, errcode = socket.bindat(fd , s , addr )
+.It Dv ok, errmsg, errcode = socket.connectat(fd , s , addr )
+.It Dv name, errmsg, errcode = socket.getpeername(s )
+.It Dv name, errmsg, errcode = socket.getsockname(s )
+.It Dv optval, errmsg, errcode = socket.getsockopt(s , level , optname , optlen )
+.It Dv ok, errmsg, errcode = socket.listen(s[ , backlog ] )
+.It Dv data, errmsg, errcode = socket.recv(s , n[ , flags ] )
+.It Dv data, from_or_errmsg, errcode = socket.recvfrom(s , n[ , flags ] )
+.It Dv n, errmsg, errcode = socket.send(s , data[ , flags ] )
+.It Dv n, errmsg, errcode = socket.sendto(s , data[ , flags ] , to )
+.It Dv sbytes, errmsg, errcode = socket.sendfile(fd , s , offset , nbytes[ , flags[ , readahead ] ] )
+.It Dv sbytes, errmsg, errcode = socket.sendfile(fd , s , offset , nbytes , hdtr[ , flags[ , readahead ] ] )
+.It Dv ok, errmsg, errcode = socket.setfib(fib )
+.It Dv ok, errmsg, errcode = socket.setsockopt(s , level , optname , optval )
+.It Dv ok, errmsg, errcode = socket.shutdown(s , how )
+.It Dv atmark, errmsg, errcode = socket.sockatmark(s )
+.It Dv s, errmsg, errcode = socket.socket(domain , type , protocol )
+.It Dv s1, s2_or_errmsg, errcode = socket.socketpair(domain , type , protocol )
+.It Dv socket.SOCK_STREAM
+.It Dv socket.SOCK_DGRAM
+.It Dv socket.SOCK_RAW
+.It Dv socket.SOCK_RDM
+.It Dv socket.SOCK_SEQPACKET
+.It Dv socket.SOCK_CLOEXEC
+.It Dv socket.SOCK_NONBLOCK
+.It Dv socket.SOCK_CLOFORK
+.It Dv socket.SO_DEBUG
+.It Dv socket.SO_ACCEPTCONN
+.It Dv socket.SO_REUSEADDR
+.It Dv socket.SO_KEEPALIVE
+.It Dv socket.SO_DONTROUTE
+.It Dv socket.SO_BROADCAST
+.It Dv socket.SO_USELOOPBACK
+.It Dv socket.SO_LINGER
+.It Dv socket.SO_OOBINLINE
+.It Dv socket.SO_REUSEPORT
+.It Dv socket.SO_TIMESTAMP
+.It Dv socket.SO_NOSIGPIPE
+.It Dv socket.SO_ACCEPTFILTER
+.It Dv socket.SO_BINTIME
+.It Dv socket.SO_NO_OFFLOAD
+.It Dv socket.SO_NO_DDP
+.It Dv socket.SO_REUSEPORT_LB
+.It Dv socket.SO_RERROR
+.It Dv socket.SO_SNDBUF
+.It Dv socket.SO_RCVBUF
+.It Dv socket.SO_SNDLOWAT
+.It Dv socket.SO_RCVLOWAT
+.It Dv socket.SO_SNDTIMEO
+.It Dv socket.SO_RCVTIMEO
+.It Dv socket.SO_ERROR
+.It Dv socket.SO_TYPE
+.It Dv socket.SO_LABEL
+.It Dv socket.SO_PEERLABEL
+.It Dv socket.SO_LISTENQLIMIT
+.It Dv socket.SO_LISTENQLEN
+.It Dv socket.SO_LISTENINCQLEN
+.It Dv socket.SO_FIB
+.It Dv socket.SO_USER_COOKIE
+.It Dv socket.SO_PROTOCOL
+.It Dv socket.SO_TS_CLOCK
+.It Dv socket.SO_MAX_PACING_RATE
+.It Dv socket.SO_DOMAIN
+.It Dv socket.SO_SPLICE
+.It Dv socket.SO_TS_REALTIME_MICRO
+.It Dv socket.SO_TS_BINTIME
+.It Dv socket.SO_TS_REALTIME
+.It Dv socket.SO_TS_MONOTONIC
+.It Dv socket.SO_TS_DEFAULT
+.It Dv socket.SO_TS_CLOCK_MAX
+.It Dv socket.SO_VENDOR
+.It Dv socket.SOL_SOCKET
+.It Dv socket.AF_UNSPEC
+.It Dv socket.AF_LOCAL
+.It Dv socket.AF_UNIX
+.It Dv socket.AF_INET
+.It Dv socket.AF_IMPLINK
+.It Dv socket.AF_PUP
+.It Dv socket.AF_CHAOS
+.It Dv socket.AF_NETBIOS
+.It Dv socket.AF_ISO
+.It Dv socket.AF_ECMA
+.It Dv socket.AF_DATAKIT
+.It Dv socket.AF_CCITT
+.It Dv socket.AF_SNA
+.It Dv socket.AF_DECnet
+.It Dv socket.AF_LAT
+.It Dv socket.AF_HYLINK
+.It Dv socket.AF_APPLETALK
+.It Dv socket.AF_ROUTE
+.It Dv socket.AF_LINK
+.It Dv socket.pseudo_AF_XTP
+.It Dv socket.AF_COIP
+.It Dv socket.AF_CNT
+.It Dv socket.pseudo_AF_RTIP
+.It Dv socket.AF_IPX
+.It Dv socket.AF_SIP
+.It Dv socket.pseudo_AF_PIP
+.It Dv socket.AF_ISDN
+.It Dv socket.AF_E164
+.It Dv socket.pseudo_AF_KEY
+.It Dv socket.AF_INET6
+.It Dv socket.AF_NATM
+.It Dv socket.AF_ATM
+.It Dv socket.pseudo_AF_HDRCMPLT
+.It Dv socket.AF_NETGRAPH
+.It Dv socket.AF_SLOW
+.It Dv socket.AF_SCLUSTER
+.It Dv socket.AF_ARP
+.It Dv socket.AF_BLUETOOTH
+.It Dv socket.AF_IEEE80211
+.It Dv socket.AF_NETLINK
+.It Dv socket.AF_INET_SDP
+.It Dv socket.AF_INET6_SDP
+.It Dv socket.AF_HYPERV
+.It Dv socket.AF_DIVERT
+.It Dv socket.AF_IPFWLOG
+.It Dv socket.AF_MAX
+.It Dv socket.AF_VENDOR00
+.It Dv socket.AF_VENDOR01
+.It Dv socket.AF_VENDOR03
+.It Dv socket.AF_VENDOR04
+.It Dv socket.AF_VENDOR05
+.It Dv socket.AF_VENDOR06
+.It Dv socket.AF_VENDOR07
+.It Dv socket.AF_VENDOR08
+.It Dv socket.AF_VENDOR09
+.It Dv socket.AF_VENDOR10
+.It Dv socket.AF_VENDOR11
+.It Dv socket.AF_VENDOR12
+.It Dv socket.AF_VENDOR13
+.It Dv socket.AF_VENDOR14
+.It Dv socket.AF_VENDOR15
+.It Dv socket.AF_VENDOR16
+.It Dv socket.AF_VENDOR17
+.It Dv socket.AF_VENDOR18
+.It Dv socket.AF_VENDOR19
+.It Dv socket.AF_VENDOR20
+.It Dv socket.AF_VENDOR21
+.It Dv socket.AF_VENDOR22
+.It Dv socket.AF_VENDOR23
+.It Dv socket.AF_VENDOR24
+.It Dv socket.AF_VENDOR25
+.It Dv socket.AF_VENDOR26
+.It Dv socket.AF_VENDOR27
+.It Dv socket.AF_VENDOR28
+.It Dv socket.AF_VENDOR29
+.It Dv socket.AF_VENDOR30
+.It Dv socket.AF_VENDOR31
+.It Dv socket.AF_VENDOR32
+.It Dv socket.AF_VENDOR33
+.It Dv socket.AF_VENDOR34
+.It Dv socket.AF_VENDOR35
+.It Dv socket.AF_VENDOR36
+.It Dv socket.AF_VENDOR37
+.It Dv socket.AF_VENDOR38
+.It Dv socket.AF_VENDOR39
+.It Dv socket.AF_VENDOR40
+.It Dv socket.AF_VENDOR41
+.It Dv socket.AF_VENDOR42
+.It Dv socket.AF_VENDOR43
+.It Dv socket.AF_VENDOR44
+.It Dv socket.AF_VENDOR45
+.It Dv socket.AF_VENDOR46
+.It Dv socket.AF_VENDOR47
+.It Dv socket.SOCK_MAXADDRLEN
+.It Dv socket.PF_UNSPEC
+.It Dv socket.PF_LOCAL
+.It Dv socket.PF_UNIX
+.It Dv socket.PF_INET
+.It Dv socket.PF_IMPLINK
+.It Dv socket.PF_PUP
+.It Dv socket.PF_CHAOS
+.It Dv socket.PF_NETBIOS
+.It Dv socket.PF_ISO
+.It Dv socket.PF_ECMA
+.It Dv socket.PF_DATAKIT
+.It Dv socket.PF_CCITT
+.It Dv socket.PF_SNA
+.It Dv socket.PF_DECnet
+.It Dv socket.PF_LAT
+.It Dv socket.PF_HYLINK
+.It Dv socket.PF_APPLETALK
+.It Dv socket.PF_ROUTE
+.It Dv socket.PF_LINK
+.It Dv socket.PF_XTP
+.It Dv socket.PF_COIP
+.It Dv socket.PF_CNT
+.It Dv socket.PF_RTIP
+.It Dv socket.PF_IPX
+.It Dv socket.PF_SIP
+.It Dv socket.PF_PIP
+.It Dv socket.PF_ISDN
+.It Dv socket.PF_KEY
+.It Dv socket.PF_INET6
+.It Dv socket.PF_NATM
+.It Dv socket.PF_ATM
+.It Dv socket.PF_NETGRAPH
+.It Dv socket.PF_SLOW
+.It Dv socket.PF_SCLUSTER
+.It Dv socket.PF_ARP
+.It Dv socket.PF_BLUETOOTH
+.It Dv socket.PF_IEEE80211
+.It Dv socket.PF_NETLINK
+.It Dv socket.PF_INET_SDP
+.It Dv socket.PF_INET6_SDP
+.It Dv socket.PF_HYPERV
+.It Dv socket.PF_DIVERT
+.It Dv socket.PF_IPFWLOG
+.It Dv socket.PF_MAX
+.It Dv socket.NET_RT_DUMP
+.It Dv socket.NET_RT_FLAGS
+.It Dv socket.NET_RT_IFLIST
+.It Dv socket.NET_RT_IFMALIST
+.It Dv socket.NET_RT_IFLISTL
+.It Dv socket.NET_RT_NHOP
+.It Dv socket.NET_RT_NHGRP
+.It Dv socket.SOMAXCONN
+.It Dv socket.MSG_OOB
+.It Dv socket.MSG_PEEK
+.It Dv socket.MSG_DONTROUTE
+.It Dv socket.MSG_EOR
+.It Dv socket.MSG_TRUNC
+.It Dv socket.MSG_CTRUNC
+.It Dv socket.MSG_WAITALL
+.It Dv socket.MSG_DONTWAIT
+.It Dv socket.MSG_EOF
+.It Dv socket.MSG_NOTIFICATION
+.It Dv socket.MSG_NBIO
+.It Dv socket.MSG_COMPAT
+.It Dv socket.MSG_NOSIGNAL
+.It Dv socket.MSG_CMSG_CLOEXEC
+.It Dv socket.MSG_WAITFORONE
+.It Dv socket.MSG_CMSG_CLOFORK
+.It Dv socket.CMGROUP_MAX
+.It Dv socket.SCM_RIGHTS
+.It Dv socket.SCM_TIMESTAMP
+.It Dv socket.SCM_CREDS
+.It Dv socket.SCM_BINTIME
+.It Dv socket.SCM_REALTIME
+.It Dv socket.SCM_MONOTONIC
+.It Dv socket.SCM_TIME_INFO
+.It Dv socket.SCM_CREDS2
+.It Dv socket.ST_INFO_HW
+.It Dv socket.ST_INFO_HW_HPREC
+.It Dv socket.SHUT_RD
+.It Dv socket.SHUT_WR
+.It Dv socket.SHUT_RDWR
+.It Dv socket.SF_NODISKIO
+.It Dv socket.SF_NOCACHE
+.It Dv socket.SF_USER_READAHEAD
+.El
+.Sh DESCRIPTION
+The
+.Nm sys.socket
+module provides a binding for socket system calls and related functions.
+.Pp
+Sockets may be passed as either Lua
+.Vt file
+handles or
+.Vt integer
+file descriptor numbers.
+.Pp
+Addresses are tables of the form
+.Bd -literal -compact
+{
+	family = <integer>,
+	data = <string>,
+}
+.Ed
+where
+.Va data
+is the unformatted address as raw bytes.
+.Bl -tag -width XXXX
+.It Dv client, clientaddr_or_errmsg, errcode = socket.accept(s[ , flags ] )
+Wraps
+.Xr accept 2 ,
+or
+.Xr accept4 2
+if
+.Fa flags
+is given.
+.It Dv ok, errmsg, errcode = socket.bind(s , addr )
+Wraps
+.Xr bind 2 .
+.It Dv ok, errmsg, errcode = socket.connect(s , addr )
+Wraps
+.Xr connect 2 .
+.It Dv ok, errmsg, errcode = socket.bindat(fd , s , addr )
+Wraps
+.Xr bindat 2 .
+.It Dv ok, errmsg, errcode = socket.connectat(fd , s , addr )
+Wraps
+.Xr connectat 2 .
+.It Dv name, errmsg, errcode = socket.getpeername(s )
+Wraps
+.Xr getpeername 2 .
+.It Dv name, errmsg, errcode = socket.getsockname(s )
+Wraps
+.Xr getsockname 2 .
+.It Dv optval, errmsg, errcode = socket.getsockopt(s , level , optname , optlen )
+Wraps
+.Xr getsockopt 2 .
+Returns the raw value as a
+.Vt string
+of bytes.
+.It Dv ok, errmsg, errcode = socket.listen(s[ , backlog ] )
+Wraps
+.Xr listen 2 .
+.Fa backlog
+defaults to
+.Dv -1
+if not specified.
+.It Dv data, errmsg, errcode = socket.recv(s , n[ , flags ] )
+Wraps
+.Xr recv 2 .
+.It Dv data, from_or_errmsg, errcode = socket.recvfrom(s , n[ , flags ] )
+Wraps
+.Xr recvfrom 2 .
+.It Dv n, errmsg, errcode = socket.send(s , data[ , flags ] )
+Wraps
+.Xr send 2 .
+.It Dv n, errmsg, errcode = socket.sendto(s , data[ , flags ] , to )
+Wraps
+.Xr sendto 2 .
+.It Dv sbytes, errmsg, errcode = socket.sendfile(fd, s, offset, nbytes[ , flags[ , readahead ] ] )
+.It Dv sbytes, errmsg, errcode = socket.sendfile(fd, s, offset, nbytes, hdtr[ , flags[ , readahead ] ] )
+Wraps
+.Xr sendfile 2 .
+.Pp
+.Fa fd
+and
+.Fa s
+may be passed as either Lua
+.Vt file
+handles or
+.Vt integer
+file descriptor numbers.
+.Pp
+Optional headers and trailers may be given as the fifth argument in a table of
+the form
+.Bd -literal -compact
+{
+	headers = { <string>, ... },
+	trailers = { <string>, ... }
+}
+.Ed
+where
+.Va headers
+and
+.Va trailers
+are lists of strings to be sent before and after the file data.
+.It Dv ok, errmsg, errcode = socket.setfib(fib )
+Wraps
+.Xr setfib 2 .
+.It Dv ok, errmsg, errcode = socket.setsockopt(s , level , optname , optval )
+Wraps
+.Xr setsockopt 2 .
+.Fa optval
+takes the raw value as a
+.Vt string
+of bytes.
+.It Dv ok, errmsg, errcode = socket.shutdown(s , how )
+Wraps
+.Xr shutdown 2 .
+.It Dv atmark, errmsg, errcode = socket.sockatmark(s )
+Wraps
+.Xr sockatmark 3 .
+.It Dv s, errmsg, errcode = socket.socket(domain , type , protocol )
+Wraps
+.Xr socket 2 .
+Returns an
+.Vt integer
+file descriptor number as the socket.
+.It Dv s1, s2_or_errmsg, errcode = socket.socketpair(domain , type , protocol )
+Wraps
+.Xr socketpair 2 .
+Returns two
+.Vt integer
+file descriptor numbers as the sockets.
+.El
+.Sh EXAMPLES
+Send the system message log file to a socket, with the path in a header string:
+.Bd -literal -offset indent
+local socket = require('sys.socket')
+
+local path = '/var/log/messages'
+local f = assert(io.open(path, 'r'))
+-- For this example we assume stdout is a socket, such as set up by inetd(8).
+assert(socket.sendfile(f, io.stdout, 0, 0, {headers={path..'\n'}}))
+f:close()
+.Ed
+.Sh SEE ALSO
+.Xr sendfile 2 ,
+.Xr inetd 8
+.Sh AUTHORS
+.An Ryan Moeller

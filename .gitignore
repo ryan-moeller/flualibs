@@ -2,6 +2,7 @@
 .*
 !.cirrus.yml
 !.gitignore
-*.so*
+*.so
+*.so.*
 *.core
 *.pico
