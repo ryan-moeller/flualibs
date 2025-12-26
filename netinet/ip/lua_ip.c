@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <sys/types.h>
+#include <netinet/in.h>
 #include <netinet/ip.h>
 
 #include <lua.h>
