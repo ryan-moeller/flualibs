@@ -216,8 +216,10 @@ l_setsourcefilter(lua_State *L)
 	lua_pop(L, numsrc);
 	if (setsourcefilter(s, interface, group, group->sa_len, fmode, numsrc,
 	    slist) == -1) {
+		int error = errno;
+
 		free(slist);
-		return (fail(L, errno));
+		return (fail(L, error));
 	}
 	free(slist);
 	lua_pushboolean(L, true);
@@ -260,8 +262,10 @@ grew:
 	numsrc = slistlen;
 	if (getsourcefilter(s, interface, group, group->sa_len, &fmode, &numsrc,
 	    slist) == -1) {
+		int error = errno;
+
 		free(slist);
-		return (fail(L, errno));
+		return (fail(L, error));
 	}
 	if (numsrc > slistlen) {
 		free(slist);

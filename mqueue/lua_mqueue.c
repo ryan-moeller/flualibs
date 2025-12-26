@@ -173,8 +173,10 @@ l_mq_receive(lua_State *L)
 
 	len = mq_receive(*mqp, buf, buflen, &prio);
 	if (len == -1) {
+		int error = errno;
+
 		free(buf);
-		return (fail(L, errno));
+		return (fail(L, error));
 	}
 	lua_pushlstring(L, buf, len);
 	lua_pushinteger(L, prio);
@@ -226,8 +228,10 @@ l_mq_timedreceive(lua_State *L)
 
 	len = mq_timedreceive(*mqp, buf, buflen, &prio, &abs_timeout);
 	if (len == -1) {
+		int error = errno;
+
 		free(buf);
-		return (fail(L, errno));
+		return (fail(L, error));
 	}
 	lua_pushlstring(L, buf, len);
 	lua_pushinteger(L, prio);

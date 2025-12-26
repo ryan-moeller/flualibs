@@ -186,8 +186,10 @@ l_getsockopt(lua_State *L)
 		return (fatal(L, "malloc", ENOMEM));
 	}
 	if (getsockopt(s, level, optname, optval, &optlen) == -1) {
+		int error = errno;
+
 		free(optval);
-		return (fail(L, errno));
+		return (fail(L, error));
 	}
 	lua_pushlstring(L, optval, optlen);
 	free(optval);
