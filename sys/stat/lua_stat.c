@@ -12,7 +12,6 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <unistd.h> /* TODO: move these parts to unistd */
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -132,46 +131,6 @@ l_chflagsat(lua_State *L)
 }
 
 static int
-l_fflagstostr(lua_State *L)
-{
-	char *str;
-	u_long flags;
-
-	flags = luaL_checkinteger(L, 1);
-
-	if ((str = fflagstostr(flags)) == NULL) {
-		return (fail(L, ENOMEM));
-	}
-	lua_pushstring(L, str);
-	free(str);
-	return (1);
-}
-
-static int
-l_strtofflags(lua_State *L)
-{
-	const char *s;
-	char *str;
-	u_long set, clr;
-
-	s = luaL_checkstring(L, 1);
-
-	if ((str = strdup(s)) == NULL) {
-		return (fatal(L, "strdup", ENOMEM));
-	}
-	if (strtofflags(&str, &set, &clr) != 0) {
-		luaL_pushfail(L);
-		lua_pushstring(L, str);
-		free(str);
-		return (2);
-	}
-	free(str);
-	lua_pushinteger(L, set);
-	lua_pushinteger(L, clr);
-	return (2);
-}
-
-static int
 l_stat(lua_State *L)
 {
 	struct stat sb;
@@ -265,8 +224,6 @@ static const struct luaL_Reg l_stat_funcs[] = {
 	{"lchflags", l_lchflags},
 	{"fchflags", l_fchflags},
 	{"chflagsat", l_chflagsat},
-	{"fflagstostr", l_fflagstostr}, /* TODO: move to unistd */
-	{"strtofflags", l_strtofflags}, /* TODO: move to unistd */
 	{"stat", l_stat},
 	{"lstat", l_lstat},
 	{"fstat", l_fstat},

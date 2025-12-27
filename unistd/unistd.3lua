@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 25, 2025
+.Dd December 26, 2025
 .Dt UNISTD 3lua
 .Os
 .Sh NAME
@@ -15,6 +15,27 @@ unistd = require('unistd')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
+.It Dv pid, errmsg, errcode = unistd.fork( )
+.It Dv pid, errmsg, errcode = unistd._Fork( )
+.It Dv unistd._exit([status ] )
+.It Dv ok, errmsg, errcode = unistd.access(path , mode )
+.It Dv ok, errmsg, errcode = unistd.eaccess(path , mode )
+.It Dv ok, errmsg, errcode = unistd.faccessat(dfd , path , mode[ , flag ] )
+.It Dv ok, errmsg, errcode = unistd.acct([path ] )
+.It Dv ok, errmsg, errcode = unistd.chdir(path )
+.It Dv ok, errmsg, errcode = unistd.fchdir(dfd )
+.It Dv strict, errmsg, errcode = unistd.check_utility_compat(utilities )
+.It Dv ok, errmsg, errcode = unistd.chown(path , owner , group )
+.It Dv ok, errmsg, errcode = unistd.fchown(fd | file , owner , group )
+.It Dv ok, errmsg, errcode = unistd.lchown(path , owner , group )
+.It Dv ok, errmsg, errcode = unistd.fchownat(dfd , path , owner , group[ , flag ] )
+.It Dv ok, errmsg, errcode = unistd.chroot(dirname )
+.It Dv ok, errmsg, errcode = unistd.fchroot(dfd )
+.It Dv ok, errmsg, errcode = unistd.close(fd | file )
+.It Dv ok, errmsg, errcode = unistd.close_range(lowfd | lowfile , highfd | highfile[ , flags ] )
+.It Dv unistd.CLOSE_RANGE_CLOEXEC
+.It Dv unistd.CLOSE_RANGE_CLOFORK
+.It Dv unistd.closefrom(lowfd | lowfile )
 .It Dv value, errmsg, errcode = unistd.confstr(name )
 .It Dv unistd._CS_PATH
 .It Dv unistd._CS_POSIX_V6_ILP32_OFF32_CFLAGS
@@ -30,9 +51,23 @@ unistd = require('unistd')
 .It Dv unistd._CS_POSIX_V6_LPBIG_OFFBIG_LDFLAGS
 .It Dv unistd._CS_POSIX_V6_LPBIG_OFFBIG_LIBS
 .It Dv unistd._CS_POSIX_V6_WIDTH_RESTRICTED_ENVS
-.It Dv copied, inoff_or_errmsg, outoff_or_errcode = unistd.copy_file_range(infd | infile , inoff , outfd | outfile , outoff , len , flags )
+.It Dv copied, inoff_or_errmsg, outoff_or_errcode = unistd.copy_file_range(infd | infile , inoff , outfd | outfile , outoff , len[ , flags ] )
 .It Dv unistd.COPY_FILE_RANGE_CLONE
+.It Dv unistd.COPY_FILE_RANGE_USERFLAGS
 .It Dv unistd.SSIZE_MAX
+.It Dv newd, errmsg, errcode = unistd.dup(fd | file )
+.It Dv newd, errmsg, errcode = unistd.dup2(oldd | oldfile , newd | newfile )
+.It Dv newd, errmsg, errcode = unistd.dup3(oldd | oldfile , newd | newfile[ , flags ] )
+.It Dv shell = unistd.getusershell( )
+.It Dv unistd.setusershell( )
+.It Dv unistd.endusershell( )
+.It Dv unistd.enter_restricted_mode( )
+.It Dv ok, errmsg, errcode = unistd.fdatasync(fd | file )
+.It Dv ok, errmsg, errcode = unistd.fsync(fd | file )
+.It Dv unistd.sync( )
+.It Dv ispresent = unistd.feature_present(feature )
+.It Dv str, errmsg, errcode = unistd.fflagstostr(flags )
+.It Dv set, clr_or_errtoken_or_errmsg, errcode = unistd.strtofflags(str )
 .It Dv value, errmsg, errcode = unistd.pathconf(path , name )
 .It Dv value, errmsg, errcode = unistd.lpathconf(path , name )
 .It Dv value, errmsg, errcode = unistd.fpathconf(fd | file , name )
@@ -68,6 +103,89 @@ unistd = require('unistd')
 .It Dv unistd._PC_CLONE_BLKSIZE
 .It Dv unistd._PC_CASE_INSENSITIVE
 .It Dv unistd._PC_MIN_HOLE_SIZE
+.It Dv ok, errmsg, errcode = unistd.unlink(path )
+.It Dv ok, errmsg, errcode = unistd.unlinkat(dfd , path[ , flag ] )
+.It Dv ok, errmsg, errcode = unistd.funlinkat(dfd , path , fd[ , flag ] )
+.It Dv cwd, errmsg, errcode = unistd.getcwd( )
+.It Dv name, errmsg, errcode = unistd.getdomainname( )
+.It Dv ok, errmsg, errcode = unistd.setdomainname(name )
+.It Dv size = unistd.getdtablesize( )
+.It Dv gid = unistd.getgid( )
+.It Dv egid = unistd.getegid( )
+.It Dv entropy, errmsg, errcode = unistd.getentropy(len )
+.It Dv uid = unistd.getuid( )
+.It Dv euid = unistd.geteuid( )
+.It Dv groups = unistd.getgrouplist(name , basegid )
+.It Dv gidset, errmsg, errcode = unistd.getgroups( )
+.It Dv name, errmsg, errcode = unistd.gethostname( )
+.It Dv ok, errmsg, errcode = unistd.sethostname(name )
+.It Dv name, errmsg, errcode = unistd.getlogin( )
+.It Dv ok, errmsg, errcode = unistd.setlogin(name )
+.It Dv name, errmsg, errcode = unistd.getloginclass( )
+.It Dv ok, errmsg, errcode = unistd.setloginclass(name )
+.It Dv set, errmsg, errcode = unistd.setmode(mode )
+.It Dv newmode = unistd.getmode(set , mode )
+.It Dv osversion, errmsg, errcode = unistd.getosreldate( )
+.It Dv pagesize = unistd.getpagesize( )
+.It Dv pass = unistd.getpass([prompt ] )
+.It Dv euid, egid_or_errmsg, errcode = unistd.getpeereid(s )
+.It Dv pgid = unistd.getpgrp( )
+.It Dv pgid, errmsg, errcode = unistd.getpgid(pid )
+.It Dv pid = unistd.getpid( )
+.It Dv ppid = unistd.getppid( )
+.It Dv rgid, egid_or_errmsg, sgid_or_errcode = unistd.getresgid( )
+.It Dv ruid, euid_or_errmsg, suid_or_errcode = unistd.getresuid( )
+.It Dv ok, errmsg, errcode = unistd.setresgid(rgid , egid , sgid )
+.It Dv ok, errmsg, errcode = unistd.setresuid(ruid , euid , suid )
+.It Dv sid, errmsg, errcode = unistd.getsid(pid )
+.It Dv ok, errmsg, errcode = unistd.initgroups(name , basegid )
+.It Dv name, errmsg, errcode = unistd.ttyname(fd | file )
+.It Dv is, errmsg, errcode = unistd.isatty(fd | file )
+.It Dv is = unistd.issetugid( )
+.It Dv result, errmsg, errcode = unistd.kcmp(pid1 , pid2 , type[ , idx1 , idx2 ] )
+.It Dv ok, errmsg, errcode = unistd.link(name1 , name2 )
+.It Dv ok, errmsg, errcode = unistd.linkat(dfd1 , name1 , dfd2 , name2[ , flag ] )
+.It Dv ok, errmsg, errcode = unistd.lockf(fd | file , fn , size )
+.It Dv unistd.F_ULOCK
+.It Dv unistd.F_LOCK
+.It Dv unistd.F_TLOCK
+.It Dv unistd.F_TEST
+.It Dv result, errmsg, errcode = unistd.lseek(fd | file , offset , whence )
+.It Dv name, errmsg, errcode = unistd.mktemp(template )
+.It Dv fd, name_or_errmsg, errcode = unistd.mkstemp(template )
+.It Dv name, errmsg, errcode = unistd.mkdtemp(template )
+.It Dv fd, name_or_errmsg, errcode = unistd.mkstemps(template , suffixlen )
+.It Dv ok, errmsg, errcode = unistd.mknod(path , mode , dev )
+.It Dv fd1, fd2_or_errmsg, errcode = unistd.pipe([flags ] )
+.It Dv fd1, fd2_or_errmsg, errcode = unistd.pipe2([flags ] )
+.It Dv data, errmsg, errcode = unistd.read(fd | file , nbytes )
+.It Dv data, errmsg, errcode = unistd.pread(fd | file , nbytes , offset )
+.It Dv samples, errmsg, errcode = unistd.profil(size , offset , scale )
+.It Dv nbytes, errmsg, errcode = unistd.write(fd | file , data )
+.It Dv nbytes, errmsg, errcode = unistd.pwrite(fd | file , data , offset )
+.It Dv path, errmsg, errcode = unistd.readlink(path )
+.It Dv path, errmsg, errcode = unistd.readlinkat(dfd , path )
+.It Dv _, errmsg, errcode = unistd.reboot(howto )
+.It Dv ok, errmsg, errcode = unistd.revoke(path )
+.It Dv pid, errmsg, errcode = unistd.rfork(flags )
+.It Dv ok, errmsg, errcode = unistd.rmdir(path )
+.It Dv ok, errmsg, errcode = unistd.setuid(uid )
+.It Dv ok, errmsg, errcode = unistd.seteuid(euid )
+.It Dv ok, errmsg, errcode = unistd.setgid(gid )
+.It Dv ok, errmsg, errcode = unistd.setegid(egid )
+.It Dv ok, errmsg, errcode = unistd.setgroups([groups ] )
+.It Dv ok, errmsg, errcode = unistd.setpgid(pid , pgid )
+.It Dv unistd.setproctitle([title[ , skipexe ] ] )
+.It Dv unistd.setproctitle_fast([title[ , skipexe ] ] )
+.It Dv ok, errmsg, errcode = unistd.setregid(rgid , egid )
+.It Dv ok, errmsg, errcode = unistd.setreuid(ruid , euid )
+.It Dv sid, errmsg, errcode = unistd.setsid( )
+.It Dv remaining = unistd.sleep(seconds )
+.It Dv swabbed = unistd.swab(data )
+.It Dv ok, errmsg, errcode = unistd.swapon(special )
+.It Dv ok, errmsg, errcode = unistd.swapoff(special[ , flags ] )
+.It Dv ok, errmsg, errcode = unistd.symlink(name1 , name2 )
+.It Dv ok, errmsg, errcode = unistd.symlinkat(name1 , dfd , name2 )
 .It Dv value, errmsg, errcode = unistd.sysconf(name )
 .It Dv unistd._SC_ARG_MAX
 .It Dv unistd._SC_CHILD_MAX
@@ -191,23 +309,173 @@ unistd = require('unistd')
 .It Dv unistd._SC_UEXTERR_MAXLEN
 .It Dv unistd._SC_NSIG
 .It Dv unistd._SC_PHYS_PAGES
+.It Dv pgid, errmsg, errcode = unistd.tcgetpgrp(fd | file )
+.It Dv ok, errmsg, errcode = unistd.tcsetpgrp(fd | file , pgid )
 .It Dv ok, errmsg, errcode = unistd.truncate(path , name )
 .It Dv ok, errmsg, errcode = unistd.ftruncate(fd | file , name )
+.It Dv remaining, errmsg, errcode = unistd.ualarm(microseconds[ , interval ] )
+.It Dv ok, errmsg, errcode = unistd.undelete(path )
+.It Dv ok, errmsg, errcode = unistd.usleep(microseconds )
 .It Dv unistd.STDIN_FILENO
 .It Dv unistd.STDOUT_FILENO
 .It Dv unistd.STDERR_FILENO
+.It Dv unistd._POSIX_VERSION
+.It Dv unistd._POSIX_BARRIERS
+.It Dv unistd._POSIX_CPUTIME
+.It Dv unistd._POSIX_READER_WRITE_LOCKS
+.It Dv unistd._POSIX_REGEXP
+.It Dv unistd._POSIX_SHELL
+.It Dv unistd._POSIX_SPAWN
+.It Dv unistd._POSIX_SPIN_LOCKS
+.It Dv unistd._POSIX_THREAD_ATTR_STACKADDR
+.It Dv unistd._POSIX_THREAD_ATTR_STACKSIZE
+.It Dv unistd._POSIX_THREAD_CPUTIME
+.It Dv unistd._POSIX_THREAD_PRIO_INHERIT
+.It Dv unistd._POSIX_THREAD_PRIO_PROTECT
+.It Dv unistd._POSIX_THREAD_PRIORITY_SCHEDULING
+.It Dv unistd._POSIX_THREAD_PROCESS_SHARED
+.It Dv unistd._POSIX_THREAD_SAFE_FUNCTIONS
+.It Dv unistd._POSIX_THREAD_SPORADIC_SERVER
+.It Dv unistd._POSIX_THREADS
+.It Dv unistd._POSIX_TRACE
+.It Dv unistd._POSIX_TRACE_EVENT_FILTER
+.It Dv unistd._POSIX_TRACE_INHERIT
+.It Dv unistd._POSIX_TRACE_LOG
+.It Dv unistd._POSIX2_C_BIND
+.It Dv unistd._POSIX2_C_DEV
+.It Dv unistd._POSIX2_CHAR_TERM
+.It Dv unistd._POSIX2_FORT_DEV
+.It Dv unistd._POSIX2_FORT_RUN
+.It Dv unistd._POSIX2_LOCALEDEF
+.It Dv unistd._POSIX2_PBS
+.It Dv unistd._POSIX2_PBS_ACCOUNTING
+.It Dv unistd._POSIX2_PBS_CHECKPOINT
+.It Dv unistd._POSIX2_PBS_LOCATE
+.It Dv unistd._POSIX2_PBS_MESSAGE
+.It Dv unistd._POSIX2_PBS_TRACK
+.It Dv unistd._POSIX2_SW_DEV
+.It Dv unistd._POSIX2_UPE
+.It Dv unistd._V6_ILP32_OFF32
+.It Dv unistd._V6_ILP32_OFFBIG
+.It Dv unistd._V6_LP64_OFF64
+.It Dv unistd._V6_LPBIG_OFFBIG
+.It Dv unistd._XOPEN_CRYPT
+.It Dv unistd._XOPEN_ENH_I18N
+.It Dv unistd._XOPEN_LEGACY
+.It Dv unistd._XOPEN_REALTIME
+.It Dv unistd._XOPEN_REALTIME_THREADS
+.It Dv unistd._XOPEN_UNIX
+.It Dv unistd._POSIX2_VERSION
 .El
 .Sh DESCRIPTION
 The
 .Nm unistd
 module provides access to the Unix-like operating system API.
 .Bl -tag -width XXXX
+.It Dv pid, errmsg, errcode = unistd.fork( )
+Wraps
+.Xr fork 2 .
+.It Dv pid, errmsg, errcode = unistd._Fork( )
+Wraps
+.Xr _Fork 2 .
+.It Dv unistd._exit([status ] )
+Wraps
+.Xr _exit 2 .
+.It Dv ok, errmsg, errcode = unistd.access(path , mode )
+Wraps
+.Xr access 2 .
+.It Dv ok, errmsg, errcode = unistd.eaccess(path , mode )
+Wraps
+.Xr eaccess 2 .
+.It Dv ok, errmsg, errcode = unistd.faccessat(dfd , path , mode[ , flag ] )
+Wraps
+.Xr faccessat 2 .
+.It Dv ok, errmsg, errcode = unistd.acct([path ] )
+Wraps
+.Xr acct 2 .
+.It Dv ok, errmsg, errcode = unistd.chdir(path )
+Wraps
+.Xr chdir 2 .
+.It Dv ok, errmsg, errcode = unistd.fchdir(dfd )
+Wraps
+.Xr fchdir 2 .
+.It Dv strict, errmsg, errcode = unistd.check_utility_compat(utilities )
+Wraps
+.Xr check_utility_compat 3 .
+.It Dv ok, errmsg, errcode = unistd.chown(path , owner , group )
+Wraps
+.Xr chown 2 .
+.It Dv ok, errmsg, errcode = unistd.fchown(fd | file , owner , group )
+Wraps
+.Xr fchown 2 .
+.It Dv ok, errmsg, errcode = unistd.lchown(path , owner , group )
+Wraps
+.Xr lchown 2 .
+.It Dv ok, errmsg, errcode = unistd.fchownat(dfd , path , owner , group[ , flag ] )
+Wraps
+.Xr fchownat 2 .
+.It Dv ok, errmsg, errcode = unistd.chroot(dirname )
+Wraps
+.Xr chroot 2 .
+.It Dv ok, errmsg, errcode = unistd.fchroot(dfd )
+Wraps
+.Xr fchroot 2 .
+.It Dv ok, errmsg, errcode = unistd.close(fd | file )
+Wraps
+.Xr close 2 .
+.It Dv ok, errmsg, errcode = unistd.close_range(lowfd | lowfile , highfd | highfile[ , flags ] )
+.Xr close_range 2 .
+.It Dv unistd.closefrom(lowfd | lowfile )
+Wraps
+.Xr closefrom 2 .
 .It Dv value, errmsg, errcode = unistd.confstr(name )
 Wraps
 .Xr confstr 3 .
 .It Dv copied, inoff_or_errmsg, outoff_or_errcode = unistd.copy_file_range(infd | infile , inoff , outfd | outfile , outoff , len , flags )
 Wraps
 .Xr copy_file_range 2 .
+.It Dv newd, errmsg, errcode = unistd.dup(fd | file )
+Wraps
+.Xr dup 2 .
+.It Dv newd, errmsg, errcode = unistd.dup2(oldd | oldfile , newd | newfile )
+Wraps
+.Xr dup2 2 .
+.It Dv newd, errmsg, errcode = unistd.dup3(oldd | oldfile , newd | newfile[ , flags ] )
+Wraps
+.Xr dup3 3 .
+.It Dv shell = unistd.getusershell( )
+Wraps
+.Xr getusershell 3 .
+.It Dv unistd.setusershell( )
+Wraps
+.Xr setusershell 3 .
+.It Dv unistd.endusershell( )
+Wraps
+.Xr endusershell 3 .
+.It Dv unistd.enter_restricted_mode( )
+Wraps
+.Fn __FreeBSD_libc_enter_restricted_mode .
+This is an undocumented interface used by ftpd.
+It prevents libc from using
+.Xr dlopen 3 .
+.It Dv ok, errmsg, errcode = unistd.fdatasync(fd | file )
+Wraps
+.Xr fdatasync 2 .
+.It Dv ok, errmsg, errcode = unistd.fsync(fd | file )
+Wraps
+.Xr fsync 2 .
+.It Dv unistd.sync( )
+Wraps
+.Xr sync 2 .
+.It Dv ispresent = unistd.feature_present(feature )
+Wraps
+.Xr feature_present 3 .
+.It Dv str, errmsg, errcode = unistd.fflagstostr(flags )
+Wraps
+.Xr fflagstostr 3 .
+.It Dv set, clr_or_errtoken_or_errmsg, errcode = unistd.strtofflags(str )
+Wraps
+.Xr strtofflags 3 .
 .It Dv value, errmsg, errcode = unistd.pathconf(path , name )
 Wraps
 .Xr pathconf 2 .
@@ -217,15 +485,292 @@ Wraps
 .It Dv value, errmsg, errcode = unistd.fpathconf(fd | file , name )
 Wraps
 .Xr fpathconf 2 .
+.It Dv ok, errmsg, errcode = unistd.unlink(path )
+Wraps
+.Xr unlink 2 .
+.It Dv ok, errmsg, errcode = unistd.unlinkat(dfd , path[ , flag ] )
+Wraps
+.Xr unlinkat 2 .
+.It Dv ok, errmsg, errcode = unistd.funlinkat(dfd , path , fd[ , flag ] )
+Wraps
+.Xr funlinkat 2 .
+.It Dv cwd, errmsg, errcode = unistd.getcwd( )
+Wraps
+.Xr getcwd 3 .
+.It Dv name, errmsg, errcode = unistd.getdomainname( )
+Wraps
+.Xr getdomainname 3 .
+.It Dv ok, errmsg, errcode = unistd.setdomainname(name )
+Wraps
+.Xr setdomainname 3 .
+.It Dv size = unistd.getdtablesize( )
+Wraps
+.Xr getdtablesize 2 .
+.It Dv gid = unistd.getgid( )
+Wraps
+.Xr getgid 2 .
+.It Dv egid = unistd.getegid( )
+Wraps
+.Xr getegid 2 .
+.It Dv entropy, errmsg, errcode = unistd.getentropy(len )
+Wraps
+.Xr getentropy 3 .
+.It Dv uid = unistd.getuid( )
+Wraps
+.Xr getuid 2 .
+.It Dv euid = unistd.geteuid( )
+Wraps
+.Xr geteuid 2 .
+.It Dv groups = unistd.getgrouplist(name , basegid )
+Wraps
+.Xr getgrouplist 3 .
+.It Dv gidset, errmsg, errcode = unistd.getgroups( )
+Wraps
+.Xr getgroups 2 .
+.It Dv name, errmsg, errcode = unistd.gethostname( )
+Wraps
+.Xr gethostname 3 .
+.It Dv ok, errmsg, errcode = unistd.sethostname(name )
+Wraps
+.Xr sethostname 3 .
+.It Dv name, errmsg, errcode = unistd.getlogin( )
+Wraps
+.Xr getlogin_r 2 .
+.It Dv ok, errmsg, errcode = unistd.setlogin(name )
+Wraps
+.Xr setlogin 2 .
+.It Dv name, errmsg, errcode = unistd.getloginclass( )
+Wraps
+.Xr getloginclass 2 .
+.It Dv ok, errmsg, errcode = unistd.setloginclass(name )
+Wraps
+.Xr setloginclass 2 .
+.It Dv set, errmsg, errcode = unistd.setmode(mode )
+Wraps
+.Xr setmode 3 .
+Returns a
+.Vt setmode
+userdata object that is freed by the garbage collector.
+.It Dv newmode = unistd.getmode(set , mode )
+Wraps
+.Xr getmode 3 .
+.It Dv osversion, errmsg, errcode = unistd.getosreldate( )
+Wraps
+.Xr getosreldate 3 .
+.It Dv pagesize = unistd.getpagesize( )
+Wraps
+.Xr getpagesize 3 .
+.It Dv pass = unistd.getpass([prompt ] )
+Wraps
+.Xr getpass 3 .
+.It Dv euid, egid_or_errmsg, errcode = unistd.getpeereid(s )
+Wraps
+.Xr getpeereid 3 .
+.It Dv pgid = unistd.getpgrp( )
+Wraps
+.Xr getpgrp 2 .
+.It Dv pgid, errmsg, errcode = unistd.getpgid(pid )
+Wraps
+.Xr getpgid 2 .
+.It Dv pid = unistd.getpid( )
+Wraps
+.Xr getpid 2 .
+.It Dv ppid = unistd.getppid( )
+Wraps
+.Xr getppid 2 .
+.It Dv rgid, egid_or_errmsg, sgid_or_errcode = unistd.getresgid( )
+Wraps
+.Xr getresgid 2 .
+.It Dv ruid, euid_or_errmsg, suid_or_errcode = unistd.getresuid( )
+Wraps
+.Xr getresuid 2 .
+.It Dv ok, errmsg, errcode = unistd.setresgid(rgid , egid , sgid )
+Wraps
+.Xr setresgid 2 .
+.It Dv ok, errmsg, errcode = unistd.setresuid(ruid , euid , suid )
+Wraps
+.Xr setresuid 2 .
+.It Dv sid, errmsg, errcode = unistd.getsid(pid )
+Wraps
+.Xr getsid 2 .
+.It Dv ok, errmsg, errcode = unistd.initgroups(name , basegid )
+Wraps
+.Xr initgroups 3 .
+.It Dv name, errmsg, errcode = unistd.ttyname(fd | file )
+Wraps
+.Xr ttyname 3 .
+.It Dv is, errmsg, errcode = unistd.isatty(fd | file )
+Wraps
+.Xr isatty 3 .
+.It Dv is = unistd.issetugid( )
+Wraps
+.Xr issetugid 2 .
+.It Dv result, errmsg, errcode = unistd.kcmp(pid1 , pid2 , type[ , idx1 , idx2 ] )
+Wraps
+.Xr kcmp 2 .
+.It Dv ok, errmsg, errcode = unistd.link(name1 , name2 )
+Wraps
+.Xr link 2 .
+.It Dv ok, errmsg, errcode = unistd.linkat(dfd1 , name1 , dfd2 , name2[ , flag ] )
+Wraps
+.Xr linkat 2 .
+.It Dv ok, errmsg, errcode = unistd.lockf(fd | file , fn , size )
+Wraps
+.Xr lockf 3 .
+.It Dv result, errmsg, errcode = unistd.lseek(fd | file , offset , whence )
+Wraps
+.Xr lseek 2 .
+.It Dv name, errmsg, errcode = unistd.mktemp(template )
+Wraps
+.Xr mktemp 3 .
+.It Dv fd, name_or_errmsg, errcode = unistd.mkstemp(template )
+Wraps
+.Xr mkstemp 3 .
+.It Dv name, errmsg, errcode = unistd.mkdtemp(template )
+Wraps
+.Xr mkdtemp 3 .
+.It Dv fd, name_or_errmsg, errcode = unistd.mkstemps(template , suffixlen )
+Wraps
+.Xr mkstemps 3 .
+.It Dv ok, errmsg, errcode = unistd.mknod(path , mode , dev )
+Wraps
+.Xr mknod 2 .
+.It Dv fd1, fd2_or_errmsg, errcode = unistd.pipe([flags ] )
+Wraps
+.Xr pipe 2 .
+.It Dv fd1, fd2_or_errmsg, errcode = unistd.pipe2([flags ] )
+Wraps
+.Xr pipe2 2 .
+.It Dv data, errmsg, errcode = unistd.read(fd | file , nbytes )
+Wraps
+.Xr read 2 .
+.It Dv data, errmsg, errcode = unistd.pread(fd | file , nbytes , offset )
+Wraps
+.Xr pread 2 .
+.It Dv samples, errmsg, errcode = unistd.profil(size , offset , scale )
+Wraps
+.Xr profil 2 .
+.It Dv nbytes, errmsg, errcode = unistd.write(fd | file , data )
+Wraps
+.Xr write 2 .
+.It Dv nbytes, errmsg, errcode = unistd.pwrite(fd | file , data , offset )
+Wraps
+.Xr pwrite 2 .
+.It Dv path, errmsg, errcode = unistd.readlink(path )
+Wraps
+.Xr readlink 2 .
+.It Dv path, errmsg, errcode = unistd.readlinkat(dfd , path )
+Wraps
+.Xr readlinkat 2 .
+.It Dv _, errmsg, errcode = unistd.reboot(howto )
+Wraps
+.Xr reboot 2 .
+.It Dv ok, errmsg, errcode = unistd.revoke(path )
+Wraps
+.Xr revoke 2 .
+.It Dv pid, errmsg, errcode = unistd.rfork(flags )
+Wraps
+.Xr rfork 2 .
+.It Dv ok, errmsg, errcode = unistd.rmdir(path )
+Wraps
+.Xr rmdir 2 .
+.It Dv ok, errmsg, errcode = unistd.setuid(uid )
+Wraps
+.Xr setuid 2 .
+.It Dv ok, errmsg, errcode = unistd.seteuid(euid )
+Wraps
+.Xr seteuid 2 .
+.It Dv ok, errmsg, errcode = unistd.setgid(gid )
+Wraps
+.Xr setgid 2 .
+.It Dv ok, errmsg, errcode = unistd.setegid(egid )
+Wraps
+.Xr setegid 2 .
+.It Dv ok, errmsg, errcode = unistd.setgroups([groups ] )
+Wraps
+.Xr setgroups 2 .
+.It Dv ok, errmsg, errcode = unistd.setpgid(pid , pgid )
+Wraps
+.Xr setpgid 2 .
+.It Dv unistd.setproctitle([title[ , skipexe ] ] )
+Wraps
+.Xr setproctitle 3 .
+Only a single
+.Vt string
+value is accepted.
+If
+.Fa skipexe
+is
+.Dv true ,
+the format string will be
+.Li "-%s" ,
+otherwise the format is
+.Li "%s" .
+.It Dv unistd.setproctitle_fast([title[ , skipexe ] ] )
+Wraps
+.Xr setproctitle_fast 3 .
+Only a single
+.Vt string
+value is accepted.
+If
+.Fa skipexe
+is
+.Dv true ,
+the format string will be
+.Li "-%s" ,
+otherwise the format is
+.Li "%s" .
+.It Dv ok, errmsg, errcode = unistd.setregid(rgid , egid )
+Wraps
+.Xr setregid 2 .
+.It Dv ok, errmsg, errcode = unistd.setreuid(ruid , euid )
+Wraps
+.Xr setreuid 2 .
+.It Dv sid, errmsg, errcode = unistd.setsid( )
+Wraps
+.Xr setsid 2 .
+.It Dv remaining = unistd.sleep(seconds )
+Wraps
+.Xr sleep 3 .
+.It Dv swabbed = unistd.swab(data )
+Wraps
+.Xr swab 3 .
+.It Dv ok, errmsg, errcode = unistd.swapon(special )
+Wraps
+.Xr swapon 2 .
+.It Dv ok, errmsg, errcode = unistd.swapoff(special[ , flags ] )
+Wraps
+.Xr swapoff 2 .
+.It Dv ok, errmsg, errcode = unistd.symlink(name1 , name2 )
+Wraps
+.Xr symlink 2 .
+.It Dv ok, errmsg, errcode = unistd.symlinkat(name1 , dfd , name2 )
+Wraps
+.Xr symlinkat 2 .
 .It Dv value, errmsg, errcode = unistd.sysconf(name )
 Wraps
 .Xr sysconf 3 .
+.It Dv pgid, errmsg, errcode = unistd.tcgetpgrp(fd | file )
+Wraps
+.Xr tcgetpgrp 3 .
+.It Dv ok, errmsg, errcode = unistd.tcsetpgrp(fd | file , pgid )
+Wraps
+.Xr tcsetpgrp 3 .
 .It Dv ok, errmsg, errcode = unistd.truncate(path , name )
 Wraps
 .Xr truncate 2 .
 .It Dv ok, errmsg, errcode = unistd.ftruncate(fd | file , name )
 Wraps
 .Xr ftruncate 2 .
+.It Dv remaining, errmsg, errcode = unistd.ualarm(microseconds[ , interval ] )
+Wraps
+.Xr ualarm 3 .
+.It Dv ok, errmsg, errcode = unistd.undelete(path )
+Wraps
+.Xr undelete 2 .
+.It Dv ok, errmsg, errcode = unistd.usleep(microseconds )
+Wraps
+.Xr usleep 3 .
 .El
 .Sh EXAMPLES
 Get a minimal POSIX utility PATH environment variable:
