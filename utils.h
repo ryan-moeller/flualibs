@@ -8,6 +8,7 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -15,6 +16,13 @@
 #include <lauxlib.h>
 
 #include "luaerror.h"
+
+static inline int
+success(lua_State *L)
+{
+	lua_pushinteger(L, true);
+	return (1);
+}
 
 static inline int
 fail(lua_State *L, int error)
