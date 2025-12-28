@@ -12,6 +12,7 @@ SUBDIR=	\
 	linker \
 	mac \
 	module \
+	reboot \
 	socket \
 	stat \
 	sysctl \

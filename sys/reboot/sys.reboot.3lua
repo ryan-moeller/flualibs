@@ -1,0 +1,63 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 27, 2025
+.Dt SYS.REBOOT 3lua
+.Os
+.Sh NAME
+.Nm sys.reboot
+.Nd Lua definitions for arguments to
+.Xr reboot 2
+.Sh SYNOPSIS
+.Bd -literal
+local rb = require('sys.reboot')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv rb.AUTOBOOT
+.It Dv rb.ASKNAME
+.It Dv rb.SINGLE
+.It Dv rb.NOSYNC
+.It Dv rb.HALT
+.It Dv rb.INITNAME
+.It Dv rb.DFLTROOT
+.It Dv rb.KDB
+.It Dv rb.RDONLY
+.It Dv rb.DUMP
+.It Dv rb.MINIROOT
+.It Dv rb.VERBOSE
+.It Dv rb.SERIAL
+.It Dv rb.CDROM
+.It Dv rb.POWEROFF
+.It Dv rb.GDB
+.It Dv rb.MUTE
+.It Dv rb.SELFTEST
+.It Dv rb.RESERVED1
+.It Dv rb.RESERVED2
+.It Dv rb.PAUSE
+.It Dv rb.REROOT
+.It Dv rb.POWERCYCLE
+.It Dv rb.MUTEMSGS
+.It Dv rb.KEXEC
+.It Dv rb.PROBE
+.It Dv rb.MULTIPLE
+.It Dv rb.BOOTINFO
+.El
+.Sh DESCRIPTION
+The
+.Nm sys.reboot
+module provides flag definitions for the
+.Fa howto
+argument to the
+.Xr reboot 2
+system call and the
+.Li debug.boothowto
+sysctl.
+.Sh SEE ALSO
+.Xr reboot 2 ,
+.Xr sys.sysctl 3lua ,
+.Xr unistd 3lua
+.Sh AUTHORS
+.An Ryan Moeller
