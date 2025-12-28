@@ -1,0 +1,87 @@
+/*
+ * Copyright (c) 2025 Ryan Moeller
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
+#include <sys/limits.h>
+
+#include <lua.h>
+
+int
+luaopen_sys_limits(lua_State *L)
+{
+	lua_newtable(L);
+#define DEFINE(ident) ({ \
+	lua_pushinteger(L, ident); \
+	lua_setfield(L, -2, #ident); \
+})
+	DEFINE(CHAR_BIT);
+	DEFINE(SCHAR_MAX);
+	DEFINE(SCHAR_MIN);
+	DEFINE(UCHAR_MAX);
+	DEFINE(CHAR_MAX);
+	DEFINE(CHAR_MIN);
+	DEFINE(USHRT_MAX);
+	DEFINE(SHRT_MAX);
+	DEFINE(SHRT_MIN);
+	DEFINE(UINT_MAX);
+	DEFINE(INT_MAX);
+	DEFINE(INT_MIN);
+	DEFINE(ULONG_MAX);
+	DEFINE(LONG_MAX);
+	DEFINE(LONG_MIN);
+	DEFINE(ULLONG_MAX);
+	DEFINE(LLONG_MAX);
+	DEFINE(LLONG_MIN);
+#ifdef BOOL_WIDTH
+	DEFINE(BOOL_WIDTH);
+#endif
+#ifdef CHAR_WIDTH
+	DEFINE(CHAR_WIDTH);
+#endif
+#ifdef SCHAR_WIDTH
+	DEFINE(SCHAR_WIDTH);
+#endif
+#ifdef UCHAR_WIDTH
+	DEFINE(UCHAR_WIDTH);
+#endif
+#ifdef SHRT_WIDTH
+	DEFINE(SHRT_WIDTH);
+#endif
+#ifdef USHRT_WIDTH
+	DEFINE(USHRT_WIDTH);
+#endif
+#ifdef INT_WIDTH
+	DEFINE(INT_WIDTH);
+#endif
+#ifdef UINT_WIDTH
+	DEFINE(UINT_WIDTH);
+#endif
+#ifdef LONG_WIDTH
+	DEFINE(LONG_WIDTH);
+#endif
+#ifdef ULONG_WIDTH
+	DEFINE(ULONG_WIDTH);
+#endif
+#ifdef LLONG_WIDTH
+	DEFINE(LLONG_WIDTH);
+#endif
+#ifdef ULLONG_WIDTH
+	DEFINE(ULLONG_WIDTH);
+#endif
+	DEFINE(SSIZE_MAX);
+	DEFINE(SIZE_T_MAX);
+	DEFINE(OFF_MAX);
+	DEFINE(OFF_MIN);
+	DEFINE(GID_MAX);
+	DEFINE(UID_MAX);
+	DEFINE(UQUAD_MAX);
+	DEFINE(QUAD_MAX);
+	DEFINE(QUAD_MIN);
+	DEFINE(LONG_BIT);
+	DEFINE(WORD_BIT);
+	DEFINE(MQ_PRIO_MAX);
+#undef DEFINE
+	return (1);
+}

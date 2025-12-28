@@ -8,7 +8,6 @@
 #include <sys/dirent.h>
 #include <assert.h>
 #include <errno.h>
-#include <limits.h>
 #include <paths.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -2325,7 +2324,6 @@ luaopen_unistd(lua_State *L)
 	DEFINE(_XOPEN_REALTIME_THREADS);
 	DEFINE(_XOPEN_UNIX);
 	DEFINE(_POSIX2_VERSION);
-	DEFINE(SSIZE_MAX); /* TODO: limits module? */
 #undef DEFINE
 	return (1);
 }

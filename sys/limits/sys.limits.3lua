@@ -1,0 +1,68 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 27, 2025
+.Dt SYS.LIMITS 3lua
+.Os
+.Sh NAME
+.Nm sys.limits
+.Nd Lua definitions for the system C language type limits
+.Sh SYNOPSIS
+.Bd -literal
+local limits = require('sys.limits')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv limits.CHAR_BIT
+.It Dv limits.SCHAR_MAX
+.It Dv limits.SCHAR_MIN
+.It Dv limits.UCHAR_MAX
+.It Dv limits.CHAR_MAX
+.It Dv limits.CHAR_MIN
+.It Dv limits.USHRT_MAX
+.It Dv limits.SHRT_MAX
+.It Dv limits.SHRT_MIN
+.It Dv limits.UINT_MAX
+.It Dv limits.INT_MAX
+.It Dv limits.INT_MIN
+.It Dv limits.ULONG_MAX
+.It Dv limits.LONG_MAX
+.It Dv limits.LONG_MIN
+.It Dv limits.ULLONG_MAX
+.It Dv limits.LLONG_MAX
+.It Dv limits.LLONG_MIN
+.It Dv limits.BOOL_WIDTH
+.It Dv limits.CHAR_WIDTH
+.It Dv limits.SCHAR_WIDTH
+.It Dv limits.UCHAR_WIDTH
+.It Dv limits.SHRT_WIDTH
+.It Dv limits.USHRT_WIDTH
+.It Dv limits.INT_WIDTH
+.It Dv limits.UINT_WIDTH
+.It Dv limits.LONG_WIDTH
+.It Dv limits.ULONG_WIDTH
+.It Dv limits.LLONG_WIDTH
+.It Dv limits.ULLONG_WIDTH
+.It Dv limits.SSIZE_MAX
+.It Dv limits.SIZE_T_MAX
+.It Dv limits.OFF_MAX
+.It Dv limits.OFF_MIN
+.It Dv limits.GID_MAX
+.It Dv limits.UID_MAX
+.It Dv limits.UQUAD_MAX
+.It Dv limits.QUAD_MAX
+.It Dv limits.QUAD_MIN
+.It Dv limits.LONG_BIT
+.It Dv limits.WORD_BIT
+.It Dv limits.MQ_PRIO_MAX
+.El
+.Sh DESCRIPTION
+The
+.Nm sys.limits
+module provides definitions for the system C language type limits.
+.Sh SEE ALSO
+.Xr unistd 3lua
+.Sh AUTHORS
+.An Ryan Moeller

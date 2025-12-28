@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 26, 2025
+.Dd December 27, 2025
 .Dt UNISTD 3lua
 .Os
 .Sh NAME
@@ -54,7 +54,6 @@ unistd = require('unistd')
 .It Dv copied, inoff_or_errmsg, outoff_or_errcode = unistd.copy_file_range(infd | infile , inoff , outfd | outfile , outoff , len[ , flags ] )
 .It Dv unistd.COPY_FILE_RANGE_CLONE
 .It Dv unistd.COPY_FILE_RANGE_USERFLAGS
-.It Dv unistd.SSIZE_MAX
 .It Dv newd, errmsg, errcode = unistd.dup(fd | file )
 .It Dv newd, errmsg, errcode = unistd.dup2(oldd | oldfile , newd | newfile )
 .It Dv newd, errmsg, errcode = unistd.dup3(oldd | oldfile , newd | newfile[ , flags ] )
@@ -783,10 +782,11 @@ print(assert(unistd.confstr(unistd._CS_PATH)))
 Copy stdin to stdout
 .Pq must be files :
 .Bd -literal -offset indent
+local limits = require('sys.limits')
 local unistd = require('unistd')
 local copy_file_range = unistd.copy_file_range
 
-copy_file_range(io.stdin, nil, io.stdout, nil, unistd.SSIZE_MAX, 0)
+copy_file_range(io.stdin, nil, io.stdout, nil, limits.SSIZE_MAX, 0)
 .Ed
 .Pp
 Check the block alignment required for
@@ -815,6 +815,7 @@ assert(unistd.truncate(path, size))
 .Ed
 .Sh SEE ALSO
 .Xr stdio 3lua ,
+.Xr sys.limits 3lua ,
 .Xr sys.socket 3lua ,
 .Xr sys.sysctl 3lua
 .Sh AUTHORS

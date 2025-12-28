@@ -9,6 +9,7 @@ SUBDIR=	\
 	cpuset \
 	event \
 	extattr \
+	limits \
 	linker \
 	mac \
 	module \
