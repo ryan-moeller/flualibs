@@ -1,0 +1,148 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 28, 2025
+.Dt SYS.INOTIFY 3lua
+.Os
+.Sh NAME
+.Nm sys.inotify
+.Nd Lua bindings for
+.Xr inotify 2
+.Sh SYNOPSIS
+.Bd -literal
+local inotify = require('sys.inotify')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv ifd, errmsg, errcode = inotify.init([flags ] )
+.It Dv wd, errmsg, errcode = ifd:add_watch(pathname , mask )
+.It Dv wd, errmsg, errcode = ifd:add_watch_at(dfd , pathname , mask )
+.It Dv ok, errmsg, errcode = ifd:rm_watch(wd )
+.It Dv ok, errmsg, errcode = ifd:close( )
+.It Dv fd, errmsg, errcode = ifd:fileno( )
+.It Dv events, errmsg, errcode = ifd:read( )
+.It Dv inotify.NONBLOCK
+.It Dv inotify.CLOEXEC
+.It Dv inotify.ACCESS
+.It Dv inotify.MODIFY
+.It Dv inotify.ATTRIB
+.It Dv inotify.CLOSE_WRITE
+.It Dv inotify.CLOSE_NOWRITE
+.It Dv inotify.CLOSE
+.It Dv inotify.OPEN
+.It Dv inotify.MOVED_FROM
+.It Dv inotify.MOVED_TO
+.It Dv inotify.MOVE
+.It Dv inotify.CREATE
+.It Dv inotify.DELETE
+.It Dv inotify.DELETE_SELF
+.It Dv inotify.MOVE_SELF
+.It Dv inotify.ALL_EVENTS
+.It Dv inotify.ONLYDIR
+.It Dv inotify.DONT_FOLLOW
+.It Dv inotify.EXCL_UNLINK
+.It Dv inotify.MASK_CREATE
+.It Dv inotify.MASK_ADD
+.It Dv inotify.ONESHOT
+.It Dv inotify.UNMOUNT
+.It Dv inotify.Q_OVERFLOW
+.It Dv inotify.IGNORED
+.It Dv inotify.ISDIR
+.El
+.Sh DESCRIPTION
+The
+.Nm sys.inotify
+module provides bindings for
+.Xr inotify 2
+system calls.
+.Bl -tag -width XXXX
+.It Dv ifd, errmsg, errcode = inotify.init([flags ] )
+Wraps
+.Xr inotify_init1 2 .
+Create and return a new
+.Xr inotify 2
+descriptor.
+The return value is a
+.Vt userdata
+object wrapping the descriptor.
+.It Dv wd, errmsg, errcode = ifd:add_watch(pathname , mask )
+Wraps
+.Xr inotify_add_watch 2 .
+.It Dv wd, errmsg, errcode = ifd:add_watch_at(dfd , pathname , mask )
+Wraps
+.Xr inotify_add_watch_at 2 .
+.It Dv ok, errmsg, errcode = ifd:rm_watch(wd )
+Wraps
+.Xr inotify_rm_watch 2 .
+.It Dv ok, errmsg, errcode = ifd:close( )
+Close an inotify descriptor.
+.It Dv fd, errmsg, errcode = ifd:fileno( )
+Get the underlying file descriptor number of an inotify descriptor.
+.It Dv event, errmsg, errcode = ifd:read( )
+Read one or more events, though not necessarily all the available events.
+Returns a table of the form
+.Bd -literal -compact
+{
+	{
+		wd = <integer>,
+		mask = <integer>,
+		[ name = <string> ],
+	},
+	...
+}
+.Ed
+.El
+.Sh EXAMPLES
+Watch events in /tmp:
+.Bd -literal -offset indent
+local inotify = require('sys.inotify')
+local ucl = require('ucl')
+
+local mask_names = {
+	'ACCESS',
+	'MODIFY',
+	'ATTRIB',
+	'CLOSE_WRITE',
+	'CLOSE_NOWRITE',
+	'CLOSE',
+	'OPEN',
+	'MOVED_FROM',
+	'MOVED_TO',
+	'MOVE',
+	'CREATE',
+	'DELETE',
+	'DELETE_SELF',
+	'MOVE_SELF',
+	'IGNORED',
+	'Q_OVERFLOW',
+	'UNMOUNT',
+}
+local event_masks = {}
+for _, name in ipairs(mask_names) do
+	event_masks[inotify[name]] = name
+end
+local function event_mask_name(event)
+	local mask = event.mask
+	local name = event_masks[mask & inotify.ALL_EVENTS] or event_masks[mask]
+	if mask & inotify.ISDIR ~= 0 then
+		name = name .. '+ISDIR'
+	return name
+end
+
+local ifd <close> = assert(inotify.init())
+local wd = assert(ifd:add_watch('/tmp', inotify.ALL_EVENTS))
+repeat
+	local events = assert(ifd:read())
+	for _, event in ipairs(events) do
+		event.mask_name = event_mask_name(event)
+		print(ucl.to_json(event))
+		assert(event.wd == wd)
+	end
+until false
+.Ed
+.Sh SEE ALSO
+.Xr sys.event 3lua
+.Sh AUTHORS
+.An Ryan Moeller

@@ -18,4 +18,8 @@ SUBDIR=	\
 	stat \
 	sysctl \
 
+.if exists(/usr/include/sys/inotify.h)
+SUBDIR+=inotify
+.endif
+
 .include <bsd.subdir.mk>
