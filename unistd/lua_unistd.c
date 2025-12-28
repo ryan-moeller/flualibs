@@ -1261,7 +1261,7 @@ l_mkstemp(lua_State *L)
 		int error = errno;
 
 		free(buf);
-		return (fail(L, errno));
+		return (fail(L, error));
 	}
 	lua_pushinteger(L, fd);
 	lua_pushstring(L, buf);
