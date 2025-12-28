@@ -1,8 +1,9 @@
+fcntl = require('fcntl')
 mqueue = require('mqueue')
 ucl = require('ucl')
 
 name = "/mqdemo"
-oflags = mqueue.O_WRONLY
+oflags = fcntl.O_WRONLY
 
 q = mqueue.open(name, oflags)
 

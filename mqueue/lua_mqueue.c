@@ -33,7 +33,7 @@ l_mq_open(lua_State *L)
 
 	name = luaL_checkstring(L, 1);
 	oflag = luaL_checkinteger(L, 2);
-	if (oflag & O_CREAT) {
+	if ((oflag & O_CREAT) != 0) {
 		mode_t mode;
 
 		mode = luaL_checkinteger(L, 3);

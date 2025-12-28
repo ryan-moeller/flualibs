@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 16, 2025
+.Dd December 28, 2025
 .Dt MQUEUE 3lua
 .Os
 .Sh NAME
@@ -73,8 +73,12 @@ Remove the named message queue given by
 .Sh EXAMPLES
 Create a message queue:
 .Bd -literal -offset indent
+local fcntl = require('fcntl')
 local mqueue = require('mqueue')
-local q = assert(mqueue.open('/myqueue', mqueue.O_CREAT | mqueue.O_WRONLY, 438))
+
+local flags = fcntl.O_CREAT | fcntl.O_WRONLY
+local mode = tonumber('0644', 8)
+local q = assert(mqueue.open('/myqueue', flags, mode))
 assert(q:send("hello", 0))
 .Ed
 .Sh SEE ALSO
@@ -85,6 +89,7 @@ assert(q:send("hello", 0))
 .Xr mq_send 2 ,
 .Xr mq_setattr 2 ,
 .Xr mq_timedreceive 2 ,
-.Xr mq_timedsend 2
+.Xr mq_timedsend 2 ,
+.Xr fcntl 3lua
 .Sh AUTHORS
 .An Ryan Moeller

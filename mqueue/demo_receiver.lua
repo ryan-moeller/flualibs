@@ -1,9 +1,10 @@
+fcntl = require('fcntl')
 mqueue = require('mqueue')
 ucl = require('ucl')
 
 name = "/mqdemo"
-oflags = mqueue.O_CREAT + mqueue.O_RDONLY
-mode = 438 -- 0666
+oflags = fcntl.O_CREAT + fcntl.O_RDONLY
+mode = tonumber('0644', 8)
 
 q = mqueue.open(name, oflags, mode)
 
