@@ -6,7 +6,6 @@
 
 #include <sys/param.h>
 #include <fcntl.h>
-#include <stdbool.h>
 #include <string.h>
 
 #include <lua.h>
@@ -127,10 +126,9 @@ l_fcntl(lua_State *L)
 		}
 		if (cmd == F_GETLK) {
 			pushflock(L, &fl);
-		} else {
-			lua_pushboolean(L, true);
+			return (1);
 		}
-		return (1);
+		return (success(L));
 	}
 	case F_GETFD:
 	case F_GETFL:
@@ -157,8 +155,7 @@ l_fcntl(lua_State *L)
 		if ((result = fcntl(fd, cmd, arg)) == -1) {
 			return (fail(L, errno));
 		}
-		lua_pushboolean(L, true);
-		return (1);
+		return (success(L));
 	}
 	}
 	__unreachable();
@@ -175,8 +172,7 @@ l_flock(lua_State *L)
 	if (flock(fd, operation) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 #if __FreeBSD_version > 1400028
@@ -273,8 +269,7 @@ l_posix_fadvise(lua_State *L)
 	if ((error = posix_fadvise(fd, offset, len, advice)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -290,8 +285,7 @@ l_posix_fallocate(lua_State *L)
 	if ((error = posix_fallocate(fd, offset, len)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static const struct luaL_Reg l_fcntl_funcs[] = {

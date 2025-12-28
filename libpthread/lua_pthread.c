@@ -482,8 +482,7 @@ l_pthread_cancel(lua_State *L)
 	if ((error = pthread_cancel(threadp->thread)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -497,8 +496,7 @@ l_pthread_detach(lua_State *L)
 	if ((error = pthread_detach(threadp->thread)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -672,8 +670,7 @@ l_pthread_setaffinity_np(lua_State *L)
 	    cpuset)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -687,8 +684,7 @@ l_pthread_resume_np(lua_State *L)
 	if ((error = pthread_resume_np(threadp->thread)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -728,8 +724,7 @@ l_pthread_suspend_np(lua_State *L)
 	if ((error = pthread_suspend_np(threadp->thread)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -776,8 +771,7 @@ l_pthread_kill(lua_State *L)
 	if ((error = pthread_kill(threadp->thread, sig)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static pthread_key_t thread_state_key;
@@ -959,8 +953,7 @@ l_pthread_multi_np(lua_State *L)
 	int error = pthread_multi_np();
 
 	assert(error == 0);
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -992,8 +985,7 @@ l_pthread_single_np(lua_State *L)
 	int error = pthread_single_np();
 
 	assert(error == 0);
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1161,8 +1153,7 @@ l_pthread_mutex_lock(lua_State *L)
 	if ((error = pthread_mutex_lock(&mutexp->mutex)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1179,8 +1170,7 @@ l_pthread_mutex_timedlock(lua_State *L)
 	if ((error = pthread_mutex_timedlock(&mutexp->mutex, &abstime)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1194,8 +1184,7 @@ l_pthread_mutex_trylock(lua_State *L)
 	if ((error = pthread_mutex_trylock(&mutexp->mutex)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1209,8 +1198,7 @@ l_pthread_mutex_unlock(lua_State *L)
 	if ((error = pthread_mutex_unlock(&mutexp->mutex)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1242,8 +1230,7 @@ l_pthread_mutex_setspinloops_np(lua_State *L)
 	    != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1275,8 +1262,7 @@ l_pthread_mutex_setyieldloops_np(lua_State *L)
 	    != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1439,8 +1425,7 @@ l_pthread_cond_broadcast(lua_State *L)
 	if ((error = pthread_cond_broadcast(&condp->cond)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1454,8 +1439,7 @@ l_pthread_cond_signal(lua_State *L)
 	if ((error = pthread_cond_signal(&condp->cond)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1475,8 +1459,7 @@ l_pthread_cond_timedwait(lua_State *L)
 	    &abstime)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1492,8 +1475,7 @@ l_pthread_cond_wait(lua_State *L)
 	if ((error = pthread_cond_wait(&condp->cond, &mutexp->mutex)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 struct rcrwlock {
@@ -1625,8 +1607,7 @@ l_pthread_rwlock_rdlock(lua_State *L)
 	if ((error = pthread_rwlock_rdlock(&lockp->lock)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1640,8 +1621,7 @@ l_pthread_rwlock_tryrdlock(lua_State *L)
 	if ((error = pthread_rwlock_tryrdlock(&lockp->lock)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1655,8 +1635,7 @@ l_pthread_rwlock_trywrlock(lua_State *L)
 	if ((error = pthread_rwlock_trywrlock(&lockp->lock)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1670,8 +1649,7 @@ l_pthread_rwlock_unlock(lua_State *L)
 	if ((error = pthread_rwlock_unlock(&lockp->lock)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1685,8 +1663,7 @@ l_pthread_rwlock_wrlock(lua_State *L)
 	if ((error = pthread_rwlock_wrlock(&lockp->lock)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 struct rckey {
@@ -1777,8 +1754,7 @@ l_pthread_key_setspecific(lua_State *L)
 	if ((error = pthread_setspecific(keyp->key, value)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1811,8 +1787,7 @@ l_pthread_setname_np(lua_State *L)
 	if ((error = pthread_setname_np(threadp->thread, name)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 #if __FreeBSD_version > 1500043
@@ -1834,8 +1809,7 @@ l_pthread_sigqueue(lua_State *L)
 	if ((error = pthread_sigqueue(threadp->thread, sig, value)) != 0) {
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 #endif
 
@@ -2009,8 +1983,7 @@ l_pthread_barrier_wait(lua_State *L)
 		}
 		return (fail(L, error));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 /* TODO: variation using rcmutex and rccond? */

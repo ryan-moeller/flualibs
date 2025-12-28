@@ -6,7 +6,6 @@
 
 #include <netinet/in.h>
 #include <assert.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -222,8 +221,7 @@ l_setsourcefilter(lua_State *L)
 		return (fail(L, error));
 	}
 	free(slist);
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 bad:
 	free(slist);
 	return (luaL_argerror(L, 5, "invalid sockaddr"));

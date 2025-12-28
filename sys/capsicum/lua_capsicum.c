@@ -213,8 +213,7 @@ l_cap_rights_limit(lua_State *L)
 	if (cap_rights_limit(fd, rights) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -229,8 +228,7 @@ l_cap_fcntls_limit(lua_State *L)
 	if (cap_fcntls_limit(fd, fcntlrights) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -270,8 +268,7 @@ l_cap_ioctls_limit(lua_State *L)
 	if (cap_ioctls_limit(fd, cmds, nitems(cmds)) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int

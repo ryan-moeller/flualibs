@@ -8,7 +8,6 @@
 #include <sys/extattr.h>
 #include <errno.h>
 #include <libutil.h> /* XXX: prototypes for functions not actually in libutil */
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -37,8 +36,7 @@ l_extattr_delete(lua_State *L)
 	if (extattr_delete_fd(fd, attrnamespace, attrname) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -54,8 +52,7 @@ l_extattr_delete_fd(lua_State *L)
 	if (extattr_delete_fd(fd, attrnamespace, attrname) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -71,8 +68,7 @@ l_extattr_delete_file(lua_State *L)
 	if (extattr_delete_file(path, attrnamespace, attrname) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -88,8 +84,7 @@ l_extattr_delete_link(lua_State *L)
 	if (extattr_delete_link(path, attrnamespace, attrname) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int

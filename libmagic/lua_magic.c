@@ -6,7 +6,6 @@
 
 #include <magic.h>
 #include <errno.h>
-#include <stdbool.h>
 #include <string.h>
 
 #include <lua.h>
@@ -155,8 +154,7 @@ l_magic_check(lua_State *L)
 	if (magic_check(*cookiep, filename) == -1) {
 		return (magicerr(L, *cookiep));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -171,8 +169,7 @@ l_magic_compile(lua_State *L)
 	if (magic_compile(*cookiep, filename) == -1) {
 		return (magicerr(L, *cookiep));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -187,8 +184,7 @@ l_magic_list(lua_State *L)
 	if (magic_list(*cookiep, filename) == -1) {
 		return (magicerr(L, *cookiep));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -203,8 +199,7 @@ l_magic_load(lua_State *L)
 	if (magic_load(*cookiep, filename) == -1) {
 		return (magicerr(L, *cookiep));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 /* magic_load_buffers seems unlikely to be useful in Lua */

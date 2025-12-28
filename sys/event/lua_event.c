@@ -7,7 +7,6 @@
 #include <sys/types.h>
 #include <sys/event.h>
 #include <errno.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -176,8 +175,7 @@ l_close(struct lua_State *L)
 		return (fail(L, errno));
 	}
 	*kqp = -1;
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int

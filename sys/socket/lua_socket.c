@@ -9,7 +9,6 @@
 #include <sys/uio.h>
 #include <assert.h>
 #include <errno.h>
-#include <stdbool.h>
 #include <stdlib.h>
 
 #include <lua.h>
@@ -67,8 +66,7 @@ l_bind(lua_State *L)
 	if (bind(s, addr, addr->sa_len) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -86,8 +84,7 @@ l_connect(lua_State *L)
 	if (connect(s, addr, addr->sa_len) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -106,8 +103,7 @@ l_bindat(lua_State *L)
 	if (bindat(fd, s, addr, addr->sa_len) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -126,8 +122,7 @@ l_connectat(lua_State *L)
 	if (connectat(fd, s, addr, addr->sa_len) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -207,8 +202,7 @@ l_listen(lua_State *L)
 	if (listen(s, backlog) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -438,8 +432,7 @@ l_setfib(lua_State *L)
 	if (setfib(fib) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -457,8 +450,7 @@ l_setsockopt(lua_State *L)
 	if (setsockopt(s, level, optname, optval, optlen) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -472,8 +464,7 @@ l_shutdown(lua_State *L)
 	if (shutdown(s, how) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int

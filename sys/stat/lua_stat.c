@@ -10,7 +10,6 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <stdbool.h>
 #include <stdlib.h>
 
 #include <lua.h>
@@ -75,8 +74,7 @@ l_chflags(lua_State *L)
 	if (chflags(path, flags) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -91,8 +89,7 @@ l_lchflags(lua_State *L)
 	if (lchflags(path, flags) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -107,8 +104,7 @@ l_fchflags(lua_State *L)
 	if (fchflags(fd, flags) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -126,8 +122,7 @@ l_chflagsat(lua_State *L)
 	if (chflagsat(fd, path, flags, atflag) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int

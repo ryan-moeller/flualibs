@@ -43,8 +43,7 @@ l_acl_delete(lua_State *L)
 	if (acl_delete_fd_np(fd, type) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -59,8 +58,7 @@ l_acl_delete_fd(lua_State *L)
 	if (acl_delete_fd_np(fd, type) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -75,8 +73,7 @@ l_acl_delete_file(lua_State *L)
 	if (acl_delete_file_np(path, type) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -91,8 +88,7 @@ l_acl_delete_link(lua_State *L)
 	if (acl_delete_link_np(path, type) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 #if __FreeBSD_version > 1400032
@@ -282,8 +278,7 @@ l_acl_calc_mask(lua_State *L)
 	}
 	lua_pushlightuserdata(L, acl);
 	lua_setiuservalue(L, 1, COOKIE);
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -331,8 +326,7 @@ l_acl_delete_entry(lua_State *L)
 			return (fail(L, errno));
 		}
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -440,8 +434,7 @@ l_acl_set(lua_State *L)
 	if (acl_set_fd_np(fd, acl, type) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -459,8 +452,7 @@ l_acl_set_fd(lua_State *L)
 	if (acl_set_fd_np(fd, acl, type) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -478,8 +470,7 @@ l_acl_set_file(lua_State *L)
 	if (acl_set_file(path, type, acl) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -497,8 +488,7 @@ l_acl_set_link(lua_State *L)
 	if (acl_set_link_np(path, type, acl) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -557,15 +547,13 @@ l_acl_valid(lua_State *L)
 		if (acl_valid_fd_np(fd, type, acl) == -1) {
 			return (fail(L, errno));
 		}
-		lua_pushboolean(L, true);
-		return (1);
+		return (success(L));
 	}
 
 	if (acl_valid(acl) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -583,8 +571,7 @@ l_acl_valid_fd(lua_State *L)
 	if (acl_valid_fd_np(fd, type, acl) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -602,8 +589,7 @@ l_acl_valid_file(lua_State *L)
 	if (acl_valid_file_np(path, type, acl) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -621,8 +607,7 @@ l_acl_valid_link(lua_State *L)
 	if (acl_valid_link_np(path, type, acl) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -636,8 +621,7 @@ l_acl_copy_entry(lua_State *L)
 	if (acl_copy_entry(dst, src) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -711,8 +695,7 @@ l_acl_set_entry_type(lua_State *L)
 	if (acl_set_entry_type_np(entry, type) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -742,8 +725,7 @@ l_acl_set_tag_type(lua_State *L)
 	if (acl_set_tag_type(entry, tag_type) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -758,8 +740,7 @@ l_acl_set_flagset(lua_State *L)
 	if (acl_set_flagset_np(entry, flagset) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -774,8 +755,7 @@ l_acl_set_permset(lua_State *L)
 	if (acl_set_permset(entry, permset) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -790,8 +770,7 @@ l_acl_set_qualifier(lua_State *L)
 	if (acl_set_qualifier(entry, &id) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -806,8 +785,7 @@ l_acl_add_flag(lua_State *L)
 	if (acl_add_flag_np(flagset, flag) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -820,8 +798,7 @@ l_acl_clear_flags(lua_State *L)
 	if (acl_clear_flags_np(flagset) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -836,8 +813,7 @@ l_acl_delete_flag(lua_State *L)
 	if (acl_delete_flag_np(flagset, flag) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -869,8 +845,7 @@ l_acl_add_perm(lua_State *L)
 	if (acl_add_perm(permset, perm) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -883,8 +858,7 @@ l_acl_clear_perms(lua_State *L)
 	if (acl_clear_perms(permset) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -899,8 +873,7 @@ l_acl_delete_perm(lua_State *L)
 	if (acl_delete_perm(permset, perm) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int

@@ -8,7 +8,6 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <netinet/sctp.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -201,8 +200,7 @@ l_sctp_bindx(lua_State *L)
 		return (fail(L, error));
 	}
 	free(addrs);
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int

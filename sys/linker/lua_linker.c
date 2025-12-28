@@ -7,7 +7,6 @@
 #include <sys/param.h>
 #include <sys/linker.h>
 #include <errno.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -45,8 +44,7 @@ l_kldunload(lua_State *L)
 	if (kldunloadf(fileid, flags) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int

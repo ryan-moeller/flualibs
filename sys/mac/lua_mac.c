@@ -7,7 +7,6 @@
 #include <sys/param.h>
 #include <sys/mac.h>
 #include <errno.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -250,8 +249,7 @@ l_mac_get(lua_State *L)
 	if (mac_get_fd(fd, label) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -266,8 +264,7 @@ l_mac_get_fd(lua_State *L)
 	if (mac_get_fd(fd, label) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -282,8 +279,7 @@ l_mac_get_file(lua_State *L)
 	if (mac_get_file(path, label) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -298,8 +294,7 @@ l_mac_get_link(lua_State *L)
 	if (mac_get_link(path, label) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -314,8 +309,7 @@ l_mac_get_peer(lua_State *L)
 	if (mac_get_peer(fd, label) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -330,8 +324,7 @@ l_mac_get_pid(lua_State *L)
 	if (mac_get_pid(pid, label) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -344,8 +337,7 @@ l_mac_get_proc(lua_State *L)
 	if (mac_get_proc(label) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -364,8 +356,7 @@ l_mac_set(lua_State *L)
 	if (mac_set_fd(fd, label) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -380,8 +371,7 @@ l_mac_set_fd(lua_State *L)
 	if (mac_set_fd(fd, label) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -396,8 +386,7 @@ l_mac_set_file(lua_State *L)
 	if (mac_set_file(path, label) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -412,8 +401,7 @@ l_mac_set_link(lua_State *L)
 	if (mac_set_link(path, label) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -426,8 +414,7 @@ l_mac_set_proc(lua_State *L)
 	if (mac_set_proc(label) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int

@@ -7,7 +7,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <mqueue.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -77,8 +76,7 @@ l_mq_close(lua_State *L)
 	if (mq_close(mq) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -91,8 +89,7 @@ l_mq_unlink(lua_State *L)
 	if (mq_unlink(name) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -131,8 +128,7 @@ l_mq_setattr(lua_State *L)
 	if (mq_setattr(*mqp, &attr, NULL) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -150,8 +146,7 @@ l_mq_send(lua_State *L)
 	if (mq_send(*mqp, msg, len, prio) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -201,8 +196,7 @@ l_mq_timedsend(lua_State *L)
 	if (mq_timedsend(*mqp, msg, len, prio, &abs_timeout) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int

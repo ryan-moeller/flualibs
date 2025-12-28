@@ -608,8 +608,7 @@ l_nvlist_send(lua_State *L)
 	if (nvlist_send(sock, nvl) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
@@ -1538,8 +1537,7 @@ l_const_nvlist_send(lua_State *L)
 	if (nvlist_send(sock, nvl) == -1) {
 		return (fail(L, errno));
 	}
-	lua_pushboolean(L, true);
-	return (1);
+	return (success(L));
 }
 
 static int
