@@ -892,7 +892,7 @@ l_getmode(lua_State *L)
 	mode_t mode;
 
 	set = checkcookie(L, 1, SETMODE_METATABLE);
-	mode = luaL_checkinteger(L, 2);
+	mode = luaL_optinteger(L, 2, 0);
 
 	lua_pushinteger(L, getmode(set, mode));
 	return (1);

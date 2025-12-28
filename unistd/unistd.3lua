@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 27, 2025
+.Dd December 28, 2025
 .Dt UNISTD 3lua
 .Os
 .Sh NAME
@@ -123,7 +123,7 @@ unistd = require('unistd')
 .It Dv name, errmsg, errcode = unistd.getloginclass( )
 .It Dv ok, errmsg, errcode = unistd.setloginclass(name )
 .It Dv set, errmsg, errcode = unistd.setmode(mode )
-.It Dv newmode = unistd.getmode(set , mode )
+.It Dv newmode = unistd.getmode(set[ , mode ] )
 .It Dv osversion, errmsg, errcode = unistd.getosreldate( )
 .It Dv pagesize = unistd.getpagesize( )
 .It Dv pass = unistd.getpass([prompt ] )
