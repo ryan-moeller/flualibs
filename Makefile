@@ -12,6 +12,7 @@ SUBDIR= \
 	mqueue \
 	netdb \
 	netinet \
+	readpassphrase \
 	stdio \
 	sys \
 	time \

@@ -1,0 +1,52 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 27, 2025
+.Dt READPASSPHRASE 3lua
+.Os
+.Sh NAME
+.Nm readpassphrase
+.Nd Lua bindings for
+.Xr readpassphrase 3
+.Sh SYNOPSIS
+.Bd -literal
+local rpp = require('readpassphrase')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv pp, errmsg, errcode = rpp.readpassphrase(prompt , buflen[ , flags ] )
+.It Dv rpp.explicit_bzero(pp )
+.It Dv rpp.ECHO_OFF
+.It Dv rpp.ECHO_ON
+.It Dv rpp.REQUIRE_TTY
+.It Dv rpp.FORCELOWER
+.It Dv rpp.FORCEUPPER
+.It Dv rpp.SEVENBIT
+.It Dv rpp.STDIN
+.El
+.Sh DESCRIPTION
+The
+.Nm readpassphrase
+module provides bindings for the
+.Xr readpassphrase 3
+and
+.Xr explicit_bzero 3
+functions in libc.
+.Bl -tag -width XXXX
+.It Dv pp, errmsg, errcode = rpp.readpassphrase(prompt , buflen[ , flags ] )
+Wraps
+.Xr readpassphrase 3 .
+.It Dv rpp.explicit_bzero(pp )
+Wraps
+.Xr explicit_bzero 3 .
+This is provided for clearing a passphrase string and must be used with care.
+.El
+.Sh SEE ALSO
+.Xr explicit_bzero 3 ,
+.Xr getpass 3 ,
+.Xr readpassphrase 3 ,
+.Xr unistd 3lua
+.Sh AUTHORS
+.An Ryan Moeller
