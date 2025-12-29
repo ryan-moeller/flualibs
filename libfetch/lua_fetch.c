@@ -13,19 +13,15 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "luaerror.h"
-
 int luaopen_fetch(lua_State *);
 
 static int
 closestream(lua_State *L)
 {
 	luaL_Stream *stream;
-	int res;
 
 	stream = luaL_checkudata(L, 1, LUA_FILEHANDLE);
-	res = fclose(stream->f);
-	return (luaL_fileresult(L, res == 0, NULL));;
+	return (luaL_fileresult(L, fclose(stream->f) == 0, NULL));
 }
 
 static void
