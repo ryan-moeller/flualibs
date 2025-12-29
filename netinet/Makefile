@@ -8,6 +8,7 @@ SUBDIR=	\
 	ip \
 	ip6 \
 	sctp \
+	tcp \
 	udp \
 	udplite \
 

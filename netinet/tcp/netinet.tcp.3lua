@@ -1,0 +1,216 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 29, 2025
+.Dt NETINET.TCP 3lua
+.Os
+.Sh NAME
+.Nm netinet.tcp
+.Nd Lua binding for Internet Transmission Control Protocol definitions
+.Sh SYNOPSIS
+.Bd -literal
+tcp = require('netinet.tcp')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv tcp.MSS
+.It Dv tcp.MINMSS
+.It Dv tcp.MAXWIN
+.It Dv tcp.MAX_WINSHIFT
+.It Dv tcp.MAXHLEN
+.It Dv tcp.MAXOLEN
+.It Dv tcp.FASTOPEN_MIN_COOKIE_LEN
+.It Dv tcp.FASTOPEN_MAX_COOKIE_LEN
+.It Dv tcp.FASTOPEN_PSK_LEN
+.It Dv tcp.NODELAY
+.It Dv tcp.MAXSEG
+.It Dv tcp.NOPUSH
+.It Dv tcp.NOOPT
+.It Dv tcp.MD5SIG
+.It Dv tcp.INFO
+.It Dv tcp.STATS
+.It Dv tcp.LOG
+.It Dv tcp.LOGBUF
+.It Dv tcp.LOGID
+.It Dv tcp.LOGDUMP
+.It Dv tcp.LOGDUMPID
+.It Dv tcp.TXTLS_ENABLE
+.It Dv tcp.TXTLS_MODE
+.It Dv tcp.RXTLS_ENABLE
+.It Dv tcp.RXTLS_MODE
+.It Dv tcp.IWND_NB
+.It Dv tcp.IWND_NSEG
+.It Dv tcp.LOGID_CNT
+.It Dv tcp.LOG_TAG
+.It Dv tcp.USER_LOG
+.It Dv tcp.CONGESTION
+.It Dv tcp.CCALGOOPT
+.It Dv tcp.MAXUNACKTIME
+.It Dv tcp.IDLE_REDUCE
+.It Dv tcp.REMOTE_UDP_ENCAPS_PORT
+.It Dv tcp.DELACK
+.It Dv tcp.FIN_IS_RST
+.It Dv tcp.LOG_LIMIT
+.It Dv tcp.SHARED_CWND_ALLOWED
+.It Dv tcp.PROC_ACCOUNTING
+.It Dv tcp.USE_CMP_ACKS
+.It Dv tcp.PERF_INFO
+.It Dv tcp.KEEPINIT
+.It Dv tcp.KEEPIDLE
+.It Dv tcp.KEEPINTVL
+.It Dv tcp.KEEPCNT
+.It Dv tcp.FASTOPEN
+.It Dv tcp.FUNCTION_BLK
+.It Dv tcp.FUNCTION_ALIAS
+.It Dv tcp.REUSPORT_LB_NUMA
+.It Dv tcp.RACK_MBUF_QUEUE
+.It Dv tcp.RACK_TLP_REDUCE
+.It Dv tcp.RACK_PACE_MAX_SEG
+.It Dv tcp.RACK_PACE_ALWAYS
+.It Dv tcp.RACK_PRR_SENDALOT
+.It Dv tcp.RACK_MIN_TO
+.It Dv tcp.RACK_EARLY_SEG
+.It Dv tcp.RACK_REORD_THRESH
+.It Dv tcp.RACK_REORD_FADE
+.It Dv tcp.RACK_TLP_THRESH
+.It Dv tcp.RACK_PKT_DELAY
+.It Dv tcp.BBR_IWINTSO
+.It Dv tcp.BBR_STARTUP_PG
+.It Dv tcp.BBR_DRAIN_PG
+.It Dv tcp.BBR_PROBE_RTT_INT
+.It Dv tcp.BBR_STARTUP_LOSS_EXIT
+.It Dv tcp.BBR_TSLIMITS
+.It Dv tcp.BBR_PACE_OH
+.It Dv tcp.BBR_USEDEL_RATE
+.It Dv tcp.BBR_MIN_RTO
+.It Dv tcp.BBR_MAX_RTO
+.It Dv tcp.BBR_ALGORITHM
+.It Dv tcp.BBR_PACE_PER_SEC
+.It Dv tcp.BBR_PACE_DEL_TAR
+.It Dv tcp.BBR_PACE_SEG_MAX
+.It Dv tcp.BBR_PACE_SEG_MIN
+.It Dv tcp.BBR_PACE_CROSS
+.It Dv tcp.BBR_TMR_PACE_OH
+.It Dv tcp.RACK_DO_DETECTION
+.It Dv tcp.BBR_RACK_RTT_USE
+.It Dv tcp.BBR_RETRAN_WTSO
+.It Dv tcp.DATA_AFTER_CLOSE
+.It Dv tcp.BBR_PROBE_RTT_GAIN
+.It Dv tcp.BBR_PROBE_RTT_LEN
+.It Dv tcp.BBR_SEND_IWND_IN_TSO
+.It Dv tcp.BBR_USE_RACK_RR
+.It Dv tcp.BBR_HDWR_PACE
+.It Dv tcp.BBR_UTTER_MAX_TSO
+.It Dv tcp.BBR_EXTRA_STATE
+.It Dv tcp.BBR_FLOOR_MIN_TSO
+.It Dv tcp.BBR_MIN_TOPACEOUT
+.It Dv tcp.BBR_TSTMP_RAISES
+.It Dv tcp.BBR_POLICER_DETECT
+.It Dv tcp.BBR_RACK_INIT_RATE
+.It Dv tcp.RACK_RR_CONF
+.It Dv tcp.RACK_GP_INCREASE_CA
+.It Dv tcp.RACK_GP_INCREASE_SS
+.It Dv tcp.RACK_GP_INCREASE_REC
+.It Dv tcp.RACK_FORCE_MSEG
+.It Dv tcp.RACK_PACE_RATE_CA
+.It Dv tcp.RACK_PACE_RATE_SS
+.It Dv tcp.RACK_PACE_RATE_REC
+.It Dv tcp.NO_PRR
+.It Dv tcp.RACK_NONRXT_CFG_RATE
+.It Dv tcp.SHARED_CWND_ENABLE
+.It Dv tcp.TIMELY_DYN_ADJ
+.It Dv tcp.RACK_NO_PUSH_AT_MAX
+.It Dv tcp.RACK_PACE_TO_FILL
+.It Dv tcp.SHARED_CWND_TIME_LIMIT
+.It Dv tcp.RACK_PROFILE
+.It Dv tcp.HDWR_RATE_CAP
+.It Dv tcp.PACING_RATE_CAP
+.It Dv tcp.HDWR_UP_ONLY
+.It Dv tcp.RACK_ABC_VAL
+.It Dv tcp.REC_ABC_VAL
+.It Dv tcp.RACK_MEASURE_CNT
+.It Dv tcp.DEFER_OPTIONS
+.It Dv tcp.RACK_PACING_BETA
+.It Dv tcp.RACK_PACING_BETA_ECN
+.It Dv tcp.RACK_TIMER_SLOP
+.It Dv tcp.RACK_DSACK_OPT
+.It Dv tcp.RACK_ENABLE_HYSTART
+.It Dv tcp.RACK_SET_RXT_OPTIONS
+.It Dv tcp.RACK_HI_BETA
+.It Dv tcp.RACK_SPLIT_LIMIT
+.It Dv tcp.RACK_PACING_DIVISOR
+.It Dv tcp.RACK_PACE_MIN_SEG
+.It Dv tcp.HYBRID_PACING
+.It Dv tcp.PACING_DND
+.It Dv tcp.SS_EEXIT
+.It Dv tcp.DGP_UPPER_BOUNDS
+.It Dv tcp.NO_TIMELY
+.It Dv tcp.HONOR_HPTS_MIN
+.It Dv tcp.REC_IS_DYN
+.It Dv tcp.SIDECHAN_DIS
+.It Dv tcp.FILLCW_RATE_CAP
+.It Dv tcp.STACK_SPEC_INFO
+.It Dv tcp.GP_USE_LTBW
+.It Dv tcp.VENDOR
+.It Dv tcp.CA_NAME_MAX
+.It Dv tcp.LOG_ID_LEN
+.It Dv tcp.NUM_PROC_COUNTERS
+.It Dv tcp.NUM_CNT_COUNTERS
+.It Dv tcp.FUNCTION_NAME_LEN_MAX
+.It Dv tcp.TLS_MODE_NONE
+.It Dv tcp.TLS_MODE_SW
+.It Dv tcp.TLS_MODE_IFNET
+.It Dv tcp.TLS_MODE_TOE
+.It Dv tcp.LOG_USER_HTTPD
+.It Dv tcp.LOG_HTTPD_TS
+.It Dv tcp.LOG_HTTPD_TS_REQ
+.It Dv tcp.LOG_HTTPD_RANGE_START
+.It Dv tcp.LOG_HTTPD_RANGE_END
+.It Dv tcp.HYBRID_PACING_CU
+.It Dv tcp.HYBRID_PACING_DTL
+.It Dv tcp.HYBRID_PACING_CSPR
+.It Dv tcp.HYBRID_PACING_H_MS
+.It Dv tcp.HYBRID_PACING_ENABLE
+.It Dv tcp.REUSPORT_LB_NUMA_NODOM
+.It Dv tcp.REUSPORT_LB_NUMA_CURDOM
+.It Dv tcp.TCP_MSS
+.It Dv tcp.TCP6_MSS
+.It Dv tcp.TTCP_CLIENT_SND_WND
+.It Dv tcp.RACK_CSPR_IS_FCC
+.It Dv tcp.TCPI_OPT_TIMESTAMPS
+.It Dv tcp.TCPI_OPT_SACK
+.It Dv tcp.TCPI_OPT_WSCALE
+.It Dv tcp.TCPI_OPT_ECN
+.It Dv tcp.TCPI_OPT_TOE
+.It Dv tcp.TCPI_OPT_TFO
+.It Dv tcp.TCPI_OPT_ACE
+.It Dv tcp.TLS_SET_RECORD_TYPE
+.It Dv tcp.TLS_GET_RECORD
+.It Dv tcp.VOI_TCP_TXPB
+.It Dv tcp.VOI_TCP_RETXPB
+.It Dv tcp.VOI_TCP_FRWIN
+.It Dv tcp.VOI_TCP_LCWIN
+.It Dv tcp.VOI_TCP_RTT
+.It Dv tcp.VOI_TCP_CSIG
+.It Dv tcp.VOI_TCP_GPUT
+.It Dv tcp.VOI_TCP_CALCFRWINDIFF
+.It Dv tcp.VOI_TCP_GPUT_ND
+.It Dv tcp.VOI_TCP_ACKLEN
+.El
+.Sh DESCRIPTION
+The
+.Nm netinet.tcp
+module provides bindings for Internet Transmission Control Protocol definitions.
+.Sh SEE ALSO
+.Xr ifconfig 3lua ,
+.Xr netinet.in 3lua ,
+.Xr netinet.ip 3lua ,
+.Xr netinet.ip6 3lua ,
+.Xr netinet.udp 3lua ,
+.Xr netinet.udplite 3lua ,
+.Xr sys.socket 3lua ,
+.Xr udp 4
+.Sh AUTHORS
+.An Ryan Moeller
