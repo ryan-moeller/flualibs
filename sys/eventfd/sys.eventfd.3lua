@@ -1,0 +1,59 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 28, 2025
+.Dt SYS.EVENTFD 3lua
+.Os
+.Sh NAME
+.Nm sys.eventfd
+.Nd Lua bindings for
+.Xr eventfd 2
+.Sh SYNOPSIS
+.Bd -literal
+local efd = require('sys.eventfd')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv eventfd, errmsg, errcode = efd.eventfd(initval[ , flags ] )
+.It Dv value, errmsg, errcode = eventfd:read( )
+.It Dv ok, errmsg, errcode = eventfd:write(value )
+.It Dv ok, errmsg, errcode = eventfd:close( )
+.It Dv fd = eventfd:fileno( )
+.It Dv efd.CLOEXEC
+.It Dv efd.NONBLOCK
+.It Dv efd.SEMAPHORE
+.El
+.Sh DESCRIPTION
+The
+.Nm sys.eventfd
+module provides bindings for the
+.Xr eventfd 2
+system call.
+.Bl -tag -width XXXX
+.It Dv eventfd, errmsg, errcode = efd.eventfd(initval[ , flags ] )
+Wraps
+.Xr eventfd 2 .
+Create and return a new
+.Xr inotify 2
+descriptor.
+The return value is a
+.Vt userdata
+object wrapping the descriptor.
+.It Dv value, errmsg, errcode = eventfd:read( )
+Wraps
+.Xr eventfd_read 2 .
+.It Dv ok, errmsg, errcode = eventfd:write(value )
+Wraps
+.Xr eventfd_write 2 .
+.It Dv ok, errmsg, errcode = eventfd:close( )
+Wraps
+.Xr close 2 .
+.It Dv fd = eventfd:fileno( )
+.El
+.Sh SEE ALSO
+.Xr sys.event 3lua ,
+.Xr sys.inotify 3lua
+.Sh AUTHORS
+.An Ryan Moeller

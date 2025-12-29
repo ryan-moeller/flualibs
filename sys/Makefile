@@ -8,6 +8,7 @@ SUBDIR=	\
 	capsicum \
 	cpuset \
 	event \
+	eventfd \
 	extattr \
 	limits \
 	linker \
