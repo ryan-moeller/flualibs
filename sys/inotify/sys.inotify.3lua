@@ -21,7 +21,7 @@ local inotify = require('sys.inotify')
 .It Dv wd, errmsg, errcode = ifd:add_watch_at(dfd , pathname , mask )
 .It Dv ok, errmsg, errcode = ifd:rm_watch(wd )
 .It Dv ok, errmsg, errcode = ifd:close( )
-.It Dv fd, errmsg, errcode = ifd:fileno( )
+.It Dv fd = ifd:fileno( )
 .It Dv events, errmsg, errcode = ifd:read( )
 .It Dv inotify.NONBLOCK
 .It Dv inotify.CLOEXEC
@@ -78,7 +78,7 @@ Wraps
 .Xr inotify_rm_watch 2 .
 .It Dv ok, errmsg, errcode = ifd:close( )
 Close an inotify descriptor.
-.It Dv fd, errmsg, errcode = ifd:fileno( )
+.It Dv fd = ifd:fileno( )
 Get the underlying file descriptor number of an inotify descriptor.
 .It Dv event, errmsg, errcode = ifd:read( )
 Read one or more events, though not necessarily all the available events.
