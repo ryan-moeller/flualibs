@@ -3,14 +3,16 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 25, 2025
+.Dd December 30, 2025
 .Dt NETDB 3lua
 .Os
 .Sh NAME
 .Nm netdb
 .Nd Lua binding for
 .Xr getaddrinfo 3 ,
-.Xr getnameinfo 3
+.Xr getnameinfo 3 ,
+.Xr getprotobyname 3 ,
+.Xr getprotobynumber 3
 .Sh SYNOPSIS
 .Bd -literal
 netdb = require('netdb')
@@ -19,6 +21,8 @@ netdb = require('netdb')
 .Bl -tag -width XXXX -compact
 .It Dv addrs, errmsg, errcode = netdb.getaddrinfo(hostname , servname[ , hints ] )
 .It Dv host, serv_or_errmsg, errcode = netdb.getnameinfo(addr[ , flags ] )
+.It Dv protoent, errmsg, errcode = netdb.getprotobyname(name )
+.It Dv protoent, errmsg, errcode = netdb.getprotobynumber(number )
 .It Dv netdb._PATH_HEQUIV
 .It Dv netdb._PATH_HOSTS
 .It Dv netdb._PATH_NETWORKS
@@ -120,6 +124,32 @@ Returns addresses in a table of the form
 .It Dv host, serv_or_errmsg, errcode = netdb.getnameinfo(addr[ , flags ] )
 Wraps
 .Xr getnameinfo 3 .
+.It Dv protoent, errmsg, errcode = netdb.getprotobyname(name )
+Wraps
+.Fn getprotobyname_r .
+See
+.Xr getprotobyname 3 .
+If found, returns a table of the form
+.Bd -literal -compact
+{
+	name = <string>,
+	aliases = {<string>, ...},
+	proto = <integer>,
+}
+.Ed
+.It Dv protoent, errmsg, errcode = netdb.getprotobynumber(number )
+Wraps
+.Fn getprotobynumber_r .
+See
+.Xr getprotobynumber 3 .
+If found, returns a table of the form
+.Bd -literal -compact
+{
+	name = <string>,
+	aliases = {<string>, ...},
+	proto = <integer>,
+}
+.Ed
 .El
 .Sh EXAMPLES
 Look up addresses for a web server:

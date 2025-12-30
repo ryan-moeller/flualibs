@@ -66,3 +66,19 @@ pushai(lua_State *L, const struct addrinfo *ai)
 	pushaddr(L, ai->ai_addr);
 	lua_setfield(L, -2, "addr");
 }
+
+static inline void
+pushprotoent(lua_State *L, const struct protoent *ent)
+{
+	lua_newtable(L);
+	lua_pushstring(L, ent->p_name);
+	lua_setfield(L, -2, "name");
+	lua_newtable(L);
+	for (int i = 0; ent->p_aliases[i] != NULL; i++) {
+		lua_pushstring(L, ent->p_aliases[i]);
+		lua_rawseti(L, -2, i + 1);
+	}
+	lua_setfield(L, -2, "aliases");
+	lua_pushinteger(L, ent->p_proto);
+	lua_setfield(L, -2, "proto");
+}

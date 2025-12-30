@@ -13,6 +13,7 @@
 
 #include "sys/socket/lua_socket.h"
 #include "lua_netdb.h"
+#include "utils.h"
 
 int luaopen_netdb(lua_State *);
 
@@ -67,9 +68,54 @@ l_getnameinfo(lua_State *L)
 	return (2);
 }
 
+static int
+l_getprotobyname(lua_State *L)
+{
+	char buf[2048]; /* at least as large as struct protoent_data */
+	const char *name;
+	struct protoent result;
+	struct protoent *ent;
+	int error;
+
+	name = luaL_checkstring(L, 1);
+
+	if ((error = getprotobyname_r(name, &result, buf, sizeof(buf), &ent))
+	    != 0) {
+		return (fail(L, error));
+	}
+	if (ent == NULL) {
+		return (0);
+	}
+	pushprotoent(L, ent);
+	return (1);
+}
+
+static int
+l_getprotobynumber(lua_State *L)
+{
+	char buf[2048]; /* at least as large as struct protoent_data */
+	struct protoent result;
+	struct protoent *ent;
+	int proto, error;
+
+	proto = luaL_checkinteger(L, 1);
+
+	if ((error = getprotobynumber_r(proto, &result, buf, sizeof(buf), &ent))
+	    != 0) {
+		return (fail(L, error));
+	}
+	if (ent == NULL) {
+		return (0);
+	}
+	pushprotoent(L, ent);
+	return (1);
+}
+
 static const struct luaL_Reg l_netdb_funcs[] = {
 	{"getaddrinfo", l_getaddrinfo},
 	{"getnameinfo", l_getnameinfo},
+	{"getprotobyname", l_getprotobyname},
+	{"getprotobynumber", l_getprotobynumber},
 	{NULL, NULL}
 };
 
