@@ -1,0 +1,104 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 30, 2025
+.Dt CASPER.NET 3lua
+.Os
+.Sh NAME
+.Nm casper.net
+.Nd Lua bindings for
+.Xr cap_net 3
+.Sh SYNOPSIS
+.Bd -literal
+net = require('casper.net')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv ok, errmsg, errcode = net.bind(chan , sockfd | sockfile , addr )
+.It Dv ok, errmsg, errcode = net.connect(chan , sockfd | sockfile , addr )
+.It Dv addrs, errmsg, errcode = net.getaddrinfo(chan , hostname , servname[ , hints ] )
+.It Dv host, serv_or_errmsg, errcode = net.getnameinfo(chan , addr[ , flags ] )
+.It Dv limit, errmsg, errcode = net.limit_init(chan , mode )
+.It Dv net.ADDR2NAME
+.It Dv net.NAME2ADDR
+.It Dv net.BIND
+.It Dv net.CONNECT
+.It Dv net.CONNECTDNS
+.It Dv limit = limit:addr2name(addr )
+.It Dv limit = limit:addr2name_family(families )
+.It Dv limit = limit:bind(addr )
+.It Dv limit = limit:connect(addr )
+.It Dv limit = limit:name2addr(name , serv )
+.It Dv limit = limit:name2addr_family(families )
+.It Dv ok, errmsg, errcode = limit:limit( )
+.El
+.Sh DESCRIPTION
+The
+.Nm casper.net
+module provides bindings for
+.Xr cap_net 3
+function calls.
+.Bl -tag -width XXXX
+.It Dv ok, errmsg, errcode = net.bind(chan , sockfd | sockfile , addr )
+Wraps
+.Xr cap_bind 3 .
+.It Dv ok, errmsg, errcode = net.connect(chan , sockfd | sockfile , addr )
+Wraps
+.Xr cap_connect 3 .
+.It Dv addrs, errmsg, errcode = net.getaddrinfo(chan , hostname , servname[ , hints ] )
+Wraps
+.Xr cap_getaddrinfo 3 .
+.It Dv host, serv_or_errmsg, errcode = net.getnameinfo(chan , addr[ , flags ] )
+Wraps
+.Xr cap_getnameinfo 3 .
+.It Dv limit, errmsg, errcode = net.limit_init(chan , mode )
+Wraps
+.Xr cap_net_limit_init 3 .
+Returns a
+.Vt userdata
+object.
+.It Dv limit = limit:addr2name(addr )
+Wraps
+.Xr cap_net_limit_addr2name 3 .
+.It Dv limit = limit:addr2name_family(families )
+Wraps
+.Xr cap_net_limit_addr2name_family 3 .
+.It Dv limit = limit:bind(addr )
+Wraps
+.Xr cap_net_limit_bind 3 .
+.It Dv limit = limit:connect(addr )
+Wraps
+.Xr cap_net_limit_connect 3 .
+.It Dv limit = limit:name2addr(name , serv )
+Wraps
+.Xr cap_net_limit_name2addr 3 .
+.It Dv limit = limit:name2addr_family(families )
+Wraps
+.Xr cap_net_limit_name2addr_family 3 .
+.It Dv ok, errmsg, errcode = limit:limit( )
+Wraps
+.Xr cap_net_limit 3 .
+.El
+.Sh EXAMPLES
+Open a channel for the net service:
+.Bd -literal -offset indent
+local cap = require('sys.capsicum')
+local casper = require('casper')
+local net = require('casper.net')
+local ucl = require('ucl')
+
+local capcas = casper.init()
+cap.enter()
+local capnet = capcas:service_open('system.net')
+capcas:close()
+-- TODO: use capnet
+.Ed
+.Sh SEE ALSO
+.Xr casper 3lua ,
+.Xr casper.netdb 3lua ,
+.Xr sys.capsicum 3lua ,
+.Xr sys.socket 3lua
+.Sh AUTHORS
+.An Ryan Moeller

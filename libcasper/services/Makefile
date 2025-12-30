@@ -3,6 +3,9 @@ FLUA_CASPER=	${LIBDIR}/flua/casper
 
 .include <bsd.dirs.mk>
 
+SUBDIR=	\
+	net \
+
 .if exists(/usr/include/casper/cap_netdb.h)
 SUBDIR+=netdb
 .endif
