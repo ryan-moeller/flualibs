@@ -18,7 +18,7 @@
 #include "luaerror.h"
 #include "utils.h"
 
-#define CAP_RIGHTS_METATABLE "acl_t"
+#define CAP_RIGHTS_METATABLE "cap_rights_t *"
 
 int luaopen_sys_capsicum(lua_State *);
 
@@ -47,11 +47,11 @@ l_cap_rights_new(lua_State *L)
 	top = lua_gettop(L);
 
 	rights = lua_newuserdatauv(L, sizeof(*rights), 0);
-	luaL_setmetatable(L, CAP_RIGHTS_METATABLE);
 	cap_rights_init(rights);
 	for (int i = 1; i <= top; i++) {
 		cap_rights_set(rights, luaL_checkinteger(L, i));
 	}
+	luaL_setmetatable(L, CAP_RIGHTS_METATABLE);
 	return (1);
 }
 
@@ -64,11 +64,10 @@ l_cap_rights_get(lua_State *L)
 	fd = checkfd(L, 1);
 
 	rights = lua_newuserdatauv(L, sizeof(*rights), 0);
-	luaL_setmetatable(L, CAP_RIGHTS_METATABLE);
-
 	if (cap_rights_get(fd, rights) == -1) {
 		return (fail(L, errno));
 	}
+	luaL_setmetatable(L, CAP_RIGHTS_METATABLE);
 	return (1);
 }
 
