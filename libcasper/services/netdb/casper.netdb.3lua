@@ -1,0 +1,51 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 30, 2025
+.Dt CASPER.NETDB 3lua
+.Os
+.Sh NAME
+.Nm casper.netdb
+.Nd Lua bindings for
+.Xr cap_netdb 3
+.Sh SYNOPSIS
+.Bd -literal
+netdb = require('casper.netdb')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv protoent = netdb.getprotobyname(name )
+.El
+.Sh DESCRIPTION
+The
+.Nm casper.netdb
+module provides bindings for
+.Xr cap_netdb 3
+function calls.
+.Bl -tag -width XXXX
+.It Dv protoent = netdb.getprotobyname(name )
+Wraps
+.Xr cap_getprotobyname 3 .
+.El
+.Sh EXAMPLES
+Look up TCP by name while sandboxed:
+.Bd -literal -offset indent
+local cap = require('sys.capsicum')
+local casper = require('casper')
+local netdb = require('casper.netdb')
+local ucl = require('ucl')
+
+local capcas = casper.init()
+cap.enter()
+local capnetdb = capcas:service_open('system.netdb')
+capcas:close()
+local tcp = netdb.getprotobyname(capnetdb, 'tcp')
+print(ucl.to_json(tcp))
+.Ed
+.Sh SEE ALSO
+.Xr casper 3lua ,
+.Xr sys.capsicum 3lua
+.Sh AUTHORS
+.An Ryan Moeller

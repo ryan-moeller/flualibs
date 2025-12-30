@@ -1,0 +1,11 @@
+local cap = require('sys.capsicum')
+local casper = require('casper')
+local netdb = require('casper.netdb')
+local ucl = require('ucl')
+
+local capcas = assert(casper.init())
+cap.enter()
+local capnetdb = assert(capcas:service_open('system.netdb'))
+capcas:close()
+local tcp = assert(netdb.getprotobyname(capnetdb, 'tcp'))
+print(ucl.to_json(tcp))

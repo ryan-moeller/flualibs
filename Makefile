@@ -2,6 +2,7 @@ SUBDIR= \
 	b64 \
 	dirent \
 	fcntl \
+	libcasper \
 	libfetch \
 	libifconfig \
 	libmagic \

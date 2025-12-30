@@ -1,0 +1,124 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 30, 2025
+.Dt CASPER 3lua
+.Os
+.Sh NAME
+.Nm casper
+.Nd Lua bindings for
+.Xr libcasper 3
+.Sh SYNOPSIS
+.Bd -literal
+casper = require('casper')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv chan, errmsg, errcode = casper.init( )
+.It Dv chan, errmsg, errcode = casper.wrap(sock[ , flags ] )
+.It Dv casper.NO_UNIQ
+.It Dv chan:close( )
+.It Dv sock, flags = chan:unwrap( )
+.It Dv sock = chan:sock( )
+.It Dv clone, errmsg, errcode = chan:clone( )
+.It Dv limits, errmsg, errcode = chan:limit( )
+.It Dv ok, errmsg, errcode = chan:limit(limits )
+.It Dv ok, errmsg, errcode = chan:send(nvl )
+.It Dv nvl, errmsg, errcode = chan:recv( )
+.It Dv rxnvl, errmsg, errcode = chan:xfer(txnvl )
+.It Dv servchan, errmsg, errcode = chan:service_open(name )
+.El
+.Sh DESCRIPTION
+The
+.Nm casper
+module provides bindings for
+.Xr libcasper 3
+function calls.
+.Bl -tag -width XXXX
+.It Dv chan, errmsg, errcode = casper.init( )
+Wraps
+.Xr cap_init 3 .
+Returns a
+.Vt userdata
+object.
+.It Dv chan, errmsg, errcode = casper.wrap(sock[ , flags ] )
+Wraps
+.Xr cap_wrap 3 .
+Returns a
+.Vt userdata
+object.
+.It Dv chan:close( )
+Wraps
+.Xr cap_close 3 .
+.It Dv sock, flags = chan:unwrap( )
+Wraps
+.Xr cap_unwrap 3 .
+.It Dv sock = chan:sock( )
+Wraps
+.Xr cap_sock 3 .
+.It Dv clone, errmsg, errcode = chan:clone( )
+Wraps
+.Xr cap_clone 3 .
+Returns a
+.Vt userdata
+object.
+.It Dv limits, errmsg, errcode = chan:limit( )
+Wraps
+.Xr cap_limit_get 3 .
+Returns a
+.Xr nv 3lua
+.Vt userdata
+object.
+.It Dv ok, errmsg, errcode = chan:limit(limits )
+Wraps
+.Xr cap_limit_set 3 .
+.Fa limits
+.It Dv ok, errmsg, errcode = chan:send(nvl )
+Wraps
+.Xr cap_send_nvlist 3 .
+.Fa nvl
+is a
+.Xr nv 3lua
+.Vt userdata
+object.
+.It Dv nvl, errmsg, errcode = chan:recv( )
+Wraps
+.Xr cap_recv_nvlist 3 .
+Returns a
+.Xr nv 3lua
+.Vt userdata
+object.
+.It Dv rxnvl, errmsg, errcode = chan:xfer(txnvl )
+Wraps
+.Xr cap_xfer_nvlist 3 .
+.It Dv servchan, errmsg, errcode = chan:service_open(name )
+Wraps
+.Xr cap_service_open 3 .
+Returns a
+.Xr nv 3lua
+.Vt userdata
+object.
+.El
+.Sh EXAMPLES
+Look up TCP by name while sandboxed:
+.Bd -literal -offset indent
+local cap = require('sys.capsicum')
+local casper = require('casper')
+local netdb = require('casper.netdb')
+local ucl = require('ucl')
+
+local capcas = casper.init()
+cap.enter()
+local capnetdb = capcas:service_open('system.netdb')
+capcas:close()
+local tcp = netdb.getprotobyname(capnetdb, 'tcp')
+print(ucl.to_json(tcp))
+.Ed
+.Sh SEE ALSO
+.Xr casper.netdb 3lua ,
+.Xr nv 3lua ,
+.Xr sys.capsicum 3lua
+.Sh AUTHORS
+.An Ryan Moeller
