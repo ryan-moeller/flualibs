@@ -1,0 +1,100 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 31, 2025
+.Dt CAPSICUM_HELPERS 3lua
+.Os
+.Sh NAME
+.Nm capsicum_helpers
+.Nd Lua module for
+.Xr capsicum_helpers 3
+.Sh SYNOPSIS
+.Bd -literal
+caph = require('capsicum_helpers')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv ok, errmsg, errcode = caph.enter( )
+.It Dv ok, errmsg, errcode = caph.enter_casper( )
+.It Dv ok, errmsg, errcode = caph.rights_limit(fd | file , rights )
+.It Dv ok, errmsg, errcode = caph.ioctls_limit(fd | file , ... )
+.It Dv ok, errmsg, errcode = caph.fcntls_limit(fd | file , fcntlrights )
+.It Dv ok, errmsg, errcode = caph.limit_stream(fd | file , flags )
+.It Dv ok, errmsg, errcode = caph.limit_stdin( )
+.It Dv ok, errmsg, errcode = caph.limit_stderr( )
+.It Dv ok, errmsg, errcode = caph.limit_stdout( )
+.It Dv ok, errmsg, errcode = caph.limit_stdio( )
+.It Dv rights = caph.stream_rights(rights , flags )
+.It Dv caph.cache_tzdata( )
+.It Dv caph.cache_catpages( )
+.It Dv caph.IGNORE_EBADF
+.It Dv caph.READ
+.It Dv caph.WRITE
+.It Dv caph.LOOKUP
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides a bindings for
+.Xr capsicum_helpers 3 .
+.Bl -tag -width XXXX
+.It Dv ok, errmsg, errcode = caph.enter( )
+Wraps
+.Xr caph_enter 3 .
+.It Dv ok, errmsg, errcode = caph.enter_casper( )
+Wraps
+.Xr caph_enter_casper 3 .
+.It Dv ok, errmsg, errcode = caph.rights_limit(fd | file , rights )
+Wraps
+.Xr caph_rights_limit 3 .
+.It Dv ok, errmsg, errcode = caph.ioctls_limit(fd | file , ... )
+Wraps
+.Xr caph_ioctls_limit 3 .
+.It Dv ok, errmsg, errcode = caph.fcntls_limit(fd | file , fcntlrights )
+Wraps
+.Xr caph_fcntls_limit 3 .
+.It Dv ok, errmsg, errcode = caph.limit_stream(fd | file , flags )
+Wraps
+.Xr caph_limit_stream 3 .
+.It Dv ok, errmsg, errcode = caph.limit_stdin( )
+Wraps
+.Xr caph_limit_stdin 3 .
+.It Dv ok, errmsg, errcode = caph.limit_stderr( )
+Wraps
+.Xr caph_limit_stderr 3 .
+.It Dv ok, errmsg, errcode = caph.limit_stdout( )
+Wraps
+.Xr caph_limit_stdout 3 .
+.It Dv ok, errmsg, errcode = caph.limit_stdio( )
+Wraps
+.Xr caph_limit_stdio 3 .
+.It Dv rights = caph.stream_rights(rights , flags )
+Wraps
+.Xr caph_stream_rights 3 .
+.It Dv caph.cache_tzdata( )
+Wraps
+.Xr caph_cache_tzdata 3 .
+.It Dv caph.cache_catpages( )
+Wraps
+.Xr caph_cache_catpages 3 .
+.El
+.Sh EXAMPLES
+Enter a sandbox if supported by the kernel:
+.Bd -literal -offset indent
+local cap = require('sys.capsicum')
+local caph = require('capsicum_helpers')
+
+assert(caph.enter())
+if cap.sandboxed() then
+	print('sandboxed')
+else
+	print('not sandboxed')
+end
+.Ed
+.Sh SEE ALSO
+.Xr casper 3lua ,
+.Xr sys.capsicum 3lua
+.Sh AUTHORS
+.An Ryan Moeller

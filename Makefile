@@ -1,5 +1,6 @@
 SUBDIR= \
 	b64 \
+	capsicum_helpers \
 	dirent \
 	fcntl \
 	libcasper \
