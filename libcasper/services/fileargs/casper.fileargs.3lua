@@ -1,0 +1,94 @@
+.\"
+.\" Copyright (c) 2025 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd December 31, 2025
+.Dt CASPER.FILEARGS 3lua
+.Os
+.Sh NAME
+.Nm casper.fileargs
+.Nd Lua bindings for
+.Xr cap_fileargs 3
+.Sh SYNOPSIS
+.Bd -literal
+fileargs = require('casper.fileargs')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv fa, errmsg, errcode = fileargs.init(args , flags , mode , rights , operations )
+.It Dv fa, errmsg, errcode = fileargs.cinit(cas , args , flags , mode , rights , operations )
+.It Dv fileargs.OPEN
+.It Dv fileargs.LSTAT
+.It Dv fileargs.REALPATH
+.It Dv fa, errmsg, errcode = fileargs.initnv(limits )
+.It Dv fa, errmsg, errcode = fileargs.cinitnv(cas , limits )
+.It Dv fa, errmsg, errcode = fileargs.wrap(chan , fdflags )
+.It Dv stat, errmsg, errcode = fa:lstat(name )
+.It Dv fd, errmsg, errcode = fa:open(name )
+.It Dv file, errmsg, errcode = fa:fopen(name , mode )
+.It Dv path, errmsg, errcode = fa:realpath(pathname )
+.It Dv chan, fdflags = fa:unwrap( )
+.El
+.Sh DESCRIPTION
+The
+.Nm casper.fileargs
+module provides bindings for
+.Xr cap_fileargs 3
+function calls.
+.Bl -tag -width XXXX
+.It Dv fa, errmsg, errcode = fileargs.init(args , flags , mode , rights , operations )
+Wraps
+.Xr fileargs_init 3 .
+.It Dv fa, errmsg, errcode = fileargs.cinit(cas , args , flags , mode , rights , operations )
+Wraps
+.Xr fileargs_cinit 3 .
+.It Dv fa, errmsg, errcode = fileargs.initnv(limits )
+Wraps
+.Xr fileargs_initnv 3 .
+.It Dv fa, errmsg, errcode = fileargs.cinitnv(cas , limits )
+Wraps
+.Xr fileargs_cinitnv 3 .
+.It Dv fa, errmsg, errcode = fileargs.wrap(chan , fdflags )
+Wraps
+.Fn fileargs_wrap .
+.It Dv stat, errmsg, errcode = fa:lstat(name )
+Wraps
+.Xr fileargs_lstat 3 .
+.It Dv fd, errmsg, errcode = fa:open(name )
+Wraps
+.Xr fileargs_open 3 .
+.It Dv file, errmsg, errcode = fa:fopen(name , mode )
+Wraps
+.Xr fileargs_fopen 3 .
+.It Dv path, errmsg, errcode = fa:realpath(pathname )
+Wraps
+.Xr fileargs_realpath 3 .
+.It Dv chan, fdflags = fa:unwrap( )
+Wraps
+.Fn fileargs_unwrap .
+.El
+.Sh EXAMPLES
+Open file args after sandboxing:
+.Bd -literal -offset indent
+local cap = require('sys.capsicum')
+local fcntl = require('fcntl')
+local fileargs = require('casper.fileargs')
+
+local args = {...}
+local fa = fileargs.init(args, fcntl.O_RDONLY, 0,
+    cap.rights.new(cap.READ, cap.FCNTL), fileargs.OPEN)
+cap.enter()
+for _, arg in ipairs(args) do
+	local f <close> = fa:fopen(arg, 'r')
+	print(f:read('a*'))
+end
+.Ed
+.Sh SEE ALSO
+.Xr cap_fileargs 3 ,
+.Xr casper 3lua ,
+.Xr fcntl 3lua ,
+.Xr sys.capsicum 3lua ,
+.Xr sys.stat 3lua
+.Sh AUTHORS
+.An Ryan Moeller
