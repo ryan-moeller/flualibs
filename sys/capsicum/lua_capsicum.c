@@ -15,10 +15,9 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+#include "lua_capsicum.h"
 #include "luaerror.h"
 #include "utils.h"
-
-#define CAP_RIGHTS_METATABLE "cap_rights_t *"
 
 int luaopen_sys_capsicum(lua_State *);
 
