@@ -243,8 +243,6 @@ l_cap_fcntls_get(lua_State *L)
 	return (1);
 }
 
-#define CAP_IOCTLS_LIMIT_MAX 256
-
 static int
 l_cap_ioctls_limit(lua_State *L)
 {

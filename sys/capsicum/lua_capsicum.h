@@ -7,3 +7,5 @@
 #pragma once
 
 #define CAP_RIGHTS_METATABLE "cap_rights_t *"
+
+#define CAP_IOCTLS_LIMIT_MAX 256
