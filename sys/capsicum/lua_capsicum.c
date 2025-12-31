@@ -257,7 +257,7 @@ l_cap_ioctls_limit(lua_State *L)
 		    CAP_IOCTLS_LIMIT_MAX));
 	}
 
-	for (int i = 2; i < top; i++) {
+	for (int i = 2; i <= top; i++) {
 		cmds[i - 2] = luaL_checkinteger(L, i);
 	}
 	if (cap_ioctls_limit(fd, cmds, nitems(cmds)) == -1) {
