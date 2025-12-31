@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 25, 2025
+.Dd December 31, 2025
 .Dt SYS.CAPSICUM 3lua
 .Os
 .Sh NAME
@@ -17,7 +17,7 @@ cap = require('sys.capsicum')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv cap.enter( )
+.It Dv ok, errmsg, errcode = cap.enter( )
 .It Dv sandboxed = cap.sandboxed( )
 .It Dv rights = cap.rights.new(... )
 .It Dv rights, errmsg, errcode = cap.rights.get(fd | file )

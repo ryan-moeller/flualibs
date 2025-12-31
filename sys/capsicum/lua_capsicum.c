@@ -24,9 +24,9 @@ static int
 l_cap_enter(lua_State *L)
 {
 	if (cap_enter() == -1) {
-		return (fatal(L, "cap_enter", errno));
+		return (fail(L, errno));
 	}
-	return (0);
+	return (success(L));
 }
 
 static int
