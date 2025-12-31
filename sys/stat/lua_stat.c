@@ -14,7 +14,6 @@
 
 #include <lua.h>
 #include <lauxlib.h>
-#include <lualib.h>
 
 #include "lua_stat.h"
 #include "utils.h"

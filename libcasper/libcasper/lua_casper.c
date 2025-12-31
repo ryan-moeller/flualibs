@@ -9,7 +9,6 @@
 
 #include <lua.h>
 #include <lauxlib.h>
-#include <lualib.h>
 
 #include "libnv/lua_nv.h"
 #include "lua_casper.h"

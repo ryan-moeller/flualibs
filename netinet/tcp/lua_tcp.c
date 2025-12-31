@@ -11,7 +11,6 @@
 
 #include <lua.h>
 #include <lauxlib.h>
-#include <lualib.h>
 
 int luaopen_netinet_tcp(lua_State *);
 

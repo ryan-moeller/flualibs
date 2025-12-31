@@ -9,7 +9,6 @@
 
 #include <lua.h>
 #include <lauxlib.h>
-#include <lualib.h>
 
 #include "sys/socket/lua_socket.h"
 #include "lua_netdb.h"

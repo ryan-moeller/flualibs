@@ -19,7 +19,6 @@ typedef uint64_t hrtime_t;
 
 #include <lua.h>
 #include <lauxlib.h>
-#include <lualib.h>
 
 #include "luaerror.h"
 #include "utils.h"
