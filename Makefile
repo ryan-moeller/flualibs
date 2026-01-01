@@ -17,6 +17,7 @@ SUBDIR= \
 	readpassphrase \
 	stdio \
 	sys \
+	syslog \
 	time \
 	unistd \
 	xor \

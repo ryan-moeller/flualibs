@@ -1,0 +1,118 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd January 1, 2026
+.Dt SYSLOG 3lua
+.Os
+.Sh NAME
+.Nm syslog
+.Nd Lua bindings for
+.Xr syslog 3
+API
+.Sh SYNOPSIS
+.Bd -literal
+local syslog = require('syslog')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv syslog.openlog(ident , logopt[ , facility ] )
+.It Dv facility = syslog.fac(priority )
+.It Dv oldmask = syslog.setlogmask(maskpri )
+.It Dv mask = syslog.mask(priority )
+.It Dv mask = syslog.upto(priority )
+.It Dv syslog.syslog(priority , message )
+.It Dv priority = syslog.pri(priority )
+.It Dv priority = syslog.makepri(facility , priority )
+.It Dv syslog.closelog( )
+.It Dv syslog._PATH_LOG
+.It Dv syslog._PATH_LOG_PRIV
+.It Dv syslog.EMERG
+.It Dv syslog.ALERT
+.It Dv syslog.CRIT
+.It Dv syslog.ERR
+.It Dv syslog.WARNING
+.It Dv syslog.NOTICE
+.It Dv syslog.INFO
+.It Dv syslog.DEBUG
+.It Dv syslog.PRIMASK
+.It Dv syslog.KERN
+.It Dv syslog.USER
+.It Dv syslog.MAIL
+.It Dv syslog.DAEMON
+.It Dv syslog.AUTH
+.It Dv syslog.SYSLOG
+.It Dv syslog.LPR
+.It Dv syslog.NEWS
+.It Dv syslog.UUCP
+.It Dv syslog.CRON
+.It Dv syslog.AUTHPRIV
+.It Dv syslog.FTP
+.It Dv syslog.NTP
+.It Dv syslog.SECURITY
+.It Dv syslog.CONSOLE
+.It Dv syslog.LOCAL0
+.It Dv syslog.LOCAL1
+.It Dv syslog.LOCAL2
+.It Dv syslog.LOCAL3
+.It Dv syslog.LOCAL4
+.It Dv syslog.LOCAL5
+.It Dv syslog.LOCAL6
+.It Dv syslog.LOCAL7
+.It Dv syslog.NFACILITIES
+.It Dv syslog.FACMASK
+.It Dv syslog.PID
+.It Dv syslog.CONS
+.It Dv syslog.ODELAY
+.It Dv syslog.NDELAY
+.It Dv syslog.NOWAIT
+.It Dv syslog.PERROR
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for the
+.Xr syslog 3
+API in libc.
+.Bl -tag -width XXXX
+.It Dv syslog.openlog(ident , logopt[ , facility ] )
+Wraps
+.Xr openlog 3 .
+.It Dv facility = syslog.fac(priority )
+Wraps
+.Fn LOG_FAC .
+.It Dv oldmask = syslog.setlogmask(maskpri )
+Wraps
+.Xr setlogmask 3 .
+.It Dv mask = syslog.mask(priority )
+Wraps
+.Fn LOG_MASK .
+.It Dv mask = syslog.upto(priority )
+Wraps
+.Fn LOG_UPTO .
+.It Dv syslog.syslog(priority , message )
+Wraps
+.Xr syslog 3 .
+Note that all string formatting must be done by the user.
+.It Dv priority = syslog.pri(priority )
+Wraps
+.Fn LOG_PRI .
+.It Dv priority = syslog.makepri(facility , priority )
+Wraps
+.Fn LOG_MAKEPRI .
+.It Dv syslog.closelog( )
+Wraps
+.Xr closelog 3 .
+.El
+.Sh EXAMPLES
+Log a warning:
+.Bd -literal -offset indent
+local syslog = require('syslog')
+
+syslog.syslog(syslog.WARNING, 'this is only a test')
+.Ed
+.Sh SEE ALSO
+.Xr syslog 3
+.Sh AUTHORS
+.An Ryan Moeller
