@@ -1,0 +1,13 @@
+local caph = require('capsicum_helpers')
+local casper = require('casper')
+local csyslog = require('casper.syslog')
+local syslog = require('syslog')
+
+local capcas = assert(casper.init())
+assert(caph.enter())
+local capsyslog = assert(capcas:service_open('system.syslog'))
+capcas:close()
+csyslog.openlog(capsyslog, "cap_syslog", syslog.PERROR)
+csyslog.syslog(capsyslog, syslog.WARNING, 'this is only a test')
+csyslog.closelog(capsyslog)
+csyslog.syslog(capsyslog, syslog.CRIT, 'test over')

@@ -1,0 +1,65 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd January 1, 2026
+.Dt CASPER.SYSLOG 3lua
+.Os
+.Sh NAME
+.Nm casper.syslog
+.Nd Lua bindings for
+.Xr cap_syslog 3
+.Sh SYNOPSIS
+.Bd -literal
+syslog = require('casper.netdb')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv syslog.openlog(chan , ident , logopt[ , facility ] )
+.It Dv oldmask = syslog.setlogmask(chan , maskpri )
+.It Dv syslog.syslog(chan , priority , message )
+.It Dv syslog.closelog(chan )
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for
+.Xr cap_syslog 3
+function calls.
+.Bl -tag -width XXXX
+.It Dv syslog.openlog(chan , ident , logopt[ , facility ] )
+Wraps
+.Xr cap_openlog 3 .
+.It Dv oldmask = syslog.setlogmask(chan , maskpri )
+Wraps
+.Xr cap_setlogmask 3 .
+.It Dv syslog.syslog(chan , priority , message )
+Wraps
+.Xr cap_syslog 3 .
+Note that all string formatting must be done by the user.
+.It Dv syslog.closelog(chan )
+Wraps
+.Xr cap_closelog 3 .
+.El
+.Sh EXAMPLES
+Log a warning while sandboxed:
+.Bd -literal -offset indent
+local caph = require('capsicum_helpers')
+local casper = require('casper')
+local csyslog = require('casper.syslog')
+local syslog = require('syslog')
+
+local capcas = casper.init()
+assert(caph.enter())
+local capsyslog = capcas:service_open('system.syslog')
+capcas:close()
+csyslog.syslog(capsyslog, syslog.WARNING, 'this is only a test')
+.Ed
+.Sh SEE ALSO
+.Xr capsicum_helpers 3lua ,
+.Xr casper 3lua ,
+.Xr sys.capsicum 3lua ,
+.Xr syslog 3lua
+.Sh AUTHORS
+.An Ryan Moeller
