@@ -5,7 +5,6 @@
  */
 
 #include <errno.h>
-#include <stdbool.h>
 #include <time.h>
 
 #include <lua.h>
