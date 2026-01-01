@@ -18,6 +18,7 @@ SUBDIR=	\
 	socket \
 	stat \
 	sysctl \
+	uio \
 
 .if exists(/usr/include/sys/inotify.h)
 SUBDIR+=inotify

@@ -1,0 +1,72 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd January 1, 2026
+.Dt SYS.UIO 3lua
+.Os
+.Sh NAME
+.Nm sys.uio
+.Nd Lua bindings for
+.Xr readv 2 ,
+.Xr preadv 2 ,
+.Xr writev 2 ,
+.Xr pwritev 2
+.Sh SYNOPSIS
+.Bd -literal
+local uio = require('sys.uio')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv bufs, len_or_errmsg, errcode = uio.readv(fd | file , buflens )
+.It Dv bufs, len_or_errmsg, errcode = uio.preadv(fd | file , buflens , offset )
+.It Dv len, errmsg, errcode = uio.writev(fd | file , bufs )
+.It Dv len, errmsg, errcode = uio.pwritev(fd | file , bufs , offset )
+.It Dv uio.READ
+.It Dv uio.WRITE
+.It Dv uio.USERSPACE
+.It Dv uio.SYSSPACE
+.It Dv uio.NOCOPY
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for the
+.Xr readv 2 ,
+.Xr preadv 2 ,
+.Xr writev 2 ,
+and
+.Xr pwritev 2
+system calls.
+.Bl -tag -width XXXX
+.It Dv bufs, len_or_errmsg, errcode = uio.readv(fd | file , buflens )
+Wraps
+.Xr readv 2 .
+.It Dv bufs, len_or_errmsg, errcode = uio.preadv(fd | file , buflens , offset )
+Wraps
+.Xr preadv 2 .
+.It Dv len, errmsg, errcode = uio.writev(fd | file , bufs )
+Wraps
+.Xr writev 2 .
+.It Dv len, errmsg, errcode = uio.pwritev(fd | file , bufs , offset )
+Wraps
+.Xr pwritev 2 .
+.El
+.Sh EXAMPLES
+Read from stdin into several strings:
+.Bd -literal -offset indent
+-- echo hello world | /usr/libexec/flua test.lua
+local uio = require('sys.uio')
+
+local bufs = assert(uio.readv(io.stdin, {5,1,5,512}))
+assert(#bufs[1] == 5) -- 'hello'
+assert(#bufs[2] == 1) -- ' '
+assert(#bufs[3] == 5) -- 'world'
+assert(#bufs[4] == 512) -- '\n<garbage...>'
+print(bufs[1], bufs[3])
+.Ed
+.Sh SEE ALSO
+.Xr unistd 3lua
+.Sh AUTHORS
+.An Ryan Moeller
