@@ -1,9 +1,9 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 26, 2025
+.Dd January 2, 2026
 .Dt NETINET.SCTP 3lua
 .Os
 .Sh NAME
@@ -30,6 +30,8 @@ sctp = require('netinet.sctp')
 .It Dv paddrs, errmsg, errcode = sctp.getpaddrs(s , associd )
 .It Dv laddrs, errmsg, errcode = sctp.getladdrs(s , associd )
 .It Dv associd, errmsg, errcode = sctp.getassocid(s , addr )
+.It Dv len, errmsg, errcode = sctp.sendv(s , bufs , addrs , info[ , flags ] )
+.It Dv bufs, len_or_errmsg, peer_or_errcode, info, flags = sctp.recvv(s , buflens , from )
 .It Dv sctp.RTOINFO
 .It Dv sctp.ASSOCINFO
 .It Dv sctp.INITMSG
@@ -467,6 +469,68 @@ tables.
 .It Dv associd, errmsg, errcode = sctp.getassocid(s , addr )
 Wraps
 .Xr sctp_getassocid 3 .
+.It Dv len, errmsg, errcode = sctp.sendv(s , bufs , addrs , info[ , flags ] )
+Wraps
+.Xr sctp_sendv 3 .
+.Fa info
+is a table of the form
+.Bd -literal -compact
+{
+	[sndinfo = {
+		sid = <integer>,
+		flags = <integer>,
+		ppid = <integer>,
+		context = <integer>,
+		assoc_id = <integer>,
+	},]
+	[prinfo = {
+		policy = <integer>,
+		value = <integer>,
+	},]
+	[authinfo = {
+		keynumber = <integer>,
+	},]
+}
+.Ed
+The top-level fields
+.Po
+.Va sndinfo ,
+.Va prinfo ,
+.Va authinfo
+.Pc
+are optional, but the internal fields of each must all be provided.
+.It Dv bufs, len_or_errmsg, peer_or_errcode, info, flags = sctp.recvv(s , buflens , from )
+Wraps
+.Xr sctp_recvv 3 .
+.Va info
+is a table of the form
+.Bd -literal -compact
+{
+	[rcvinfo = {
+		sid = <integer>,
+		ssn = <integer>,
+		flags = <integer>,
+		ppid = <integer>,
+		tsn = <integer>,
+		cumtsn = <integer>,
+		context = <integer>,
+		assoc_id = <integer>,
+	},]
+	[nxtinfo = {
+		sid = <integer>,
+		flags = <integer>,
+		ppid = <integer>,
+		length = <integer>,
+		assoc_id = <integer>,
+	},]
+}
+.Ed
+Which, if any, of the top-level fields
+.Po
+.Va rcvinfo ,
+.Va nxtinfo
+.Pc
+are present depends on the configured socket options.
 .El
 .Sh EXAMPLES
 TODO:

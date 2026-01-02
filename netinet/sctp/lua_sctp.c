@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Ryan Moeller
+ * Copyright (c) 2025-2026 Ryan Moeller
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -15,7 +15,10 @@
 #include <lauxlib.h>
 
 #include "sys/socket/lua_socket.h"
+#include "sys/uio/lua_uio.h"
 #include "utils.h"
+
+#define CLOSER_METATABLE "netinet.sctp closer"
 
 int luaopen_netinet_sctp(lua_State *);
 
@@ -293,16 +296,264 @@ l_sctp_getassocid(lua_State *L)
 	return (1);
 }
 
+static inline void
+checksndinfo(lua_State *L, int idx, struct sctp_sndinfo *info)
+{
+#define FIELD(name) ({ \
+	lua_getfield(L, -1, #name); \
+	luaL_argcheck(L, lua_isinteger(L, -1), idx, "invalid sndinfo"); \
+	info->snd_ ## name = lua_tointeger(L, -1); \
+	lua_pop(L, 1); \
+})
+	FIELD(sid);
+	FIELD(flags);
+	FIELD(ppid);
+	FIELD(context);
+	FIELD(assoc_id);
+#undef FIELD
+}
+
+static inline void
+checkprinfo(lua_State *L, int idx, struct sctp_prinfo *info)
+{
+#define FIELD(name) ({ \
+	lua_getfield(L, -1, #name); \
+	luaL_argcheck(L, lua_isinteger(L, -1), idx, "invalid prinfo"); \
+	info->pr_ ## name = lua_tointeger(L, -1); \
+	lua_pop(L, 1); \
+})
+	FIELD(policy);
+	FIELD(value);
+#undef FIELD
+}
+
+static inline void
+checkauthinfo(lua_State *L, int idx, struct sctp_authinfo *info)
+{
+#define FIELD(name) ({ \
+	lua_getfield(L, -1, #name); \
+	luaL_argcheck(L, lua_isinteger(L, -1), idx, "invalid authinfo"); \
+	info->auth_ ## name = lua_tointeger(L, -1); \
+	lua_pop(L, 1); \
+})
+	FIELD(keynumber);
+#undef FIELD
+}
+
+static inline void
+checksendvspa(lua_State *L, int idx, struct sctp_sendv_spa *info)
+{
+	info->sendv_flags = 0;
+	if (lua_getfield(L, idx, "sndinfo") == LUA_TTABLE) {
+		checksndinfo(L, idx, &info->sendv_sndinfo);
+		info->sendv_flags |= SCTP_SEND_SNDINFO_VALID;
+	}
+	lua_pop(L, 1);
+	if (lua_getfield(L, idx, "prinfo") == LUA_TTABLE) {
+		checkprinfo(L, idx, &info->sendv_prinfo);
+		info->sendv_flags |= SCTP_SEND_PRINFO_VALID;
+	}
+	lua_pop(L, 1);
+	if (lua_getfield(L, idx, "authinfo") == LUA_TTABLE) {
+		checkauthinfo(L, idx, &info->sendv_authinfo);
+		info->sendv_flags |= SCTP_SEND_AUTHINFO_VALID;
+	}
+	lua_pop(L, 1);
+}
+
+enum {
+	POINTER,
+	LEN,
+	FUNCTION,
+};
+
+static int
+closer_close(lua_State *L)
+{
+	void (*closer)(void *, size_t);
+	void *p;
+	size_t len;
+
+	luaL_checkudata(L, 1, CLOSER_METATABLE);
+
+	lua_getiuservalue(L, 1, POINTER);
+	p = lua_touserdata(L, -1);
+	lua_getiuservalue(L, 1, LEN);
+	len = lua_tointeger(L, -1);
+	lua_getiuservalue(L, 1, FUNCTION);
+	closer = lua_touserdata(L, -1);
+	closer(p, len);
+	return (0);
+}
+
+/*
+ * Give a pointer a __close method and mark it to-be-closed.
+ */
+static inline void
+closer(lua_State *L, void *p, size_t len, void (*closer)(void *, size_t))
+{
+	lua_newuserdatauv(L, 0, 3);
+	lua_pushlightuserdata(L, p);
+	lua_setiuservalue(L, -2, POINTER);
+	lua_pushinteger(L, len);
+	lua_setiuservalue(L, -2, LEN);
+	lua_pushlightuserdata(L, closer);
+	lua_setiuservalue(L, -2, FUNCTION);
+	luaL_setmetatable(L, CLOSER_METATABLE);
+	lua_toclose(L, -1);
+}
+
+static void
+free_closer(void *p, size_t len __unused)
+{
+	free(p);
+}
+
 static int
 l_sctp_sendv(lua_State *L)
 {
-	return (luaL_error(L, "TODO: sys.uio module"));
+	struct sctp_sendv_spa info;
+	struct sockaddr *addrs;
+	struct iovec *iov;
+	void *infop;
+	size_t addrcnt, iovcnt;
+	ssize_t len;
+	int s, flags;
+	unsigned int infotype;
+	socklen_t infolen;
+
+	s = checkfd(L, 1);
+	iov = checkwiovecs(L, 2, &iovcnt);
+	closer(L, iov, iovcnt, free_closer);
+	addrs = checkaddrs(L, 3, &addrcnt);
+	closer(L, addrs, addrcnt, free_closer);
+	checksendvspa(L, 4, &info);
+	flags = luaL_optinteger(L, 5, 0);
+
+	if (info.sendv_flags == 0) {
+		infop = NULL;
+		infolen = 0;
+		infotype = SCTP_SENDV_NOINFO;
+	} else {
+		infop = &info;
+		infolen = sizeof(info);
+		infotype = SCTP_SENDV_SPA;
+	}
+	if ((len = sctp_sendv(s, iov, iovcnt, addrs, addrcnt, infop, infolen,
+	    infotype, flags)) == -1) {
+		return (fail(L, errno));
+	}
+	lua_pushinteger(L, len);
+	return (1);
+}
+
+static inline void
+pushrcvinfo(lua_State *L, struct sctp_rcvinfo *info)
+{
+	lua_newtable(L);
+#define FIELD(name) ({ \
+	lua_pushinteger(L, info->rcv_ ## name); \
+	lua_setfield(L, -2, #name); \
+})
+	FIELD(sid);
+	FIELD(ssn);
+	FIELD(flags);
+	FIELD(ppid);
+	FIELD(tsn);
+	FIELD(cumtsn);
+	FIELD(context);
+	FIELD(assoc_id);
+#undef FIELD
+}
+
+static inline void
+pushnxtinfo(lua_State *L, struct sctp_nxtinfo *info)
+{
+	lua_newtable(L);
+#define FIELD(name) ({ \
+	lua_pushinteger(L, info->nxt_ ## name); \
+	lua_setfield(L, -2, #name); \
+})
+	FIELD(sid);
+	FIELD(flags);
+	FIELD(ppid);
+	FIELD(length);
+	FIELD(assoc_id);
+#undef FIELD
+}
+
+union sctp_recvvinfo {
+	struct sctp_recvv_rn rn;
+	struct sctp_rcvinfo rcv;
+	struct sctp_nxtinfo nxt;
+};
+
+static inline void
+pushrecvvinfo(lua_State *L, union sctp_recvvinfo *info, unsigned int infotype)
+{
+	lua_newtable(L);
+	switch (infotype) {
+	case SCTP_RECVV_NOINFO:
+		break;
+	case SCTP_RECVV_NXTINFO:
+		pushnxtinfo(L, &info->nxt);
+		lua_setfield(L, -2, "nxtinfo");
+		break;
+	case SCTP_RECVV_RCVINFO:
+		pushrcvinfo(L, &info->rcv);
+		lua_setfield(L, -2, "rcvinfo");
+		break;
+	case SCTP_RECVV_RN:
+		pushnxtinfo(L, &info->nxt);
+		lua_setfield(L, -2, "nxtinfo");
+		pushrcvinfo(L, &info->rcv);
+		lua_setfield(L, -2, "rcvinfo");
+		break;
+	default:
+		lua_pushliteral(L, "unknown infotype");
+		lua_setfield(L, -2, "error");
+		break;
+	}
+}
+
+static void
+freeriovecs_closer(void *p, size_t len)
+{
+	freeriovecs(p, len);
 }
 
 static int
 l_sctp_recvv(lua_State *L)
 {
-	return (luaL_error(L, "TODO: sys.uio module"));
+	union sctp_recvvinfo info;
+	struct sockaddr_storage ss;
+	struct sockaddr *from;
+	struct iovec *iov;
+	size_t iovlen;
+	ssize_t len;
+	unsigned int infotype;
+	int s, flags;
+	socklen_t fromlen, infolen;
+
+	from = (struct sockaddr *)&ss;
+	infolen = sizeof(info);
+
+	s = checkfd(L, 1);
+	iov = checkriovecs(L, 2, &iovlen);
+	closer(L, iov, iovlen, freeriovecs_closer);
+	checkaddr(L, 3, &ss);
+
+	fromlen = from->sa_len;
+	if ((len = sctp_recvv(s, iov, iovlen, from, &fromlen, &info, &infolen,
+	    &infotype, &flags)) == -1) {
+		return (fail(L, errno));
+	}
+	pushriovecs(L, iov, iovlen);
+	lua_pushinteger(L, len);
+	pushaddr(L, from);
+	pushrecvvinfo(L, &info, infotype);
+	lua_pushinteger(L, flags);
+	return (5);
 }
 
 static const struct luaL_Reg l_sctp_funcs[] = {
@@ -325,6 +576,7 @@ static const struct luaL_Reg l_sctp_funcs[] = {
 	APIREG(getassocid),
 	APIREG(sendv),
 	APIREG(recvv),
+	/* deprecated send* & recv* APIs omitted */
 #undef APIREG
 	{NULL, NULL}
 };
@@ -332,6 +584,11 @@ static const struct luaL_Reg l_sctp_funcs[] = {
 int
 luaopen_netinet_sctp(lua_State *L)
 {
+	/* A small convenience for giving C pointers a __close metamethod. */
+	luaL_newmetatable(L, CLOSER_METATABLE);
+	lua_pushcfunction(L, closer_close);
+	lua_setfield(L, -2, "__close");
+
 	luaL_newlib(L, l_sctp_funcs);
 #define DEFINE(ident) ({ \
 	lua_pushinteger(L, SCTP_ ## ident); \
