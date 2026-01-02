@@ -28,7 +28,6 @@ checkriovecs(lua_State *L, int idx, size_t *niov)
 {
 	struct iovec *iovs;
 	size_t n;
-	int error;
 
 	*niov = 0;
 
@@ -38,29 +37,22 @@ checkriovecs(lua_State *L, int idx, size_t *niov)
 	if ((iovs = calloc(n, sizeof(*iovs))) == NULL) {
 		fatal(L, "calloc", ENOMEM);
 	}
-	error = 0;
 	for (size_t i = 0; i < n; i++) {
 		struct iovec *iov = &iovs[i];
 
 		lua_geti(L, idx, i + 1);
 		if (!lua_isinteger(L, -1)) {
-			error = EINVAL;
-			goto fail;
+			freeriovecs(iovs, n);
+			luaL_argerror(L, idx, "expected iovec buffer lengths");
 		}
 		iov->iov_len = lua_tointeger(L, -1);
 		if ((iov->iov_base = malloc(iov->iov_len)) == NULL) {
-			error = ENOMEM;
-			goto fail;
+			freeriovecs(iovs, n);
+			fatal(L, "malloc", ENOMEM);
 		}
 	}
 	*niov = n;
 	return (iovs);
-fail:
-	freeriovecs(iovs, n);
-	if (error == EINVAL) {
-		luaL_argerror(L, idx, "expected iovec buffer lengths");
-	}
-	fatal(L, "malloc", ENOMEM);
 }
 
 static inline void
