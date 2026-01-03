@@ -288,7 +288,6 @@ l_acl_create_entry(lua_State *L)
 	int index;
 
 	acl = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	index = luaL_optinteger(L, 2, -1);
 
 	if (index == -1) {
@@ -311,7 +310,6 @@ l_acl_delete_entry(lua_State *L)
 	acl_t acl;
 
 	acl = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	if (lua_isinteger(L, 2)) {
 		int index = lua_tointeger(L, 2);
 
@@ -390,7 +388,6 @@ l_acl_get_entry(lua_State *L)
 	int id;
 
 	acl = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	id = luaL_checkinteger(L, 2);
 
 	if (acl_get_entry(acl, id, &entry) == -1) {
@@ -423,7 +420,6 @@ l_acl_set(lua_State *L)
 	int fd;
 
 	acl = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	s = luaL_checkudata(L, 2, LUA_FILEHANDLE);
 	type = luaL_optinteger(L, 3, ACL_TYPE_ACCESS);
 
@@ -444,7 +440,6 @@ l_acl_set_fd(lua_State *L)
 	int fd;
 
 	acl = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	fd = luaL_checkinteger(L, 2);
 	type = luaL_optinteger(L, 3, ACL_TYPE_ACCESS);
 
@@ -462,7 +457,6 @@ l_acl_set_file(lua_State *L)
 	acl_type_t type;
 
 	acl = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	path = luaL_checkstring(L, 2);
 	type = luaL_optinteger(L, 3, ACL_TYPE_ACCESS);
 
@@ -480,7 +474,6 @@ l_acl_set_link(lua_State *L)
 	acl_type_t type;
 
 	acl = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	path = luaL_checkstring(L, 2);
 	type = luaL_optinteger(L, 3, ACL_TYPE_ACCESS);
 
@@ -497,7 +490,6 @@ l_acl_strip(lua_State *L)
 	bool recalculate_mask;
 
 	acl1 = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	recalculate_mask = lua_toboolean(L, 2);
 
 	if ((acl2 = acl_strip_np(acl1, recalculate_mask)) == NULL) {
@@ -515,7 +507,6 @@ l_acl_to_text(lua_State *L)
 	int flags;
 
 	acl = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	flags = luaL_optinteger(L, 2, 0);
 
 	if ((buf = acl_to_text_np(acl, &len, flags)) == NULL) {
@@ -531,7 +522,6 @@ l_acl_valid(lua_State *L)
 	acl_t acl;
 
 	acl = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	if (lua_isuserdata(L, 2)) {
 		luaL_Stream *s;
 		acl_type_t type;
@@ -563,7 +553,6 @@ l_acl_valid_fd(lua_State *L)
 	int fd;
 
 	acl = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	fd = luaL_checkinteger(L, 2);
 	type = luaL_optinteger(L, 3, ACL_TYPE_ACCESS);
 
@@ -581,7 +570,6 @@ l_acl_valid_file(lua_State *L)
 	acl_type_t type;
 
 	acl = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	path = luaL_checkstring(L, 2);
 	type = luaL_optinteger(L, 3, ACL_TYPE_ACCESS);
 
@@ -599,7 +587,6 @@ l_acl_valid_link(lua_State *L)
 	acl_type_t type;
 
 	acl = checkcookie(L, 1, ACL_METATABLE);
-	lua_pop(L, 1);
 	path = luaL_checkstring(L, 2);
 	type = luaL_optinteger(L, 3, ACL_TYPE_ACCESS);
 

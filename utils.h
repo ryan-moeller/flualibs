@@ -58,13 +58,10 @@ setcookie(lua_State *L, int idx, void *cookie)
 	lua_setiuservalue(L, idx, COOKIE);
 }
 
-static inline void *
+static inline int
 getcookie(lua_State *L, int idx)
 {
-	void *cookie;
-
-	lua_getiuservalue(L, idx, COOKIE);
-	return (lua_touserdata(L, -1));
+	return (lua_getiuservalue(L, idx, COOKIE));
 }
 
 static inline void
@@ -112,14 +109,24 @@ checklightuserdata(lua_State *L, int idx)
 	return (lua_touserdata(L, idx));
 }
 
+static inline void
+checkcookieuv(lua_State *L, int idx, const char *metatable)
+{
+	luaL_checkudata(L, idx, metatable);
+	luaL_argcheck(L, getcookie(L, idx) == LUA_TLIGHTUSERDATA, idx,
+	    "invalid cookie");
+}
+
 static inline void *
 checkcookienull(lua_State *L, int idx, const char *metatable)
 {
 	void *cookie;
 
-	luaL_checkudata(L, idx, metatable);
+	checkcookieuv(L, idx, metatable);
 
-	return (getcookie(L, idx));
+	cookie = lua_touserdata(L, -1);
+	lua_pop(L, 1);
+	return (cookie);
 }
 
 static inline void *

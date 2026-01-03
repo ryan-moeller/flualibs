@@ -453,7 +453,7 @@ l_pthread_retain(lua_State *L)
 static int
 l_pthread_cookie(lua_State *L)
 {
-	checkcookie(L, 1, PTHREAD_METATABLE);
+	checkcookieuv(L, 1, PTHREAD_METATABLE);
 
 	return (1);
 }
@@ -835,7 +835,7 @@ l_pthread_once_retain(lua_State *L)
 static int
 l_pthread_once_cookie(lua_State *L)
 {
-	checkcookie(L, 1, PTHREAD_ONCE_METATABLE);
+	checkcookieuv(L, 1, PTHREAD_ONCE_METATABLE);
 
 	return (1);
 }
@@ -1119,7 +1119,7 @@ l_pthread_mutex_retain(lua_State *L)
 static int
 l_pthread_mutex_cookie(lua_State *L)
 {
-	checkcookie(L, 1, PTHREAD_MUTEX_METATABLE);
+	checkcookieuv(L, 1, PTHREAD_MUTEX_METATABLE);
 
 	return (1);
 }
@@ -1391,7 +1391,7 @@ l_pthread_cond_retain(lua_State *L)
 static int
 l_pthread_cond_cookie(lua_State *L)
 {
-	checkcookie(L, 1, PTHREAD_COND_METATABLE);
+	checkcookieuv(L, 1, PTHREAD_COND_METATABLE);
 
 	return (1);
 }
@@ -1573,7 +1573,7 @@ l_pthread_rwlock_retain(lua_State *L)
 static int
 l_pthread_rwlock_cookie(lua_State *L)
 {
-	checkcookie(L, 1, PTHREAD_RWLOCK_METATABLE);
+	checkcookieuv(L, 1, PTHREAD_RWLOCK_METATABLE);
 
 	return (1);
 }
@@ -1705,7 +1705,7 @@ l_pthread_key_retain(lua_State *L)
 static int
 l_pthread_key_cookie(lua_State *L)
 {
-	checkcookie(L, 1, PTHREAD_KEY_METATABLE);
+	checkcookieuv(L, 1, PTHREAD_KEY_METATABLE);
 
 	return (1);
 }
@@ -1945,7 +1945,7 @@ l_pthread_barrier_retain(lua_State *L)
 static int
 l_pthread_barrier_cookie(lua_State *L)
 {
-	checkcookie(L, 1, PTHREAD_BARRIER_METATABLE);
+	checkcookieuv(L, 1, PTHREAD_BARRIER_METATABLE);
 
 	return (1);
 }
@@ -2053,7 +2053,7 @@ l_pthread_rendezvous_gc(lua_State *L)
 static int
 l_pthread_rendezvous_cookie(lua_State *L)
 {
-	checkcookie(L, 1, PTHREAD_RENDEZVOUS_METATABLE);
+	checkcookieuv(L, 1, PTHREAD_RENDEZVOUS_METATABLE);
 
 	return (1);
 }
@@ -2095,7 +2095,6 @@ l_pthread_rendezvous_exchange(lua_State *L)
 
 	narg = lua_gettop(L) - 1;
 	rp = checkcookie(L, 1, PTHREAD_RENDEZVOUS_METATABLE);
-	lua_pop(L, 1);
 
 	if ((error = pthread_mutex_lock(&rp->mutex)) != 0) {
 		return (fatal(L, "pthread_mutex_lock", error));
@@ -2142,7 +2141,6 @@ l_pthread_rendezvous_timedexchange(lua_State *L)
 
 	narg = lua_gettop(L) - 3;
 	rp = checkcookie(L, 1, PTHREAD_RENDEZVOUS_METATABLE);
-	lua_pop(L, 1);
 	abstime.tv_sec = luaL_checkinteger(L, 2);
 	abstime.tv_nsec = luaL_checkinteger(L, 3);
 

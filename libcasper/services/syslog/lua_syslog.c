@@ -23,7 +23,6 @@ l_cap_openlog(lua_State *L)
 	int logopt, facility;
 
 	chan = checkcookie(L, 1, CAP_CHANNEL_METATABLE);
-	lua_pop(L, 1);
 	ident = luaL_checkstring(L, 2);
 	logopt = luaL_checkinteger(L, 3);
 	facility = luaL_optinteger(L, 4, 0);

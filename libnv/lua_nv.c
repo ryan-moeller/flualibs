@@ -1591,7 +1591,6 @@ checkcookietype(lua_State *L, int idx, int type)
 	void *cookie;
 
 	cookie = checkcookie(L, idx, CNVLIST_METATABLE);
-	lua_pop(L, 1);
 	luaL_argcheck(L, cnvlist_type(cookie) == type, idx, "wrong type");
 
 	return (cookie);

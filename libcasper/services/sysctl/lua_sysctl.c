@@ -46,7 +46,6 @@ l_cap_sysctl(lua_State *L)
 	int error;
 
 	chan = checkcookie(L, 1, CAP_CHANNEL_METATABLE);
-	lua_pop(L, 1);
 	name = luaL_optstring(L, 2, NULL);
 
 	mib = lua_newuserdatauv(L, sizeof(*mib), 0);

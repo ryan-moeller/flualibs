@@ -24,7 +24,10 @@ getnvlist(lua_State *L, int idx, const char *metatable)
 	if (lua_getmetatable(L, idx)) {
 		luaL_getmetatable(L, metatable);
 		if (lua_rawequal(L, -1, -2)) {
-			nvl = getcookie(L, idx);
+			luaL_argcheck(L,
+			    getcookie(L, idx) == LUA_TLIGHTUSERDATA, idx,
+			    "invalid cookie");
+			nvl = lua_touserdata(L, -1);
 			lua_pop(L, 3);
 		} else {
 			lua_pop(L, 2);
@@ -66,7 +69,10 @@ getanynvlist(lua_State *L, int idx)
 		luaL_getmetatable(L, NVLIST_METATABLE);
 		luaL_getmetatable(L, CONST_NVLIST_METATABLE);
 		if (lua_rawequal(L, -1, -2) || lua_rawequal(L, -1, -3)) {
-			nvl = getcookie(L, idx);
+			luaL_argcheck(L,
+			    getcookie(L, idx) == LUA_TLIGHTUSERDATA, idx,
+			    "invalid cookie");
+			nvl = lua_touserdata(L, -1);
 			lua_pop(L, 4);
 		} else {
 			lua_pop(L, 3);

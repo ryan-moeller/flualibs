@@ -176,7 +176,6 @@ l_mac_execve(lua_State *L)
 	int argc, envc, error;
 
 	label = checkcookie(L, 1, MAC_METATABLE);
-	lua_pop(L, 1);
 	fname = luaL_checkstring(L, 2);
 	luaL_checktype(L, 3, LUA_TTABLE);
 	envv = lua_istable(L, 4) ? NULL : environ;
