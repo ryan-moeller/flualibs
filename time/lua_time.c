@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Ryan Moeller
+ * Copyright (c) 2025-2026 Ryan Moeller
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -105,11 +105,11 @@ l_clock_settime(lua_State *L)
 }
 
 static const struct luaL_Reg l_time_funcs[] = {
-	{"getcpuclockid", l_clock_getcpuclockid},
-	{"getres", l_clock_getres},
-	{"gettime", l_clock_gettime},
-	{"nanosleep", l_clock_nanosleep},
-	{"settime", l_clock_settime},
+	{"clock_getcpuclockid", l_clock_getcpuclockid},
+	{"clock_getres", l_clock_getres},
+	{"clock_gettime", l_clock_gettime},
+	{"clock_nanosleep", l_clock_nanosleep},
+	{"clock_settime", l_clock_settime},
 	{NULL, NULL}
 };
 
