@@ -2372,7 +2372,7 @@ luaopen_pthread(lua_State *L)
 
 	/* Load cpuset module for its metatable. */
 	lua_getglobal(L, "require");
-	lua_pushstring(L, "cpuset");
+	lua_pushstring(L, "sys.cpuset");
 	lua_call(L, 1, 0);
 
 	if ((error = pthread_setspecific(thread_state_key, L)) != 0) {
