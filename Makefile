@@ -14,6 +14,7 @@ SUBDIR= \
 	mqueue \
 	netdb \
 	netinet \
+	pwd \
 	readpassphrase \
 	stdio \
 	sys \

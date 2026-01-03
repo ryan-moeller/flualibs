@@ -1,0 +1,77 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd January 3, 2026
+.Dt PWD 3lua
+.Os
+.Sh NAME
+.Nm pwd
+.Nd Lua bindings for libc password database operations
+.Sh SYNOPSIS
+.Bd -literal
+pwd = require('pwd')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv passwd, errmsg, errcode = pwd.getpwent( )
+.It Dv passwd, errmsg, errcode = pwd.getpwnam(name )
+.It Dv passwd, errmsg, errcode = pwd.getpwuid(uid )
+.It Dv success = pwd.setpassent(stayopen )
+.It Dv pwd.setpwent( )
+.It Dv pwd.endpwent( )
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for the password database operations API in libc.
+.Pp
+Password database information is returned in a table of the form
+.Bd -literal -compact
+{
+	name = <string>,
+	passwd = <string>,
+	uid = <integer>,
+	gid = <integer>,
+	change = <integer>,
+	class = <string>,
+	gecos = <string>,
+	dir = <string>,
+	shell = <string>,
+	expire = <integer>,
+}
+.Ed
+.Bl -tag -width XXXX
+.It Dv passwd, errmsg, errcode = pwd.getpwent( )
+Wraps
+.Xr getpwent_r 3 .
+.It Dv passwd, errmsg, errcode = pwd.getpwnam(name )
+Wraps
+.Xr getpwnam_r 3 .
+.It Dv passwd, errmsg, errcode = pwd.getpwuid(uid )
+Wraps
+.Xr getpwuid_r 3 .
+.It Dv success = pwd.setpassent(stayopen )
+Wraps
+.Xr setpassent 3 .
+.It Dv pwd.setpwent( )
+Wraps
+.Xr setpwent 3 .
+.It Dv pwd.endpwent( )
+Wraps
+.Xr endpwent 3 .
+.El
+.Sh EXAMPLES
+Check what shell the root user uses:
+.Bd -literal -offset indent
+local pwd = require('pwd')
+
+local root = assert(pwd.getpwuid(0))
+print(root.shell)
+.Ed
+.Sh SEE ALSO
+.Xr unistd 3lua ,
+.Xr passwd 5
+.Sh AUTHORS
+.An Ryan Moeller
