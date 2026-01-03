@@ -71,6 +71,7 @@ local root = assert(pwd.getpwuid(0))
 print(root.shell)
 .Ed
 .Sh SEE ALSO
+.Xr grp 3lua ,
 .Xr unistd 3lua ,
 .Xr passwd 5
 .Sh AUTHORS

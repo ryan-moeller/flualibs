@@ -1,0 +1,73 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd January 3, 2026
+.Dt GRP 3lua
+.Os
+.Sh NAME
+.Nm grp
+.Nd Lua bindings for libc group database operations
+.Sh SYNOPSIS
+.Bd -literal
+grp = require('grp')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv group, errmsg, errcode = grp.getgrent( )
+.It Dv group, errmsg, errcode = grp.getgrnam(name )
+.It Dv group, errmsg, errcode = grp.getgrgid(gid )
+.It Dv success = grp.setgroupent(stayopen )
+.It Dv grp.setgrent( )
+.It Dv grp.endgrent( )
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for the group database operations API in libc.
+.Pp
+Group database information is returned in a table of the form
+.Bd -literal -compact
+{
+	name = <string>,
+	passwd = <string>,
+	gid = <integer>,
+	mem = {<string>, ...},
+}
+.Ed
+.Bl -tag -width XXXX
+.It Dv group, errmsg, errcode = grp.getgrent( )
+Wraps
+.Xr getgrent_r 3 .
+.It Dv group, errmsg, errcode = grp.getgrnam(name )
+Wraps
+.Xr getgrnam_r 3 .
+.It Dv group, errmsg, errcode = grp.getgrgid(gid )
+Wraps
+.Xr getgrgid_r 3 .
+.It Dv success = grp.setgroupent(stayopen )
+Wraps
+.Xr setgroupent 3 .
+.It Dv grp.setgrent( )
+Wraps
+.Xr setgrent 3 .
+.It Dv grp.endgrent( )
+Wraps
+.Xr endgrent 3 .
+.El
+.Sh EXAMPLES
+Check the members of the wheel group:
+.Bd -literal -offset indent
+local grp = require('grp')
+local ucl = require('ucl')
+
+local wheel = assert(grp.getgrgid(0))
+print(ucl.to_json(wheel.mem))
+.Ed
+.Sh SEE ALSO
+.Xr pwd 3lua ,
+.Xr unistd 3lua ,
+.Xr group 5
+.Sh AUTHORS
+.An Ryan Moeller

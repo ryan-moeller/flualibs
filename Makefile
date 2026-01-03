@@ -3,6 +3,7 @@ SUBDIR= \
 	capsicum_helpers \
 	dirent \
 	fcntl \
+	grp \
 	libcasper \
 	libfetch \
 	libifconfig \
