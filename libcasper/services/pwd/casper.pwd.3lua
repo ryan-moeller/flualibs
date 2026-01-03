@@ -1,0 +1,113 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd January 3, 2026
+.Dt CASPER.PWD 3lua
+.Os
+.Sh NAME
+.Nm casper.pwd
+.Nd Lua bindings for
+.Xr cap_pwd 3
+.Sh SYNOPSIS
+.Bd -literal
+pwd = require('casper.pwd')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv passwd, errmsg, errcode = pwd.getpwent(chan )
+.It Dv passwd, errmsg, errcode = pwd.getpwnam(chan , name )
+.It Dv passwd, errmsg, errcode = pwd.getpwuid(chan , uid )
+.It Dv ok, errmsg, errcode = pwd.setpassent(chan , stayopen )
+.It Dv pwd.setpwent(chan )
+.It Dv pwd.endpwent(chan )
+.It Dv ok, errmsg, errcode = pwd.limit_cmds(chan , cmds )
+.It Dv ok, errmsg, errcode = pwd.limit_fields(chan , fields )
+.It Dv ok, errmsg, errcode = pwd.limit_users(chan , users )
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for
+.Xr cap_pwd 3 .
+.Pp
+Password database information is returned in a table of the form
+.Bd -literal -compact
+{
+	name = <string>,
+	passwd = <string>,
+	uid = <integer>,
+	gid = <integer>,
+	change = <integer>,
+	class = <string>,
+	gecos = <string>,
+	dir = <string>,
+	shell = <string>,
+	expire = <integer>,
+}
+.Ed
+.Bl -tag -width XXXX
+.It Dv passwd, errmsg, errcode = pwd.getpwent(chan )
+Wraps
+.Xr cap_getpwent_r 3 .
+.It Dv passwd, errmsg, errcode = pwd.getpwnam(chan , name )
+Wraps
+.Xr cap_getpwnam_r 3 .
+.It Dv passwd, errmsg, errcode = pwd.getpwuid(chan , uid )
+Wraps
+.Xr cap_getpwuid_r 3 .
+.It Dv ok, errmsg, errcode = pwd.setpassent(chan , stayopen )
+Wraps
+.Xr cap_setpassent 3 .
+.It Dv pwd.setpwent(chan )
+Wraps
+.Xr cap_setpwent 3 .
+.It Dv pwd.endpwent(chan )
+Wraps
+.Xr cap_endpwent 3 .
+.It Dv ok, errmsg, errcode = pwd.limit_cmds(chan , cmds )
+Wraps
+.Xr cap_pwd_limit_cmds 3 .
+.It Dv ok, errmsg, errcode = pwd.limit_fields(chan , fields )
+Wraps
+.Xr cap_pwd_limit_fields 3 .
+.It Dv ok, errmsg, errcode = pwd.limit_users(chan , users )
+Wraps
+.Xr cap_pwd_limit_users 3 .
+The
+.Fa users
+argument is an array of values, each of which can be either a
+.Vt string
+user name or a
+.Vt integer
+user identifier.
+The single array is divided into the
+.Fa names
+and
+.Fa uids
+arrays internally.
+.El
+.Sh EXAMPLES
+Check what shell the root user uses while sandboxed:
+.Bd -literal -offset indent
+local caph = require('capsicum_helpers')
+local casper = require('casper')
+local pwd = require('casper.pwd')
+
+local capcas = assert(casper.init())
+assert(caph.enter_casper())
+local cappwd = assert(capcas:service_open('system.pwd'))
+capcas:close()
+local root = assert(pwd.getpwuid(cappwd, 0))
+cappwd:close()
+print(root.shell)
+.Ed
+.Sh SEE ALSO
+.Xr casper 3lua ,
+.Xr casper.grp 3lua ,
+.Xr pwd 3lua ,
+.Xr unistd 3lua ,
+.Xr passwd 5
+.Sh AUTHORS
+.An Ryan Moeller

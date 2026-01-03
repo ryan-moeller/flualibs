@@ -1,0 +1,12 @@
+local caph = require('capsicum_helpers')
+local casper = require('casper')
+local pwd = require('casper.pwd')
+local ucl = require('ucl')
+
+local capcas = assert(casper.init())
+assert(caph.enter_casper())
+local cappwd = assert(capcas:service_open('system.pwd'))
+capcas:close()
+local root = assert(pwd.getpwuid(cappwd, 0))
+cappwd:close()
+print(ucl.to_json(root))

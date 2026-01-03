@@ -1,0 +1,108 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd January 3, 2026
+.Dt CASPER.GRP 3lua
+.Os
+.Sh NAME
+.Nm casper.grp
+.Nd Lua bindings for
+.Xr cap_grp 3
+.Sh SYNOPSIS
+.Bd -literal
+grp = require('casper.grp')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv group, errmsg, errcode = grp.getgrent(chan )
+.It Dv group, errmsg, errcode = grp.getgrnam(chan , name )
+.It Dv group, errmsg, errcode = grp.getgrgid(chan , gid )
+.It Dv ok, errmsg, errcode = grp.setgroupent(chan , stayopen )
+.It Dv ok, errmsg, errcode = grp.setgrent(chan )
+.It Dv grp.endgrent(chan )
+.It Dv ok, errmsg, errcode = grp.limit_cmds(chan , cmds )
+.It Dv ok, errmsg, errcode = grp.limit_fields(chan , fields )
+.It Dv ok, errmsg, errcode = grp.limit_groups(chan , groups )
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for
+.Xr cap_grp 3 .
+.Pp
+Group database information is returned in a table of the form
+.Bd -literal -compact
+{
+	name = <string>,
+	passwd = <string>,
+	gid = <integer>,
+	mem = {<string>, ...},
+}
+.Ed
+.Bl -tag -width XXXX
+.It Dv group, errmsg, errcode = grp.getgrent(chan )
+Wraps
+.Xr cap_getgrent_r 3 .
+.It Dv group, errmsg, errcode = grp.getgrnam(chan , name )
+Wraps
+.Xr cap_getgrnam_r 3 .
+.It Dv group, errmsg, errcode = grp.getgrgid(chan , gid )
+Wraps
+.Xr cap_getgrgid_r 3 .
+.It Dv ok, errmsg, errcode = grp.setgroupent(chan , stayopen )
+Wraps
+.Xr cap_setgroupent 3 .
+.It Dv ok, errmsg, errcode = grp.setgrent(chan )
+Wraps
+.Xr cap_setgrent 3 .
+.It Dv grp.endgrent(chan )
+Wraps
+.Xr cap_endgrent 3 .
+.It Dv ok, errmsg, errcode = grp.limit_cmds(chan , cmds )
+Wraps
+.Xr cap_grp_limit_cmds 3 .
+.It Dv ok, errmsg, errcode = grp.limit_fields(chan , fields )
+Wraps
+.Xr cap_grp_limit_fields 3 .
+.It Dv ok, errmsg, errcode = grp.limit_groups(chan , groups )
+Wraps
+.Xr cap_grp_limit_groups 3 .
+The
+.Fa groups
+argument is an array of values, each of which can be either a
+.Vt string
+group name or a
+.Vt integer
+group identifier.
+The single array is divided into the
+.Fa names
+and
+.Fa gids
+arrays internally.
+.El
+.Sh EXAMPLES
+Check the members of the wheel group while sandboxed:
+.Bd -literal -offset indent
+local caph = require('capsicum_helpers')
+local casper = require('casper')
+local grp = require('casper.grp')
+local ucl = require('ucl')
+
+local capcas = assert(casper.init())
+assert(caph.enter_casper())
+local capgrp = assert(capcas:service_open('system.grp'))
+capcas:close()
+local wheel = assert(grp.getgrgid(capgrp, 0))
+capgrp:close()
+print(ucl.to_json(wheel.mem))
+.Ed
+.Sh SEE ALSO
+.Xr casper 3lua ,
+.Xr casper.pwd 3lua ,
+.Xr grp 3lua ,
+.Xr unistd 3lua ,
+.Xr group 5
+.Sh AUTHORS
+.An Ryan Moeller

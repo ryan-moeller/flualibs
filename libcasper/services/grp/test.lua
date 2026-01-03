@@ -1,0 +1,12 @@
+local caph = require('capsicum_helpers')
+local casper = require('casper')
+local grp = require('casper.grp')
+local ucl = require('ucl')
+
+local capcas = assert(casper.init())
+assert(caph.enter_casper())
+local capgrp = assert(capcas:service_open('system.grp'))
+capcas:close()
+local wheel = assert(grp.getgrgid(capgrp, 0))
+capgrp:close()
+print(ucl.to_json(wheel))

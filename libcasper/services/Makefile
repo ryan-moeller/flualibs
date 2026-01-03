@@ -5,7 +5,9 @@ FLUA_CASPER=	${LIBDIR}/flua/casper
 
 SUBDIR=	\
 	fileargs \
+	grp \
 	net \
+	pwd \
 	sysctl \
 	syslog \
 
