@@ -1,0 +1,584 @@
+/*
+ * Copyright (c) 2025-2026 Ryan Moeller
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
+#include <sys/param.h>
+#include <sys/nv.h>
+#include <sys/sysctl.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <libcasper.h>
+#include <casper/cap_sysctl.h>
+
+#include <lua.h>
+#include <lauxlib.h>
+
+#include "libcasper/libcasper/lua_casper.h"
+#include "luaerror.h"
+#include "utils.h"
+
+#define CAP_MIB_METATABLE "struct cap_mib *"
+#define CAP_SYSCTL_LIMIT_METATABLE "cap_sysctl_limit_t *"
+
+struct cap_mib {
+	cap_channel_t *chan;
+	int oid[CTL_MAXNAME];
+	size_t oidlen;
+	size_t prefix;
+	u_int kind;
+	char *format;
+	char *name;
+	char *description;
+};
+
+int luaopen_casper_sysctl(lua_State *);
+
+static int
+l_cap_sysctl(lua_State *L)
+{
+	cap_channel_t *chan;
+	struct cap_mib *mib;
+	const char *name;
+	int error;
+
+	chan = checkcookie(L, 1, CAP_CHANNEL_METATABLE);
+	lua_pop(L, 1);
+	name = luaL_optstring(L, 2, NULL);
+
+	mib = lua_newuserdatauv(L, sizeof(*mib), 0);
+	memset(mib, 0, sizeof(*mib));
+	if (name == NULL) {
+		mib->oid[0] = CTL_KERN;
+		mib->oidlen = 1;
+		mib->prefix = 0;
+	} else {
+		mib->oidlen = nitems(mib->oid);
+		error = sysctlnametomib(name, mib->oid, &mib->oidlen);
+		if (error != 0) {
+			return (fail(L, errno));
+		}
+		mib->prefix = mib->oidlen * sizeof(int);
+		mib->name = strdup(name);
+		if (mib->name == NULL) {
+			return (fatal(L, "strdup", errno));
+		}
+	}
+	mib->chan = chan;
+	luaL_setmetatable(L, CAP_MIB_METATABLE);
+	return (1);
+}
+
+static int
+l_cap_mib_gc(lua_State *L)
+{
+	struct cap_mib *mib;
+
+	mib = luaL_checkudata(L, 1, CAP_MIB_METATABLE);
+	free(mib->name);
+	free(mib->description);
+	free(mib->format);
+	memset(mib, 0, sizeof(*mib));
+	return (0);
+}
+
+static int
+l_cap_mib_oid(lua_State *L)
+{
+	struct cap_mib *mib;
+
+	mib = luaL_checkudata(L, 1, CAP_MIB_METATABLE);
+	lua_createtable(L, mib->oidlen, 0);
+	for (u_int i = 0; i < mib->oidlen; i++) {
+		lua_pushinteger(L, mib->oid[i]);
+		lua_rawseti(L, -2, i + 1);
+	}
+	return (1);
+}
+
+static int
+l_cap_mib_format(lua_State *L)
+{
+	struct cap_mib *mib;
+
+	mib = luaL_checkudata(L, 1, CAP_MIB_METATABLE);
+	if (mib->format == NULL) {
+		char buf[BUFSIZ];
+		int qoid[CTL_MAXNAME+2];
+		size_t length;
+		int error;
+
+		qoid[0] = CTL_SYSCTL;
+		qoid[1] = CTL_SYSCTL_OIDFMT;
+		memcpy(qoid + 2, mib->oid, mib->oidlen * sizeof(int));
+		length = sizeof(buf);
+		memset(buf, 0, length);
+		error = cap_sysctl(mib->chan, qoid, mib->oidlen + 2, buf,
+		    &length, NULL, 0);
+		if (error != 0) {
+			return (fail(L, errno));
+		}
+		mib->kind = *(u_int *)buf;
+		mib->format = strdup(buf + sizeof(u_int));
+		if (mib->format == NULL) {
+			return (fatal(L, "strdup", errno));
+		}
+	}
+	lua_pushinteger(L, mib->kind);
+	lua_pushstring(L, mib->format);
+	return (2);
+}
+
+static int
+l_cap_mib_name(lua_State *L)
+{
+	struct cap_mib *mib;
+
+	mib = luaL_checkudata(L, 1, CAP_MIB_METATABLE);
+	if (mib->name == NULL) {
+		char buf[BUFSIZ];
+		int qoid[CTL_MAXNAME+2];
+		size_t length;
+		int error;
+
+		qoid[0] = CTL_SYSCTL;
+		qoid[1] = CTL_SYSCTL_NAME;
+		memcpy(qoid + 2, mib->oid, mib->oidlen * sizeof(int));
+		length = sizeof(buf);
+		memset(buf, 0, length);
+		error = cap_sysctl(mib->chan, qoid, mib->oidlen + 2, buf,
+		    &length, NULL, 0);
+		if (error != 0) {
+			return (fail(L, errno));
+		}
+		mib->name = strdup(buf);
+		if (mib->name == NULL) {
+			return (fatal(L, "strdup", errno));
+		}
+	}
+	lua_pushstring(L, mib->name);
+	return (1);
+}
+
+static int
+l_cap_mib_description(lua_State *L)
+{
+	struct cap_mib *mib;
+
+	mib = luaL_checkudata(L, 1, CAP_MIB_METATABLE);
+	if (mib->description == NULL) {
+		char buf[BUFSIZ];
+		int qoid[CTL_MAXNAME+2];
+		size_t length;
+		int error;
+
+		qoid[0] = CTL_SYSCTL;
+		qoid[1] = CTL_SYSCTL_OIDDESCR;
+		memcpy(qoid + 2, mib->oid, mib->oidlen * sizeof(int));
+		length = sizeof(buf);
+		memset(buf, 0, length);
+		error = cap_sysctl(mib->chan, qoid, mib->oidlen + 2, buf,
+		    &length, NULL, 0);
+		if (error != 0) {
+			if (errno == ENOENT) {
+				lua_pushnil(L);
+				return (1);
+			}
+			return (fail(L, errno));
+		}
+		mib->description = strdup(buf);
+		if (mib->description == NULL) {
+			return (fatal(L, "strdup", errno));
+		}
+	}
+	lua_pushstring(L, mib->description);
+	return (1);
+}
+
+static int
+l_cap_mib_value(lua_State *L)
+{
+	struct cap_mib *mib;
+	void *p;
+	size_t size;
+	int argc, ctltype, error;
+
+	argc = lua_gettop(L);
+	mib = luaL_checkudata(L, 1, CAP_MIB_METATABLE);
+	if (mib->format == NULL) {
+		(void)l_cap_mib_format(L);
+	}
+	ctltype = mib->kind & CTLTYPE;
+	if (argc == 1) {
+		if (ctltype == CTLTYPE_NODE) {
+			lua_pushnil(L);
+			return (1);
+		}
+		p = NULL;
+		size = 0;
+		for (;;) {
+			if (cap_sysctl(mib->chan, mib->oid, mib->oidlen, p,
+			    &size, NULL, 0) == -1) {
+				if ((error = errno) != ENOMEM) {
+					free(p);
+					return (fail(L, error));
+				}
+			} else if (p != NULL) {
+				break;
+			}
+			free(p);
+			size *= 2; /* in case it grows */
+			if ((p = malloc(size)) == NULL) {
+				return (fatal(L, "malloc", ENOMEM));
+			}
+		}
+		switch (ctltype) {
+		case CTLTYPE_INT:
+			lua_pushinteger(L, *(int *)p);
+			break;
+		case CTLTYPE_UINT:
+			lua_pushinteger(L, *(u_int *)p);
+			break;
+		case CTLTYPE_LONG:
+			lua_pushinteger(L, *(long *)p);
+			break;
+		case CTLTYPE_ULONG:
+			lua_pushinteger(L, *(u_long *)p);
+			break;
+		case CTLTYPE_S8:
+			lua_pushinteger(L, *(int8_t *)p);
+			break;
+		case CTLTYPE_U8:
+			lua_pushinteger(L, *(uint8_t *)p);
+			break;
+		case CTLTYPE_S16:
+			lua_pushinteger(L, *(int16_t *)p);
+			break;
+		case CTLTYPE_U16:
+			lua_pushinteger(L, *(uint16_t *)p);
+			break;
+		case CTLTYPE_S32:
+			lua_pushinteger(L, *(int32_t *)p);
+			break;
+		case CTLTYPE_U32:
+			lua_pushinteger(L, *(uint32_t *)p);
+			break;
+		case CTLTYPE_S64:
+			lua_pushinteger(L, *(int64_t *)p);
+			break;
+		case CTLTYPE_U64:
+			lua_pushinteger(L, *(uint64_t *)p);
+			break;
+		case CTLTYPE_STRING:
+			lua_pushlstring(L, p, size - 1);
+			break;
+		case CTLTYPE_OPAQUE:
+			lua_pushlstring(L, p, size);
+			break;
+		default:
+			return (luaL_error(L, "unknown ctltype: %d", ctltype));
+		}
+		free(p);
+		return (1);
+	}
+	if (ctltype == CTLTYPE_NODE) {
+		return (0);
+	}
+	switch (ctltype) {
+	case CTLTYPE_INT: {
+		int value = luaL_checkinteger(L, 2);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    &value, sizeof(value));
+		break;
+	}
+	case CTLTYPE_UINT: {
+		u_int value = luaL_checkinteger(L, 2);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    &value, sizeof(value));
+		break;
+	}
+	case CTLTYPE_LONG: {
+		long value = luaL_checkinteger(L, 2);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    &value, sizeof(value));
+		break;
+	}
+	case CTLTYPE_ULONG: {
+		u_long value = luaL_checkinteger(L, 2);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    &value, sizeof(value));
+		break;
+	}
+	case CTLTYPE_S8: {
+		int8_t value = luaL_checkinteger(L, 2);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    &value, sizeof(value));
+		break;
+	}
+	case CTLTYPE_U8: {
+		uint8_t value = luaL_checkinteger(L, 2);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    &value, sizeof(value));
+		break;
+	}
+	case CTLTYPE_S16: {
+		int16_t value = luaL_checkinteger(L, 2);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    &value, sizeof(value));
+		break;
+	}
+	case CTLTYPE_U16: {
+		uint16_t value = luaL_checkinteger(L, 2);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    &value, sizeof(value));
+		break;
+	}
+	case CTLTYPE_S32: {
+		int32_t value = luaL_checkinteger(L, 2);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    &value, sizeof(value));
+		break;
+	}
+	case CTLTYPE_U32: {
+		uint32_t value = luaL_checkinteger(L, 2);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    &value, sizeof(value));
+		break;
+	}
+	case CTLTYPE_S64: {
+		int64_t value = luaL_checkinteger(L, 2);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    &value, sizeof(value));
+		break;
+	}
+	case CTLTYPE_U64: {
+		uint64_t value = luaL_checkinteger(L, 2);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    &value, sizeof(value));
+		break;
+	}
+	case CTLTYPE_STRING: {
+		size_t length;
+		const char *s = luaL_checklstring(L, 2, &length);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    s, length + 1);
+		break;
+	}
+	case CTLTYPE_OPAQUE: {
+		size_t length;
+		const char *b = luaL_checklstring(L, 2, &length);
+		error = cap_sysctl(mib->chan, mib->oid, mib->oidlen, NULL, NULL,
+		    b, length);
+		break;
+	}
+	default:
+		luaL_error(L, "unknown ctltype: %d", ctltype);
+	}
+	if (error != 0) {
+		return (fail(L, errno));
+	}
+	return (0);
+}
+
+static int
+l_cap_mib_iter_next(lua_State *L)
+{
+	int qoid[CTL_MAXNAME+2];
+	struct cap_mib *prev, *next;
+	size_t size;
+	int error;
+
+	prev = luaL_testudata(L, 2, CAP_MIB_METATABLE);
+	if (prev == NULL) {
+		lua_pushvalue(L, 1); /* the initial mib */
+		return (1);
+	}
+	next = lua_newuserdatauv(L, sizeof(*next), 0);
+	memset(next, 0, sizeof(*next));
+	next->prefix = prev->prefix;
+	qoid[0] = CTL_SYSCTL;
+	qoid[1] = luaL_checkinteger(L, lua_upvalueindex(1));
+	memcpy(qoid + 2, prev->oid, prev->oidlen * sizeof(int));
+	size = sizeof(next->oid);
+	error = sysctl(qoid, prev->oidlen + 2, next->oid, &size, NULL, 0);
+	if (error != 0) {
+		if (errno == ENOENT) {
+			lua_pushnil(L);
+			return (1);
+		}
+		return (fail(L, errno));
+	}
+	if (memcmp(prev->oid, next->oid, prev->prefix) != 0) {
+		lua_pushnil(L);
+		return (1);
+	}
+	next->oidlen = size / sizeof(int);
+	next->chan = prev->chan;
+	luaL_setmetatable(L, CAP_MIB_METATABLE);
+	return (1);
+}
+
+static int
+l_cap_mib_iter(lua_State *L)
+{
+	struct cap_mib *mib;
+
+	mib = luaL_checkudata(L, 1, CAP_MIB_METATABLE);
+	lua_pushinteger(L, CTL_SYSCTL_NEXT);
+	lua_pushcclosure(L, l_cap_mib_iter_next, 1);
+	if (mib->prefix == 0) {
+		lua_pushvalue(L, 1);
+		lua_pushnil(L);
+	} else {
+		lua_pushnil(L);
+		lua_pushvalue(L, 1);
+	}
+	return (3);
+}
+
+static int
+l_cap_mib_iter_noskip(lua_State *L)
+{
+	struct cap_mib *mib;
+
+	mib = luaL_checkudata(L, 1, CAP_MIB_METATABLE);
+	lua_pushinteger(L, CTL_SYSCTL_NEXTNOSKIP);
+	lua_pushcclosure(L, l_cap_mib_iter_next, 1);
+	if (mib->prefix == 0) {
+		lua_pushvalue(L, 1);
+		lua_pushnil(L);
+	} else {
+		lua_pushnil(L);
+		lua_pushvalue(L, 1);
+	}
+	return (3);
+}
+
+static int
+l_cap_sysctl_limit_init(lua_State *L)
+{
+	cap_channel_t *chan;
+	cap_sysctl_limit_t *limit;
+
+	chan = checkcookie(L, 1, CAP_CHANNEL_METATABLE);
+
+	if ((limit = cap_sysctl_limit_init(chan)) == NULL) {
+		return (fail(L, errno));
+	}
+	return (new(L, limit, CAP_SYSCTL_LIMIT_METATABLE));
+}
+
+/* XXX: cap_sysctl is missing a cap_sysctl_limit_free function. */
+static inline void
+cap_sysctl_limit_free(cap_sysctl_limit_t *limit)
+{
+	/* XXX: implementation details */
+	struct {
+		cap_channel_t *chan;
+		nvlist_t *nv;
+	} *impl = (void *)limit;
+
+	if (impl != NULL) {
+		nvlist_destroy(impl->nv);
+		free(impl);
+	}
+}
+
+static int
+l_cap_sysctl_limit_free(lua_State *L)
+{
+	cap_sysctl_limit_t *limit;
+
+	limit = checkcookienull(L, 1, CAP_SYSCTL_LIMIT_METATABLE);
+
+	cap_sysctl_limit_free(limit);
+	setcookie(L, 1, NULL);
+	return (0);
+}
+
+static int
+l_cap_sysctl_limit_name(lua_State *L)
+{
+	cap_sysctl_limit_t *limit;
+	const char *name;
+	int flags;
+
+	limit = checkcookie(L, 1, CAP_SYSCTL_LIMIT_METATABLE);
+	name = luaL_checkstring(L, 2);
+	flags = luaL_checkinteger(L, 3);
+
+	if (cap_sysctl_limit_name(limit, name, flags) == NULL) {
+		return (fail(L, errno));
+	}
+	lua_pushvalue(L, 1);
+	return (1);
+}
+
+static int
+l_cap_sysctl_limit(lua_State *L)
+{
+	cap_sysctl_limit_t *limit;
+
+	limit = checkcookie(L, 1, CAP_SYSCTL_LIMIT_METATABLE);
+
+	setcookie(L, 1, NULL);
+	if (cap_sysctl_limit(limit) == -1) {
+		return (fail(L, errno));
+	}
+	return (success(L));
+}
+
+static const struct luaL_Reg l_cap_sysctl_funcs[] = {
+	{"sysctl", l_cap_sysctl},
+	{NULL, NULL}
+};
+
+static const struct luaL_Reg l_cap_mib_meta[] = {
+	{"__gc", l_cap_mib_gc},
+	{"oid", l_cap_mib_oid},
+	{"format", l_cap_mib_format},
+	{"name", l_cap_mib_name},
+	{"description", l_cap_mib_description},
+	{"value", l_cap_mib_value},
+	{"iter", l_cap_mib_iter},
+	{"iter_noskip", l_cap_mib_iter_noskip},
+	{"limit_init", l_cap_sysctl_limit_init},
+	{NULL, NULL}
+};
+
+static const struct luaL_Reg l_cap_sysctl_limit_meta[] = {
+	{"__gc", l_cap_sysctl_limit_free},
+	{"name", l_cap_sysctl_limit_name},
+	/* {"mib", l_cap_sysctl_limit_mib}, we don't accept numeric oids yet */
+	{"limit", l_cap_sysctl_limit},
+	{NULL, NULL}
+};
+
+int
+luaopen_casper_sysctl(lua_State *L)
+{
+	luaL_newmetatable(L, CAP_MIB_METATABLE);
+	lua_pushvalue(L, -1);
+	lua_setfield(L, -2, "__index");
+	luaL_setfuncs(L, l_cap_mib_meta, 0);
+
+	luaL_newmetatable(L, CAP_SYSCTL_LIMIT_METATABLE);
+	lua_pushvalue(L, -1);
+	lua_setfield(L, -2, "__index");
+	luaL_setfuncs(L, l_cap_sysctl_limit_meta, 0);
+
+	luaL_newlib(L, l_cap_sysctl_funcs);
+#define DEFINE(ident) ({ \
+	lua_pushinteger(L, CAP_SYSCTL_ ## ident); \
+	lua_setfield(L, -2, #ident); \
+})
+	DEFINE(READ);
+	DEFINE(WRITE);
+	DEFINE(RDWR);
+	DEFINE(RECURSIVE);
+#undef DEFINE
+	return (1);
+}

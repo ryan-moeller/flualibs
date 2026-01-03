@@ -1,0 +1,115 @@
+.\"
+.\" Copyright (c) 2025-2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd January 2, 2026
+.Dt CASPER.SYSCTL 3lua
+.Os
+.Sh NAME
+.Nm casper.sysctl
+.Nd Lua binding for
+.Xr cap_sysctl 3
+.Sh SYNOPSIS
+.Bd -literal
+sysctl = require('casper.sysctl')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv allmibs = sysctl.sysctl(chan )
+.It Dv mib, errmsg, errcode = sysctl.sysctl(chan , name )
+.It Dv oid = mib:oid( )
+.It Dv name, errmsg, errcode = mib:name( )
+.It Dv kind, format_or_errmsg, errcode = mib:format( )
+.It Dv description, errmsg, errcode = mib:description( )
+.It Dv value, errmsg, errcode = mib:value( )
+.It Dv _, errmsg, errcode = mib:value(value )
+.It Dv for descendant in mib:iter( ) do ... end
+.It Dv for descendant in mib:iter_noskip( ) do ... end
+.It Dv limit, errmsg, errcode = sysctl.limit_init(chan )
+.It Dv limit, errmsg, errcode = limit:name(name , flags )
+.It Dv sysctl.READ
+.It Dv sysctl.WRITE
+.It Dv sysctl.RDWR
+.It Dv sysctl.RECURSIVE
+.It Dv ok, errmsg, errcode = limit:limit( )
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides a binding for the
+.Xr cap_sysctl 3
+library routines.
+.Bl -tag -width XXXX
+.It Dv allmibs = sysctl.sysctl(chan )
+Get a special MIB userdata object for iterating all sysctl MIBs.
+.It Dv mib, errmsg, errcode = sysctl.sysctl(chan , name )
+Get a MIB userdata object for the given sysctl MIB name.
+.It Dv oid = mib:oid( )
+Get the OID of a MIB as a table of integers.
+.It Dv name, errmsg, errcode = mib:name( )
+Get the name of a MIB as a string of dotted components.
+.It Dv kind, format_or_errmsg, errcode = mib:format( )
+Get the kind and format of a MIB as an integer and a string, respectively.
+.It Dv description, errmsg, errcode = mib:description( )
+Get the description of a MIB as a string, or
+.Dv nil
+if a description does not exist.
+.It Dv value, errmsg, errcode = mib:value( )
+Get the value of a MIB as either a string or an integer, depending on the kind
+of the sysctl MIB.
+.It Dv _, errmsg, errcode, mib:value(value )
+Set a new value for a MIB.
+The value must be either a string or an integer, according to the kind of the
+sysctl MIB.
+.It Dv for descendant in mib:iter( ) do ... end
+Iterate all descendants of a node MIB, except those flagged with
+.Dv CTLFLAG_SKIP .
+.It Dv for descendant in mib:iter_noskip( ) do ... end
+Iterate all descendants of a node MIB, including those flagged with
+.Dv CTLFLAG_SKIP .
+.It Dv limit, errmsg, errcode = sysctl.limit_init(chan )
+Wraps
+.Xr cap_sysctl_limit_init 3 .
+Returns a
+.Vt userdata
+object.
+.It Dv limit, errmsg, errcode = limit:name(name , flags )
+Wraps
+.Xr cap_sysctl_limit_name 3 .
+.It Dv ok, errmsg, errcode = limit:limit( )
+Wraps
+.Xr cap_sysctl_limit 3 .
+.Va limit
+is no longer usable after calling this method.
+.El
+.Sh EXAMPLES
+Print all sysctl names and descriptions:
+.Bd -literal -offset indent
+local caph = require('capsicum_helpers')
+local casper = require('casper')
+local sysctl = require('casper.sysctl')
+
+local capcas = casper.init()
+caph.enter()
+local capsysctl = capcas:service_open('system.sysctl')
+capcas:close()
+
+for mib in sysctl.sysctl(capsysctl):iter() do
+	print(mib:name(), mib:description())
+end
+capsysctl:close()
+.Ed
+Print all kstat.zfs sysctl values, including ones usually skipped:
+.Bd -literal -offset indent
+local sysctl = require('sys.sysctl')
+
+for mib in sysctl.sysctl('kstat.zfs'):iter_noskip() do
+	print(mib:name(), mib:value())
+end
+.Ed
+.Sh SEE ALSO
+.Xr sysctl 3 ,
+.Xr sysctl 8
+.Sh AUTHORS
+.An Ryan Moeller

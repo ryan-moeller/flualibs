@@ -6,6 +6,7 @@ FLUA_CASPER=	${LIBDIR}/flua/casper
 SUBDIR=	\
 	fileargs \
 	net \
+	sysctl \
 	syslog \
 
 .if exists(/usr/include/casper/cap_netdb.h)
