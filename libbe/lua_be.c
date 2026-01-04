@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Ryan Moeller
+ * Copyright (c) 2025-2026 Ryan Moeller
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -27,46 +27,70 @@ typedef uint64_t hrtime_t;
 
 int luaopen_be(lua_State *);
 
+/* XXX: From be_impl.h, using because error handling in libbe is incomplete. */
+int set_error(libbe_handle_t *, be_error_t);
+
+static inline int
+befail(lua_State *L, libbe_handle_t *hdl)
+{
+	luaL_pushfail(L);
+	lua_pushstring(L, libbe_error_description(hdl));
+	lua_pushinteger(L, libbe_errno(hdl));
+	return (3);
+}
+
+static inline int
+befailwith(lua_State *L, libbe_handle_t *hdl, be_error_t error)
+{
+	/*
+	 * Some functions return an error without setting it.  The only way we
+	 * can get error descriptions from libbe is if the error is set in the
+	 * handle.  By coincidence, the internal set_error() function is
+	 * externally visible.  Hopefully the former problem gets fixed before
+	 * the latter.
+	 */
+	set_error(hdl, error);
+	return (befail(L, hdl));
+}
+
 static int
 l_be_init(lua_State *L)
 {
-	libbe_handle_t *hdl, **hdlp;
+	libbe_handle_t *hdl;
 	const char *root;
 
 	root = lua_tostring(L, 1);
 	hdl = libbe_init(root);
 	if (hdl == NULL) {
+		/* XXX: No error info is provided by libbe. */
 		luaL_error(L, "libbe_init");
 	}
-	hdlp = lua_newuserdatauv(L, sizeof(*hdlp), 0);
-	luaL_setmetatable(L, LIBBE_METATABLE);
-	*hdlp = hdl;
-	return (1);
+	return (new(L, hdl, LIBBE_METATABLE));
 }
 
 static int
 l_be_close(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
-	if (*hdlp == NULL) {
+	hdl = checkcookienull(L, 1, LIBBE_METATABLE);
+	if (hdl == NULL) {
 		return (0);
 	}
-	libbe_close(*hdlp);
-	*hdlp = NULL;
+	libbe_close(hdl);
+	setcookie(L, 1, NULL);
 	return (0);
 }
 
 static int
 l_be_active_name(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 
-	name = be_active_name(*hdlp);
+	name = be_active_name(hdl);
 	lua_pushstring(L, name);
 	return (1);
 }
@@ -74,12 +98,12 @@ l_be_active_name(lua_State *L)
 static int
 l_be_active_path(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *path;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 
-	path = be_active_path(*hdlp);
+	path = be_active_path(hdl);
 	lua_pushstring(L, path);
 	return (1);
 }
@@ -87,12 +111,12 @@ l_be_active_path(lua_State *L)
 static int
 l_be_nextboot_name(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 
-	name = be_nextboot_name(*hdlp);
+	name = be_nextboot_name(hdl);
 	lua_pushstring(L, name);
 	return (1);
 }
@@ -100,12 +124,12 @@ l_be_nextboot_name(lua_State *L)
 static int
 l_be_nextboot_path(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *path;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 
-	path = be_nextboot_path(*hdlp);
+	path = be_nextboot_path(hdl);
 	lua_pushstring(L, path);
 	return (1);
 }
@@ -113,12 +137,12 @@ l_be_nextboot_path(lua_State *L)
 static int
 l_be_root_path(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *path;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 
-	path = be_root_path(*hdlp);
+	path = be_root_path(hdl);
 	lua_pushstring(L, path);
 	return (1);
 }
@@ -383,17 +407,18 @@ push_nvlist(lua_State *L, nvlist_t *nvl)
 static int
 l_be_get_bootenv_props(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	nvlist_t *props;
+	int error;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 
-	if (be_prop_list_alloc(&props) != 0) {
-		luaL_error(L, "be_prop_list_alloc");
+	if ((error = be_prop_list_alloc(&props)) != 0) {
+		return (fatal(L, "be_prop_list_alloc", error));
 	}
-	if (be_get_bootenv_props(*hdlp, props) != 0) {
+	if ((error = be_get_bootenv_props(hdl, props)) != 0) {
 		be_prop_list_free(props);
-		luaL_error(L, "be_get_bootenv_props");
+		return (befailwith(L, hdl, error));
 	}
 	push_nvlist(L, props);
 	be_prop_list_free(props);
@@ -403,19 +428,20 @@ l_be_get_bootenv_props(lua_State *L)
 static int
 l_be_get_dataset_props(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
 	nvlist_t *props;
+	int error;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 
-	if (be_prop_list_alloc(&props) != 0) {
-		luaL_error(L, "be_prop_list_alloc");
+	if ((error = be_prop_list_alloc(&props)) != 0) {
+		return (fatal(L, "be_prop_list_alloc", error));
 	}
-	if (be_get_dataset_props(*hdlp, name, props) != 0) {
+	if ((error = be_get_dataset_props(hdl, name, props)) != 0) {
 		be_prop_list_free(props);
-		luaL_error(L, "be_get_dataset_props");
+		return (befailwith(L, hdl, error));
 	}
 	push_nvlist(L, props);
 	be_prop_list_free(props);
@@ -425,19 +451,20 @@ l_be_get_dataset_props(lua_State *L)
 static int
 l_be_get_dataset_snapshots(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
 	nvlist_t *snaps;
+	int error;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 
-	if (be_prop_list_alloc(&snaps) != 0) {
-		luaL_error(L, "be_prop_list_alloc");
+	if ((error = be_prop_list_alloc(&snaps)) != 0) {
+		return (fatal(L, "be_prop_list_alloc", error));
 	}
-	if (be_get_dataset_snapshots(*hdlp, name, snaps) != 0) {
+	if ((error = be_get_dataset_snapshots(hdl, name, snaps)) != 0) {
 		be_prop_list_free(snaps);
-		luaL_error(L, "be_get_dataset_props");
+		return (befailwith(L, hdl, error));
 	}
 	push_nvlist(L, snaps);
 	be_prop_list_free(snaps);
@@ -447,50 +474,48 @@ l_be_get_dataset_snapshots(lua_State *L)
 static int
 l_be_activate(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
 	bool temp;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 	temp = lua_toboolean(L, 3);
 
-	if (be_activate(*hdlp, name, temp) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_activate");
+	if (be_activate(hdl, name, temp) != 0) {
+		return (befail(L, hdl));
 	}
-	return (0);
+	return (success(L));
 }
 
 static int
 l_be_deactivate(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
 	bool temp;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 	temp = lua_toboolean(L, 3);
 
-	if (be_deactivate(*hdlp, name, temp) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_deactivate");
+	if (be_deactivate(hdl, name, temp) != 0) {
+		return (befail(L, hdl));
 	}
-	return (0);
+	return (success(L));
 }
 
 static int
 l_be_is_auto_snapshot_name(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
 	bool isauto;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 
-	isauto = be_is_auto_snapshot_name(*hdlp, name);
+	isauto = be_is_auto_snapshot_name(hdl, name);
 	lua_pushboolean(L, isauto);
 	return (1);
 }
@@ -498,88 +523,83 @@ l_be_is_auto_snapshot_name(lua_State *L)
 static int
 l_be_create(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 
-	if (be_create(*hdlp, name) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_create");
+	if (be_create(hdl, name) != 0) {
+		return (befail(L, hdl));
 	}
-	return (0);
+	return (success(L));
 }
 
 static int
 l_be_create_depth(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name, *snap;
 	int depth;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 	snap = luaL_checkstring(L, 3);
 	depth = luaL_checkinteger(L, 4);
 
-	if (be_create_depth(*hdlp, name, snap, depth) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_create_depth");
+	if (be_create_depth(hdl, name, snap, depth) != 0) {
+		return (befail(L, hdl));
 	}
-	return (0);
+	return (success(L));
 }
 
 static int
 l_be_create_from_existing(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name, *existing;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 	existing = luaL_checkstring(L, 3);
 
-	if (be_create_from_existing(*hdlp, name, existing) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_create_from_existing");
+	if (be_create_from_existing(hdl, name, existing) != 0) {
+		return (befail(L, hdl));
 	}
-	return (0);
+	return (success(L));
 }
 
 static int
 l_be_create_from_existing_snap(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name, *snap;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 	snap = luaL_checkstring(L, 3);
 
-	if (be_create_from_existing_snap(*hdlp, name, snap) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_create_from_existing_snap");
+	if (be_create_from_existing_snap(hdl, name, snap) != 0) {
+		return (befail(L, hdl));
 	}
-	return (0);
+	return (success(L));
 }
 
 static int
 l_be_snapshot(lua_State *L)
 {
 	char result[BE_MAXPATHLEN];
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *source, *snap;
 	bool recursive;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	source = luaL_checkstring(L, 2);
 	snap = lua_tostring(L, 3);
 	recursive = lua_toboolean(L, 4);
 
-	if (be_snapshot(*hdlp, source, snap, recursive, result) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_snapshot");
+	if (be_snapshot(hdl, source, snap, recursive, result) != 0) {
+		return (befail(L, hdl));
 	}
 	lua_pushstring(L, result);
 	return (1);
@@ -588,54 +608,51 @@ l_be_snapshot(lua_State *L)
 static int
 l_be_rename(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *oldname, *newname;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	oldname = luaL_checkstring(L, 2);
 	newname = luaL_checkstring(L, 3);
 
-	if (be_rename(*hdlp, oldname, newname) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_rename");
+	if (be_rename(hdl, oldname, newname) != 0) {
+		return (befail(L, hdl));
 	}
-	return (0);
+	return (success(L));
 }
 
 static int
 l_be_destroy(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
 	int options;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 	options = luaL_checkinteger(L, 3);
 
-	if (be_destroy(*hdlp, name, options) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_destroy");
+	if (be_destroy(hdl, name, options) != 0) {
+		return (befail(L, hdl));
 	}
-	return (0);
+	return (success(L));
 }
 
 static int
 l_be_mount(lua_State *L)
 {
 	char result[BE_MAXPATHLEN];
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name, *mountpoint;
 	int options;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 	mountpoint = lua_tostring(L, 3);
 	options = luaL_checkinteger(L, 4);
 
-	if (be_mount(*hdlp, name, mountpoint, options, result) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_mount");
+	if (be_mount(hdl, name, mountpoint, options, result) != 0) {
+		return (befail(L, hdl));
 	}
 	lua_pushstring(L, result);
 	return (1);
@@ -644,52 +661,49 @@ l_be_mount(lua_State *L)
 static int
 l_be_unmount(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
 	int options;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 	options = luaL_checkinteger(L, 3);
 
-	if (be_unmount(*hdlp, name, options) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_unmount");
+	if (be_unmount(hdl, name, options) != 0) {
+		return (befail(L, hdl));
 	}
-	return (0);
+	return (success(L));
 }
 
 static int
 l_be_mounted_at(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *path;
 	nvlist_t *details;
 	bool get_details;
-	int err;
+	int error;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	path = luaL_checkstring(L, 2);
 	get_details = lua_toboolean(L, 3);
 
 	if (!get_details) {
-		err = be_mounted_at(*hdlp, path, NULL);
-		if (err != 0 && err != 1) {
-			/* TODO: error details */
-			luaL_error(L, "be_mounted_at");
+		error = be_mounted_at(hdl, path, NULL);
+		if (error != 0 && error != 1) {
+			return (befail(L, hdl));
 		}
-		lua_pushboolean(L, err == 0);
+		lua_pushboolean(L, error == 0);
 		return (1);
 	}
-	if (be_prop_list_alloc(&details) != 0) {
-		luaL_error(L, "be_prop_list_alloc");
+	if ((error = be_prop_list_alloc(&details)) != 0) {
+		return (fatal(L, "be_pro_list_alloc", error));
 	}
-	err = be_mounted_at(*hdlp, path, details);
-	if (err != 0 && err != 1) {
-		/* TODO: error details */
-		luaL_error(L, "be_mounted_at");
+	error = be_mounted_at(hdl, path, details);
+	if (error != 0 && error != 1) {
+		return (befail(L, hdl));
 	}
-	lua_pushboolean(L, err == 0);
+	lua_pushboolean(L, error == 0);
 	push_nvlist(L, details);
 	be_prop_list_free(details);
 	return (2);
@@ -698,35 +712,35 @@ l_be_mounted_at(lua_State *L)
 static int
 l_be_errno(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 
-	lua_pushinteger(L, libbe_errno(*hdlp));
+	lua_pushinteger(L, libbe_errno(hdl));
 	return (1);
 }
 
 static int
 l_be_error_description(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 
-	lua_pushstring(L, libbe_error_description(*hdlp));
+	lua_pushstring(L, libbe_error_description(hdl));
 	return (1);
 }
 
 static int
 l_be_print_on_error(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	bool value;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	value = lua_toboolean(L, 2);
 
-	libbe_print_on_error(*hdlp, value);
+	libbe_print_on_error(hdl, value);
 	return (0);
 }
 
@@ -734,15 +748,15 @@ static int
 l_be_root_concat(lua_State *L)
 {
 	char result[BE_MAXPATHLEN];
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
+	int error;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 
-	if (be_root_concat(*hdlp, name, result) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_root_concat");
+	if ((error = be_root_concat(hdl, name, result)) != 0) {
+		return (befailwith(L, hdl, error));
 	}
 	lua_pushstring(L, result);
 	return (1);
@@ -751,86 +765,85 @@ l_be_root_concat(lua_State *L)
 static int
 l_be_validate_name(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
-	int err;
+	int error;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 
-	err = be_validate_name(*hdlp, name);
-	lua_pushinteger(L, err);
-	return (1);
+	if ((error = be_validate_name(hdl, name)) != 0) {
+		return (befailwith(L, hdl, error));
+	}
+	return (success(L));
 }
 
 static int
 l_be_validate_snap(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *snap;
-	int err;
+	int error;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	snap = luaL_checkstring(L, 2);
 
-	err = be_validate_snap(*hdlp, snap);
-	lua_pushinteger(L, err);
-	return (1);
+	if ((error = be_validate_snap(hdl, snap)) != 0) {
+		return (befailwith(L, hdl, error));
+	}
+	return (success(L));
 }
 
 static int
 l_be_exists(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
-	int err;
+	int error;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 
-	err = be_exists(*hdlp, name);
-	if (err != 0 && err != 1) {
-		/* TODO: error details */
-		luaL_error(L, "be_exists");
+	error = be_exists(hdl, name);
+	if (error != 0 && error != 1) {
+		return (befailwith(L, hdl, error));
 	}
-	lua_pushboolean(L, err == 0);
+	lua_pushboolean(L, error == 0);
 	return (1);
 }
 
 static int
 l_be_export(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
 	int fd;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 	fd = checkfd(L, 3);
 
-	if (be_export(*hdlp, name, fd) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_export");
+	if (be_export(hdl, name, fd) != 0) {
+		return (befail(L, hdl));
 	}
-	return (0);
+	return (success(L));
 }
 
 static int
 l_be_import(lua_State *L)
 {
-	libbe_handle_t **hdlp;
+	libbe_handle_t *hdl;
 	const char *name;
 	int fd;
 
-	hdlp = luaL_checkudata(L, 1, LIBBE_METATABLE);
+	hdl = checkcookie(L, 1, LIBBE_METATABLE);
 	name = luaL_checkstring(L, 2);
 	fd = checkfd(L, 3);
 
-	if (be_import(*hdlp, name, fd) != 0) {
-		/* TODO: error details */
-		luaL_error(L, "be_import");
+	if (be_import(hdl, name, fd) != 0) {
+		return (befail(L, hdl));
 	}
-	return (0);
+	return (success(L));
 }
 
 static int
@@ -853,6 +866,8 @@ static const struct luaL_Reg l_be_funcs[] = {
 };
 
 static const struct luaL_Reg l_be_meta[] = {
+	{"__close", l_be_close},
+	{"__gc", l_be_close},
 	{"close", l_be_close},
 	{"active_name", l_be_active_name},
 	{"active_path", l_be_active_path},
@@ -891,17 +906,11 @@ int
 luaopen_be(lua_State *L)
 {
 	luaL_newmetatable(L, LIBBE_METATABLE);
-
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
-
-	lua_pushcfunction(L, l_be_close);
-	lua_setfield(L, -2, "__gc");
-
 	luaL_setfuncs(L, l_be_meta, 0);
 
 	luaL_newlib(L, l_be_funcs);
-
 #define DEFINE(ident) ({ \
 	lua_pushinteger(L, BE_ ## ident); \
 	lua_setfield(L, -2, #ident); \
