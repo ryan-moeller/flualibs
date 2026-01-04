@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Ryan Moeller
+ * Copyright (c) 2024-2026 Ryan Moeller
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -169,7 +169,10 @@ l_close(struct lua_State *L)
 
 	kqp = luaL_checkudata(L, 1, KQUEUE_METATABLE);
 	kq = *kqp;
-	luaL_argcheck(L, kq != -1, 1, "`kq' already closed");
+	if (kq == -1) {
+		/* Already closed.  Return nothing to be safe for <close>. */
+		return (0);
+	}
 	if (close(kq) == -1) {
 		return (fail(L, errno));
 	}
@@ -199,8 +202,10 @@ static const struct luaL_Reg l_kqueue_funcs[] = {
 };
 
 static const struct  luaL_Reg l_kqueue_meta[] = {
-	{"kevent", l_kevent},
+	{"__close", l_close},
+	{"__gc", l_gc},
 	{"close", l_close},
+	{"kevent", l_kevent},
 	{NULL, NULL}
 };
 
@@ -208,17 +213,11 @@ int
 luaopen_sys_event(lua_State *L)
 {
 	luaL_newmetatable(L, KQUEUE_METATABLE);
-
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
-
-	lua_pushcfunction(L, l_gc);
-	lua_setfield(L, -2, "__gc");
-
 	luaL_setfuncs(L, l_kqueue_meta, 0);
 
 	luaL_newlib(L, l_kqueue_funcs);
-
 #define DEFINE(ident) ({ \
 	lua_pushinteger(L, ident); \
 	lua_setfield(L, -2, #ident); \

@@ -2,7 +2,7 @@ require('stdio')
 local event = require('sys.event')
 local ucl = require('ucl')
 
-local kq = event.kqueue()
+local kq <close> = event.kqueue()
 local threads = {}
 local changelist
 
@@ -72,4 +72,5 @@ while next(threads) do
 	end
 end
 
+-- Make sure <close> + :close() isn't a problem.
 kq:close()
