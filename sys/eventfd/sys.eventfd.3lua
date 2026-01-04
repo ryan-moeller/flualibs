@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 28, 2025
+.Dd January 4, 2026
 .Dt SYS.EVENTFD 3lua
 .Os
 .Sh NAME
@@ -51,6 +51,7 @@ Wraps
 Wraps
 .Xr close 2 .
 .It Dv fd = eventfd:fileno( )
+Returns the underlying file descriptor number.
 .El
 .Sh SEE ALSO
 .Xr sys.event 3lua ,
