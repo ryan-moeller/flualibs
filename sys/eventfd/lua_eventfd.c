@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Ryan Moeller
+ * Copyright (c) 2025-2026 Ryan Moeller
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -25,8 +25,6 @@ enum {
 static inline void
 checkeventfdnil(lua_State *L, int idx)
 {
-	int fd;
-
 	luaL_checkudata(L, idx, EVENTFD_METATABLE);
 
 	lua_getiuservalue(L, idx, FILEDESC);
@@ -45,6 +43,16 @@ checkeventfd(lua_State *L, int idx)
 	return (fd);
 }
 
+static inline int
+neweventfd(lua_State *L, int fd)
+{
+	lua_newuserdatauv(L, 0, 1);
+	lua_pushinteger(L, fd);
+	lua_setiuservalue(L, -2, FILEDESC);
+	luaL_setmetatable(L, EVENTFD_METATABLE);
+	return (1);
+}
+
 static int
 l_eventfd(lua_State *L)
 {
@@ -57,11 +65,7 @@ l_eventfd(lua_State *L)
 	if ((fd = eventfd(initval, flags)) == -1) {
 		return (fail(L, errno));
 	}
-	lua_newuserdatauv(L, 0, 1);
-	lua_pushinteger(L, fd);
-	lua_setiuservalue(L, -2, FILEDESC);
-	luaL_setmetatable(L, EVENTFD_METATABLE);
-	return (1);
+	return (neweventfd(L, fd));
 }
 
 static int
@@ -124,8 +128,19 @@ l_eventfd_write(lua_State *L)
 	return (success(L));
 }
 
+static int
+l_eventfd_wrap(lua_State *L)
+{
+	int fd;
+
+	fd = luaL_checkinteger(L, 1);
+
+	return (neweventfd(L, fd));
+}
+
 static const struct luaL_Reg l_eventfd_funcs[] = {
 	{"eventfd", l_eventfd},
+	{"wrap", l_eventfd_wrap},
 	{NULL, NULL}
 };
 

@@ -24,8 +24,6 @@ enum {
 static inline void
 checkprocdescnil(lua_State *L, int idx)
 {
-	int fd;
-
 	luaL_checkudata(L, idx, PROCDESC_METATABLE);
 
 	lua_getiuservalue(L, idx, FILEDESC);

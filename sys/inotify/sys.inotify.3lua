@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 28, 2025
+.Dd January 4, 2026
 .Dt SYS.INOTIFY 3lua
 .Os
 .Sh NAME
@@ -17,6 +17,7 @@ local inotify = require('sys.inotify')
 .Pp
 .Bl -tag -width XXXX -compact
 .It Dv ifd, errmsg, errcode = inotify.init([flags ] )
+.It Dv ifd = inotify.wrap(fd )
 .It Dv wd, errmsg, errcode = ifd:add_watch(pathname , mask )
 .It Dv wd, errmsg, errcode = ifd:add_watch_at(dfd , pathname , mask )
 .It Dv ok, errmsg, errcode = ifd:rm_watch(wd )
@@ -64,6 +65,11 @@ Wraps
 Create and return a new
 .Xr inotify 2
 descriptor.
+The return value is a
+.Vt userdata
+object wrapping the descriptor.
+.It Dv ifd = inotify.wrap(fd )
+Wrap an existing inotify file descriptor number.
 The return value is a
 .Vt userdata
 object wrapping the descriptor.

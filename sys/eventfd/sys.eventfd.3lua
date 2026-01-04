@@ -17,6 +17,7 @@ local efd = require('sys.eventfd')
 .Pp
 .Bl -tag -width XXXX -compact
 .It Dv eventfd, errmsg, errcode = efd.eventfd(initval[ , flags ] )
+.It Dv eventfd = efd.wrap(fd )
 .It Dv value, errmsg, errcode = eventfd:read( )
 .It Dv ok, errmsg, errcode = eventfd:write(value )
 .It Dv ok, errmsg, errcode = eventfd:close( )
@@ -38,6 +39,11 @@ Wraps
 Create and return a new
 .Xr inotify 2
 descriptor.
+The return value is a
+.Vt userdata
+object wrapping the descriptor.
+.It Dv eventfd = efd.wrap(fd )
+Wrap an existing eventfd file descriptor number.
 The return value is a
 .Vt userdata
 object wrapping the descriptor.

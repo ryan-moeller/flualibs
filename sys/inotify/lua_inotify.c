@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Ryan Moeller
+ * Copyright (c) 2025-2026 Ryan Moeller
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -24,8 +24,6 @@ enum {
 static inline void
 checkinotifynil(lua_State *L, int idx)
 {
-	int fd;
-
 	luaL_checkudata(L, idx, INOTIFY_METATABLE);
 
 	lua_getiuservalue(L, idx, FILEDESC);
@@ -45,6 +43,16 @@ checkinotify(lua_State *L, int idx)
 	return (fd);
 }
 
+static inline int
+newinotify(lua_State *L, int fd)
+{
+	lua_newuserdatauv(L, 0, 1);
+	lua_pushinteger(L, fd);
+	lua_setiuservalue(L, -2, FILEDESC);
+	luaL_setmetatable(L, INOTIFY_METATABLE);
+	return (1);
+}
+
 static int
 l_inotify_init(lua_State *L)
 {
@@ -55,11 +63,7 @@ l_inotify_init(lua_State *L)
 	if ((fd = inotify_init1(flags)) == -1) {
 		return (fail(L, errno));
 	}
-	lua_newuserdatauv(L, 0, 1);
-	lua_pushinteger(L, fd);
-	lua_setiuservalue(L, -2, FILEDESC);
-	luaL_setmetatable(L, INOTIFY_METATABLE);
-	return (1);
+	return (newinotify(L, fd));
 }
 
 static int
@@ -188,8 +192,19 @@ l_inotify_rm_watch(lua_State *L)
 	return (success(L));
 }
 
+static int
+l_inotify_wrap(lua_State *L)
+{
+	int fd;
+
+	fd = luaL_checkinteger(L, 1);
+
+	return (newinotify(L, fd));
+}
+
 static const struct luaL_Reg l_inotify_funcs[] = {
 	{"init", l_inotify_init},
+	{"wrap", l_inotify_wrap},
 	{NULL, NULL}
 };
 
