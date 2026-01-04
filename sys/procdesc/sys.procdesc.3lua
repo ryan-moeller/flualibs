@@ -1,0 +1,81 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd January 4, 2026
+.Dt SYS.PROCDESC 3lua
+.Os
+.Sh NAME
+.Nm sys.procdesc
+.Nd Lua bindings for
+.Xr procdesc 4
+system calls
+.Sh SYNOPSIS
+.Bd -literal
+local procdesc = require('sys.procdesc')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv pd, errmsg, errcode = procdesc.pdfork([flags ] )
+.It Dv pid, errmsg, errcode = procdesc.pdgetpid(fd )
+.It Dv ok, errmsg, errcode = procdesc.pdkill(signum )
+.It Dv pd = procdesc.wrap(fd )
+.It Dv pid, errmsg, errcode = pd:getpid( )
+.It Dv ok, errmsg, errcode = pd:kill(signum )
+.It Dv ok, errmsg, errcode = pd:close( )
+.It Dv fd = pd:fileno( )
+.It Dv procdesc.DAEMON
+.It Dv procdesc.CLOEXEC
+.It Dv procdesc.ALLOWED_AT_FORK
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for
+.Xr procdesc 4
+system calls.
+.Bl -tag -width XXXX
+.It Dv pid, pd_or_errmsg, errcode = procdesc.pdfork([flags ] )
+Wraps
+.Xr pdfork 2 .
+In success, returns an
+.Vt integer
+child process ID or 0 in the child and a
+.Vt userdata
+wrapper for the process descriptor.
+.It Dv pid, errmsg, errcode = procdesc.pdgetpid(fd )
+Wraps
+.Xr pdgetpid 2 .
+.It Dv ok, errmsg, errcode = procdesc.pdkill(fd , signum )
+Wraps
+.Xr pdkill 2 .
+.It Dv pd = procdesc.wrap(fd )
+Wrap a bare
+.Xr procdesc 4
+file descriptor number
+in a
+.Vt userdata
+wrapper with the following methods.
+.It Dv pid, errmsg, errcode = pd:getpid( )
+Wraps
+.Xr pdgetpid 2 .
+.It Dv ok, errmsg, errcode = pd:kill(signum )
+Wraps
+.Xr pdkill 2 .
+.It Dv ok, errmsg, errcode = pd:close( )
+Wraps
+.Xr close 2 .
+The object also has a
+.Va __close
+metamethod, and is closed by
+.Va __gc ,
+as well.
+.It Dv fd = pd:fileno( )
+Returns the underlying file descriptor number.
+.El
+.Sh SEE ALSO
+.Xr sys.event 3lua ,
+.Xr unistd 3lua
+.Sh AUTHORS
+.An Ryan Moeller

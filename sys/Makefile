@@ -14,6 +14,7 @@ SUBDIR=	\
 	linker \
 	mac \
 	module \
+	procdesc \
 	reboot \
 	socket \
 	stat \
