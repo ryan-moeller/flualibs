@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -53,7 +53,7 @@ local inotify = require('sys.inotify')
 .El
 .Sh DESCRIPTION
 The
-.Nm sys.inotify
+.Nm
 module provides bindings for
 .Xr inotify 2
 system calls.

@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2024-2025 Ryan Moeller
+.\" Copyright (c) 2024-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -21,7 +21,7 @@ stdio = require('stdio')
 .El
 .Sh DESCRIPTION
 The
-.Nm stdio
+.Nm
 module provides bindings for the
 .Xr fileno 3
 library routine.

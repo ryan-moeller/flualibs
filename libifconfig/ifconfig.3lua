@@ -1,50 +1,13 @@
 .\"
-.\" Copyright (c) 2020-2025 Ryan Moeller
+.\" Copyright (c) 2020-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 23, 2025
+.Dd January 4, 2026
 .Dt IFCONFIG 3lua
 .Os
 .Sh NAME
-.Nm open ,
-.Nm close ,
-.Nm error ,
-.Nm foreach_iface ,
-.Nm foreach_ifaddr ,
-.Nm get_description ,
-.Nm set_description ,
-.Nm unset_description ,
-.Nm set_name ,
-.Nm get_orig_name ,
-.Nm get_fib ,
-.Nm set_mtu ,
-.Nm get_mtu ,
-.Nm get_nd6 ,
-.Nm set_metric ,
-.Nm get_metric ,
-.Nm set_capabilities ,
-.Nm get_capabilities ,
-.Nm get_groups ,
-.Nm get_status ,
-.Nm get_media ,
-.Nm get_carp ,
-.Nm get_carp_vhid ,
-.Nm set_carp ,
-.Nm addr_info ,
-.Nm get_bridge_status ,
-.Nm get_lagg_status ,
-.Nm get_laggport_laggdev ,
-.Nm destroy ,
-.Nm create ,
-.Nm create_vlan ,
-.Nm set_vlantag ,
-.Nm list_cloners ,
-.Nm set_up ,
-.Nm get_sfp_info ,
-.Nm get_sfp_vendor_info ,
-.Nm get_sfp_status ,
-.Nm get_sfp_dump
+.Nm ifconfig
 .Nd Lua binding to libifconfig
 .Sh SYNOPSIS
 .Bd -literal
@@ -94,7 +57,7 @@ local ifconfig = require('ifconfig')
 .El
 .Sh DESCRIPTION
 The
-.Nm ifconfig
+.Nm
 module is a binding to the libifconfig
 library.
 It provides a high-level interface for many socket ioctls that query and
@@ -253,9 +216,9 @@ of an interface, returns a table of the form
 }
 .Ed
 where
-.Nm enabled
+.Va enabled
 and
-.Nm supported
+.Va supported
 are the lists of enabled and supported capabilities with each capability
 represented by a string.
 .It Dv groups = ifcfg:get_groups(name )
@@ -281,9 +244,9 @@ of an interface, returns a table of the form
 }
 .Ed
 where
-.Nm current
+.Va current
 and
-.Nm active
+.Va active
 are tables of the form
 .Bd -literal -compact
 {
@@ -294,7 +257,7 @@ are tables of the form
 }
 .Ed
 and
-.Nm supported
+.Va supported
 is a list of the same form of tables.
 .It Dv carp = ifcfg:get_carp(name )
 Given the
@@ -369,7 +332,7 @@ userdata object as
 returns a table describing the address.
 The format of the table depends on the type of address.
 .Bl -inset
-.It Nm AF_INET
+.It Dv AF_INET
 addresses are described by a table of the form
 .Bd -literal -compact
 {
@@ -380,7 +343,7 @@ addresses are described by a table of the form
 	[ vhid = # ]
 }
 .Ed
-.It Nm AF_INET6
+.It Dv AF_INET6
 addresses are described by a table of the form
 .Bd -literal -compact
 {
@@ -393,7 +356,7 @@ addresses are described by a table of the form
 	[ vhid = # ]
 }
 .Ed
-.It Nm AF_LINK
+.It Dv AF_LINK
 addresses are described by a table of the form
 .Bd -literal -compact
 {
@@ -401,10 +364,10 @@ addresses are described by a table of the form
 }
 .Ed
 for link types
-.Nm IFT_ETHER ,
-.Nm IFT_L2VLAN ,
+.Dv IFT_ETHER ,
+.Dv IFT_L2VLAN ,
 and
-.Nm IFT_BRIDGE
+.Dv IFT_BRIDGE
 or
 .Bd -literal -compact
 {
@@ -412,7 +375,7 @@ or
 }
 .Ed
 for other link types.
-.It Nm AF_LOCAL
+.It Dv AF_LOCAL
 addresses are described by a table of the form
 .Bd -literal -compact
 {
@@ -447,7 +410,7 @@ interface, returns a table of the form
 }
 .Ed
 where
-.Nm members
+.Va members
 is a list of tables of the form
 .Bd -literal -compact
 {
@@ -473,7 +436,7 @@ interface, returns a table of the form
 }
 .Ed
 where
-.Nm options
+.Va options
 is a table of the form
 .Bd -literal -compact
 {
@@ -484,7 +447,7 @@ is a table of the form
 	[ rr_limit = # ]
 }
 .Ed
-.Nm stats
+.Va stats
 is a table of the form
 .Bd -literal -compact
 {
@@ -493,7 +456,7 @@ is a table of the form
 }
 .Ed
 and
-.Nm ports
+.Va ports
 is a table where the keys are the names of the laggports and the values are
 tables of the form
 .Bd -literal -compact
@@ -597,7 +560,7 @@ of an interface, returns SFP module status as a table of the form
 }
 .Ed
 where
-.Nm channels
+.Va channels
 is a list of tables of the form
 .Bd -literal -compact
 {
@@ -605,7 +568,7 @@ is a list of tables of the form
 	tx_bias = {}
 }
 .Ed
-.Nm rx_power
+.Va rx_power
 is a table of the form
 .Bd -literal -compact
 {
@@ -614,7 +577,7 @@ is a table of the form
 	dBm = #
 }
 .Ed
-.Nm tx_bias
+.Va tx_bias
 is a table of the form
 .Bd -literal -compact
 {

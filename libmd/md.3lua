@@ -1,16 +1,13 @@
 .\"
-.\" Copyright (c) 2024-2025 Ryan Moeller
+.\" Copyright (c) 2024-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd September 6, 2025
+.Dd January 4, 2026
 .Dt MD 3lua
 .Os
 .Sh NAME
-.Nm sha1_init ,
-.Nm :update ,
-.Nm :final ,
-.Nm :digest
+.Nm md
 .Nd Lua bindings for
 .Xr SHA1_Init 3 ,
 .Xr SHA1_Update 3 ,
@@ -29,7 +26,7 @@ md = require('md')
 .El
 .Sh DESCRIPTION
 The
-.Nm md
+.Nm
 module provides bindings for Message Digest Support Library
 .Pq libmd
 function calls.

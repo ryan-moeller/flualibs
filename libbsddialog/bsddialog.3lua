@@ -1,80 +1,13 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd October 20, 2025
+.Dd January 3, 2026
 .Dt BSDDIALOG 3lua
 .Os
 .Sh NAME
-.Nm init ,
-.Nm init_notheme ,
-.Nm inmode ,
-.Nm clear ,
-.Nm refresh ,
-.Nm _end ,
-.Nm initconf ,
-.Nm backtitle ,
-.Nm calendar ,
-.Nm checklist ,
-.Nm datebox ,
-.Nm form ,
-.Nm gauge ,
-.Nm infobox ,
-.Nm menu ,
-.Nm mixedgauge ,
-.Nm mixedlist ,
-.Nm msgbox ,
-.Nm pause ,
-.Nm radiolist ,
-.Nm rangebox ,
-.Nm textbox ,
-.Nm timebox ,
-.Nm yesno ,
-.Nm color ,
-.Nm color_attrs ,
-.Nm hascolors ,
-.Nm set_default_theme ,
-.Nm get_theme ,
-.Nm set_theme ,
-.Nm ERROR ,
-.Nm OK ,
-.Nm YES ,
-.Nm CANCEL ,
-.Nm NO ,
-.Nm HELP ,
-.Nm EXTRA ,
-.Nm TIMEOUT ,
-.Nm ESC ,
-.Nm LEFT1 ,
-.Nm LEFT2 ,
-.Nm LEFT3 ,
-.Nm RIGHT1 ,
-.Nm RIGHT2 ,
-.Nm RIGHT3 ,
-.Nm FULLSCREEN ,
-.Nm AUTOSIZE ,
-.Nm CENTER ,
-.Nm MG_SUCCEEDED ,
-.Nm MG_FAILED ,
-.Nm MG_PASSED ,
-.Nm MG_COMPLETED ,
-.Nm MG_CHECKED ,
-.Nm MG_DONE ,
-.Nm MG_SKIPPED ,
-.Nm MG_INPROGRESS ,
-.Nm MG_BLANK ,
-.Nm MG_NA ,
-.Nm MG_PENDING ,
-.Nm FIELDHIDDEN ,
-.Nm FIELDREADONLY ,
-.Nm FIELDNOCOLOR ,
-.Nm FIELDCURSOREND ,
-.Nm FIELDEXTEND ,
-.Nm FIELDSINGLEBYTE ,
-.Nm CHECKLIST ,
-.Nm RADIOLIST ,
-.Nm SEPARATOR
+.Nm bsddialog
 .Nd Lua bindings for
 .Xr bsddialog 3
 .Sh SYNOPSIS
@@ -113,10 +46,48 @@ bsddialog = require('bsddialog')
 .It Dv bsddialog.set_default_theme(theme )
 .It Dv theme = bsddialog.get_theme( )
 .It Dv bsddialog.set_theme(theme )
+.It Dv bsddialog.ERROR
+.It Dv bsddialog.OK
+.It Dv bsddialog.YES
+.It Dv bsddialog.CANCEL
+.It Dv bsddialog.NO
+.It Dv bsddialog.HELP
+.It Dv bsddialog.EXTRA
+.It Dv bsddialog.TIMEOUT
+.It Dv bsddialog.ESC
+.It Dv bsddialog.LEFT1
+.It Dv bsddialog.LEFT2
+.It Dv bsddialog.LEFT3
+.It Dv bsddialog.RIGHT1
+.It Dv bsddialog.RIGHT2
+.It Dv bsddialog.RIGHT3
+.It Dv bsddialog.FULLSCREEN
+.It Dv bsddialog.AUTOSIZE
+.It Dv bsddialog.CENTER
+.It Dv bsddialog.MG_SUCCEEDED
+.It Dv bsddialog.MG_FAILED
+.It Dv bsddialog.MG_PASSED
+.It Dv bsddialog.MG_COMPLETED
+.It Dv bsddialog.MG_CHECKED
+.It Dv bsddialog.MG_DONE
+.It Dv bsddialog.MG_SKIPPED
+.It Dv bsddialog.MG_INPROGRESS
+.It Dv bsddialog.MG_BLANK
+.It Dv bsddialog.MG_NA
+.It Dv bsddialog.MG_PENDING
+.It Dv bsddialog.FIELDHIDDEN
+.It Dv bsddialog.FIELDREADONLY
+.It Dv bsddialog.FIELDNOCOLOR
+.It Dv bsddialog.FIELDCURSOREND
+.It Dv bsddialog.FIELDEXTEND
+.It Dv bsddialog.FIELDSINGLEBYTE
+.It Dv bsddialog.CHECKLIST
+.It Dv bsddialog.RADIOLIST
+.It Dv bsddialog.SEPARATOR
 .El
 .Sh DESCRIPTION
 The
-.Nm bsddialog
+.Nm
 module provides bindings for
 .Xr bsddialog 3
 functions and constants.
@@ -132,11 +103,11 @@ Initialize the
 library without setting a default theme.
 .It Dv inmode = bsddialog.inmode( )
 Check if
-.Nm init
+.Fn init
 or
-.Nm init_notheme
+.Fn init_notheme
 has been called and
-.Nm _end
+.Fn _end
 has not.
 .It Dv bsddialog.clear(y )
 Clear the screen from
@@ -145,18 +116,18 @@ Clear the screen from
 Refresh the screen after a terminal mode change.
 .It Dv bsddialog._end( )
 Restore the screen to the state before
-.Nm init
+.Fn init
 or
-.Nm init_notheme
+.Fn init_notheme
 was called.
 The name is
-.Nm _end
+.Dv _end
 because
-.Nm end
+.Dv end
 is a keyword in Lua.
 .It Dv conf = bsddialog.initconf( )
 Initialize a
-.Nm struct bsddialog_conf *
+.Vt struct bsddialog_conf *
 userdata value.
 The struct fields may be accessed as if the value is a table, for example:
 .Bd -literal -offset indent

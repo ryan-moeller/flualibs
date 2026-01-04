@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -23,7 +23,7 @@ pathconv = require('pathconv')
 .El
 .Sh DESCRIPTION
 The
-.Nm pathconv
+.Nm
 module provides bindings for libpathconv.
 .Bl -tag -width XXXX
 .It Dv result, errmsg, errcode = pathconv.abs2rel(path , base )

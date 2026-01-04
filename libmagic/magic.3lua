@@ -1,68 +1,13 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd October 19, 2025
+.Dd January 4, 2025
 .Dt MAGIC 3lua
 .Os
 .Sh NAME
-.Nm open ,
-.Nm :close ,
-.Nm :descriptor ,
-.Nm :file ,
-.Nm :buffer ,
-.Nm :getflags ,
-.Nm :setflags ,
-.Nm :check ,
-.Nm :compile ,
-.Nm :list ,
-.Nm :load ,
-.Nm :getparam ,
-.Nm :setparam ,
-.Nm getpath ,
-.Nm NONE ,
-.Nm DEBUG ,
-.Nm SYMLINK ,
-.Nm COMPRESS ,
-.Nm DEVICES ,
-.Nm MIME_TYPE ,
-.Nm CONTINUE ,
-.Nm CHECK ,
-.Nm PRESERVE_ATIME ,
-.Nm RAW ,
-.Nm ERROR ,
-.Nm MIME_ENCODING ,
-.Nm MIME ,
-.Nm APPLE ,
-.Nm EXTENSION ,
-.Nm COMPRESS_TRANSP ,
-.Nm NO_COMPRESS_FORK ,
-.Nm NODESC ,
-.Nm NO_CHECK_COMPRESS ,
-.Nm NO_CHECK_TAR ,
-.Nm NO_CHECK_SOFT ,
-.Nm NO_CHECK_APPTYPE ,
-.Nm NO_CHECK_ELF ,
-.Nm NO_CHECK_TEXT ,
-.Nm NO_CHECK_CDF ,
-.Nm NO_CHECK_CSV ,
-.Nm NO_CHECK_TOKENS ,
-.Nm NO_CHECK_ENCODING ,
-.Nm NO_CHECK_JSON ,
-.Nm NO_CHECK_SIMH ,
-.Nm NO_CHECK_BUILTIN ,
-.Nm VERSION ,
-.Nm PARAM_INDIR_MAX ,
-.Nm PARAM_NAME_MAX ,
-.Nm PARAM_ELF_PHNUM_MAX ,
-.Nm PARAM_ELF_SHNUM_MAX ,
-.Nm PARAM_ELF_NOTES_MAX ,
-.Nm PARAM_REGEX_MAX ,
-.Nm PARAM_BYTES_MAX ,
-.Nm PARAM_ENCODING_MAX ,
-.Nm PARAM_ELF_SHSIZE_MAX ,
-.Nm PARAM_MAGWARN_MAX
+.Nm magic
 .Nd Lua bindings for
 .Xr libmagic 3
 .Sh SYNOPSIS
@@ -85,10 +30,52 @@ magic = require('magic')
 .It Dv cookie:setparam(param , limit )
 .It Dv cookie:close( )
 .It Dv path = magic.getpath([magicfile[ , action ] ] )
+.It Dv magic.NONE
+.It Dv magic.DEBUG
+.It Dv magic.SYMLINK
+.It Dv magic.COMPRESS
+.It Dv magic.DEVICES
+.It Dv magic.MIME_TYPE
+.It Dv magic.CONTINUE
+.It Dv magic.CHECK
+.It Dv magic.PRESERVE_ATIME
+.It Dv magic.RAW
+.It Dv magic.ERROR
+.It Dv magic.MIME_ENCODING
+.It Dv magic.MIME
+.It Dv magic.APPLE
+.It Dv magic.EXTENSION
+.It Dv magic.COMPRESS_TRANSP
+.It Dv magic.NO_COMPRESS_FORK
+.It Dv magic.NODESC
+.It Dv magic.NO_CHECK_COMPRESS
+.It Dv magic.NO_CHECK_TAR
+.It Dv magic.NO_CHECK_SOFT
+.It Dv magic.NO_CHECK_APPTYPE
+.It Dv magic.NO_CHECK_ELF
+.It Dv magic.NO_CHECK_TEXT
+.It Dv magic.NO_CHECK_CDF
+.It Dv magic.NO_CHECK_CSV
+.It Dv magic.NO_CHECK_TOKENS
+.It Dv magic.NO_CHECK_ENCODING
+.It Dv magic.NO_CHECK_JSON
+.It Dv magic.NO_CHECK_SIMH
+.It Dv magic.NO_CHECK_BUILTIN
+.It Dv magic.VERSION
+.It Dv magic.PARAM_INDIR_MAX
+.It Dv magic.PARAM_NAME_MAX
+.It Dv magic.PARAM_ELF_PHNUM_MAX
+.It Dv magic.PARAM_ELF_SHNUM_MAX
+.It Dv magic.PARAM_ELF_NOTES_MAX
+.It Dv magic.PARAM_REGEX_MAX
+.It Dv magic.PARAM_BYTES_MAX
+.It Dv magic.PARAM_ENCODING_MAX
+.It Dv magic.PARAM_ELF_SHSIZE_MAX
+.It Dv magic.PARAM_MAGWARN_MAX
 .El
 .Sh DESCRIPTION
 The
-.Nm magic
+.Nm
 module provides bindings for Magic Number Recognition Library
 .Pq libmagic
 function calls.

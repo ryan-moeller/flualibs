@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -47,7 +47,7 @@ local rb = require('sys.reboot')
 .El
 .Sh DESCRIPTION
 The
-.Nm sys.reboot
+.Nm
 module provides flag definitions for the
 .Fa howto
 argument to the

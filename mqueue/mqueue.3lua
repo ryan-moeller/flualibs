@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2024-2025 Ryan Moeller
+.\" Copyright (c) 2024-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -38,7 +38,7 @@ local mqueue = require('mqueue')
 .El
 .Sh DESCRIPTION
 The
-.Nm mqueue
+.Nm
 module provides bindings for the message queue system calls in librt.
 .Bl -tag -width XXXX
 .It Dv q, err, code = mqueue.open(name , oflags[ , mode[ , attr ] ] )

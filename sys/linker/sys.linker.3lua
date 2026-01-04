@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2023-2025 Ryan Moeller
+.\" Copyright (c) 2023-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -32,7 +32,7 @@ local linker = require('sys.linker')
 .El
 .Sh DESCRIPTION
 The
-.Nm sys.linker
+.Nm
 module provides bindings for kernel module linker system calls.
 .Bl -tag -width XXXX
 .It Dv fileid, errmsg, errcode = linker.kldload(filename )

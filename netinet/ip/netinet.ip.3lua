@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -88,7 +88,7 @@ ip = require('netinet.ip')
 .El
 .Sh DESCRIPTION
 The
-.Nm netinet.ip
+.Nm
 module provides bindings for Internet Protocol version 4 definitions and
 utilities.
 .Bl -tag -width XXXX

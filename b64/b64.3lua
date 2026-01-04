@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2024-2025 Ryan Moeller
+.\" Copyright (c) 2024-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -20,7 +20,7 @@ base64 = require('b64')
 .El
 .Sh DESCRIPTION
 The
-.Nm b64
+.Nm
 module provides bindings for the libc base64 encode and decode functions.
 .Bl -tag -width XXXX
 .It Dv encoded = base64.encode(data )

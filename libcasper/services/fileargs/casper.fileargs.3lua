@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -32,7 +32,7 @@ fileargs = require('casper.fileargs')
 .El
 .Sh DESCRIPTION
 The
-.Nm casper.fileargs
+.Nm
 module provides bindings for
 .Xr cap_fileargs 3
 function calls.

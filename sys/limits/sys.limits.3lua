@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -60,7 +60,7 @@ local limits = require('sys.limits')
 .El
 .Sh DESCRIPTION
 The
-.Nm sys.limits
+.Nm
 module provides definitions for the system C language type limits.
 .Sh SEE ALSO
 .Xr unistd 3lua

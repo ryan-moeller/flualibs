@@ -387,7 +387,7 @@ sctp = require('netinet.sctp')
 .El
 .Sh DESCRIPTION
 The
-.Nm netinet.sctp
+.Nm
 module provides bindings for Internet Stream Control Transmission Protocol
 definitions, system calls, and utilities in libc.
 .Pp

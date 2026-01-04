@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -48,7 +48,7 @@ mac = require('sys.mac')
 .El
 .Sh DESCRIPTION
 The
-.Nm sys.mac
+.Nm
 module provides bindings for the libc
 .Xr mac 3
 Mandatory Access Control

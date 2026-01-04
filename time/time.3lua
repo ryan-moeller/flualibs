@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -28,7 +28,7 @@ local time = require('time')
 .El
 .Sh DESCRIPTION
 The
-.Nm time
+.Nm
 module provides bindings for the
 .Xr clock_getcpuclockid 3
 function and

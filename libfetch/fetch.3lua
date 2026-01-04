@@ -1,36 +1,13 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd September 29, 2025
+.Dd January 4, 2026
 .Dt FETCH 3lua
 .Os
 .Sh NAME
-.Nm get ,
-.Nm put ,
-.Nm xget ,
-.Nm stat ,
-.Nm list ,
-.Nm request ,
-.Nm ABORT ,
-.Nm AUTH ,
-.Nm DOWN ,
-.Nm EXISTS ,
-.Nm FULL ,
-.Nm INFO ,
-.Nm MEMORY ,
-.Nm MOVED ,
-.Nm NETWORK ,
-.Nm OK ,
-.Nm PROTO ,
-.Nm RESOLV ,
-.Nm SERVER ,
-.Nm TEMP ,
-.Nm TIMEOUT ,
-.Nm UNAVAIL ,
-.Nm UNKNOWN ,
-.Nm URL
+.Nm fetch
 .Nd Lua bindings for
 .Xr fetch 3
 .Sh SYNOPSIS
@@ -45,26 +22,50 @@ fetch = require('fetch')
 .It Dv stat, errmsg, errcode = fetch.stat(URL[ , flags ] )
 .It Dv ents, errmsg, errcode = fetch.list(URL[ , flags ] )
 .It Dv f, errmsg, errcode = fetch.request(URL, method[ , flags[ , content_type[ , body ] ] ] )
+.It Dv fetch.ABORT
+.It Dv fetch.AUTH
+.It Dv fetch.DOWN
+.It Dv fetch.EXISTS
+.It Dv fetch.FULL
+.It Dv fetch.INFO
+.It Dv fetch.MEMORY
+.It Dv fetch.MOVED
+.It Dv fetch.NETWORK
+.It Dv fetch.OK
+.It Dv fetch.PROTO
+.It Dv fetch.RESOLV
+.It Dv fetch.SERVER
+.It Dv fetch.TEMP
+.It Dv fetch.TIMEOUT
+.It Dv fetch.UNAVAIL
+.It Dv fetch.UNKNOWN
+.It Dv fetch.URL
 .El
 .Sh DESCRIPTION
 The
-.Nm fetch
+.Nm
 module provides bindings for File Transfer Library
 .Pq libfetch
 function calls.
 .Bl -tag -width XXXX
 .It Dv f, errmsg, errcode = fetch.get(URL[ , flags ] )
-Wraps fetchGetURL.
+Wraps
+.Xr fetchGetURL 3 .
 .It Dv f, errmsg, errcode = fetch.put(URL[ , flags ] )
-Wraps fetchPutURL.
+Wraps
+.Xr fetchPutURL 3 .
 .It Dv f, stat_or_errmsg, errcode = fetch.xget(URL[ , flags ] )
-Wraps fetchXGetURL.
+Wraps
+.Xr fetchXGetURL 3 .
 .It Dv stat, errmsg, errcode = fetch.stat(URL[ , flags ] )
-Wraps fetchStatURL.
+Wraps
+.Xr fetchStatURL 3 .
 .It Dv ents, errmsg, errcode = fetch.list(URL[ , flags ] )
-Wraps fetchListURL.
+Wraps
+.Xr fetchListURL 3 .
 .It Dv f, errmsg, errcode = fetch.request(URL, method[ , flags[ , content_type[ , body ] ] ] )
-Wraps fetchReqHTTP.
+Wraps
+.Xr fetchReqHTTP 3 .
 .El
 .Sh EXAMPLES
 Get the contents of a URL:

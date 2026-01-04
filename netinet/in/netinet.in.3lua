@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -374,7 +374,7 @@ netin = require('netinet.in')
 .El
 .Sh DESCRIPTION
 The
-.Nm netinet.in
+.Nm
 module provides bindings for Internet Protocol definitions and utilities.
 .Pp
 .Vt sockaddr

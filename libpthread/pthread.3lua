@@ -1,119 +1,13 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 25, 2025
+.Dd January 4, 2026
 .Dt PTHREAD 3lua
 .Os
 .Sh NAME
-.Nm pthread.create ,
-.Nm pthread.retain ,
-.Nm pthread.exit ,
-.Nm pthread.self ,
-.Nm pthread.setcancelstate ,
-.Nm pthread.setcanceltype ,
-.Nm pthread.testcancel ,
-.Nm pthread.yield ,
-.Nm pthread.getthreadid_np ,
-.Nm pthread.main_np ,
-.Nm pthread.multi_np ,
-.Nm pthread.resume_all_np ,
-.Nm pthread.signals_block_np ,
-.Nm pthread.signals_unblock_np ,
-.Nm pthread.single_np ,
-.Nm pthread.suspend_all_np ,
-.Nm pthread_t:cookie ,
-.Nm pthread_t:cancel ,
-.Nm pthread_t:detach ,
-.Nm pthread_t:equal ,
-.Nm pthread_t:join ,
-.Nm pthread_t:attr_get_np ,
-.Nm pthread_t:getaffinity_np ,
-.Nm pthread_t:setaffinity_np ,
-.Nm pthread_t:resume_np ,
-.Nm pthread_t:peekjoin_np ,
-.Nm pthread_t:suspend_np ,
-.Nm pthread_t:timedjoin_np ,
-.Nm pthread_t:getname_np ,
-.Nm pthread_t:setname_np ,
-.Nm pthread_t:sigqueue ,
-.Nm pthread.once.new ,
-.Nm pthread.once.retain ,
-.Nm pthread_once_t:cookie ,
-.Nm pthread.mutex.new ,
-.Nm pthread.mutex.retain ,
-.Nm pthread_mutex_t:cookie ,
-.Nm pthread_mutex_t:lock ,
-.Nm pthread_mutex_t:timedlock ,
-.Nm pthread_mutex_t:trylock ,
-.Nm pthread_mutex_t:unlock ,
-.Nm pthread_mutex_t:getspinloops_np ,
-.Nm pthread_mutex_t:setspinloops_np ,
-.Nm pthread_mutex_t:getyieldloops_np ,
-.Nm pthread_mutex_t:setyieldloops_np ,
-.Nm pthread_mutex_t:isowned_np ,
-.Nm pthread.cond.new ,
-.Nm pthread.cond.retain ,
-.Nm pthread_cond_t:cookie ,
-.Nm pthread_cond_t:broadcast ,
-.Nm pthread_cond_t:signal ,
-.Nm pthread_cond_t:timedwait ,
-.Nm pthread_cond_t:wait ,
-.Nm pthread.rwlock.new ,
-.Nm pthread.rwlock.retain ,
-.Nm pthread_rwlock_t:cookie ,
-.Nm pthread_rwlock_t:rdlock ,
-.Nm pthread_rwlock_t:tryrdlock ,
-.Nm pthread_rwlock_t:trywrlock ,
-.Nm pthread_rwlock_t:unlock ,
-.Nm pthread_rwlock_t:wrlock ,
-.Nm pthread.key.create ,
-.Nm pthread.key.retain ,
-.Nm pthread_key_t:cookie ,
-.Nm pthread_key_t:getspecific ,
-.Nm pthread_key_t:setspecific ,
-.Nm pthread.cleanup.pop ,
-.Nm pthread.cleanup.push ,
-.Nm pthread.barrier.new ,
-.Nm pthread.barrier.retain ,
-.Nm pthread_barrier_t:cookie ,
-.Nm pthread_barrier_t:wait ,
-.Nm pthread.rendezvous.new ,
-.Nm pthread.rendezvous.retain ,
-.Nm pthread.rendezvous:cookie ,
-.Nm pthread.rendezvous:exchange ,
-.Nm pthread.rendezvous:timedexchange ,
-.Nm pthread.DESTRUCTOR_ITERATIONS ,
-.Nm pthread.KEYS_MAX ,
-.Nm pthread.STACK_MIN ,
-.Nm pthread.THREADS_MAX ,
-.Nm pthread.DETACHED ,
-.Nm pthread.SCOPE_SYSTEM ,
-.Nm pthread.INHERIT_SCHED ,
-.Nm pthread.NOFLOAT ,
-.Nm pthread.CREATE_DETACHED ,
-.Nm pthread.CREATE_JOINABLE ,
-.Nm pthread.SCOPE_PROCESS ,
-.Nm pthread.EXPLICIT_SCHED ,
-.Nm pthread.PROCESS_PRIVATE ,
-.Nm pthread.PROCESS_SHARED ,
-.Nm pthread.CANCEL_ENABLE ,
-.Nm pthread.CANCEL_DISABLE ,
-.Nm pthread.CANCEL_DEFERRED ,
-.Nm pthread.CANCEL_ASYNCHRONOUS ,
-.Nm pthread.PRIO_NONE ,
-.Nm pthread.PRIO_INHERIT ,
-.Nm pthread.PRIO_PROTECT ,
-.Nm pthread.mutex.ERRORCHECK ,
-.Nm pthread.mutex.RECURSIVE ,
-.Nm pthread.mutex.NORMAL ,
-.Nm pthread.mutex.ADAPTIVE_NP ,
-.Nm pthread.mutex.TYPE_MAX ,
-.Nm pthread.mutex.DEFAULT ,
-.Nm pthread.mutex.STALLED ,
-.Nm pthread.mutex.ROBUST ,
-.Nm pthread.barrier.SERIAL_THREAD
+.Nm pthread
 .Nd Lua bindings for
 .Xr pthread 3
 and
@@ -202,10 +96,40 @@ pthread = require('pthread')
 .It Dv cookie = rendezvous:cookie( )
 .It Dv ... = rendezvous:exchange(... )
 .It Dv exchanged, ... = rendezvous:timedexchange(abstime_sec , abstime_nsec , ... )
+.It Dv pthread.DESTRUCTOR_ITERATIONS
+.It Dv pthread.KEYS_MAX
+.It Dv pthread.STACK_MIN
+.It Dv pthread.THREADS_MAX
+.It Dv pthread.DETACHED
+.It Dv pthread.SCOPE_SYSTEM
+.It Dv pthread.INHERIT_SCHED
+.It Dv pthread.NOFLOAT
+.It Dv pthread.CREATE_DETACHED
+.It Dv pthread.CREATE_JOINABLE
+.It Dv pthread.SCOPE_PROCESS
+.It Dv pthread.EXPLICIT_SCHED
+.It Dv pthread.PROCESS_PRIVATE
+.It Dv pthread.PROCESS_SHARED
+.It Dv pthread.CANCEL_ENABLE
+.It Dv pthread.CANCEL_DISABLE
+.It Dv pthread.CANCEL_DEFERRED
+.It Dv pthread.CANCEL_ASYNCHRONOUS
+.It Dv pthread.PRIO_NONE
+.It Dv pthread.PRIO_INHERIT
+.It Dv pthread.PRIO_PROTECT
+.It Dv pthread.mutex.ERRORCHECK
+.It Dv pthread.mutex.RECURSIVE
+.It Dv pthread.mutex.NORMAL
+.It Dv pthread.mutex.ADAPTIVE_NP
+.It Dv pthread.mutex.TYPE_MAX
+.It Dv pthread.mutex.DEFAULT
+.It Dv pthread.mutex.STALLED
+.It Dv pthread.mutex.ROBUST
+.It Dv pthread.barrier.SERIAL_THREAD
 .El
 .Sh DESCRIPTION
 The
-.Nm pthread
+.Nm
 module provides bindings for POSIX Threads Library
 .Pq libpthread
 function calls.
@@ -266,7 +190,7 @@ The created thread is provided with a new Lua state in which to execute.
 Lua values are not shared between threads; threads that share resources must
 do so by external means, such as message passing or shared memory.
 These features are not provided by
-.Xr pthread 3lua ,
+.Nm
 except for the types provided by this library.
 .Pp
 Any values returned by

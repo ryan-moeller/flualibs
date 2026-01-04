@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -60,7 +60,7 @@ ip6 = require('netinet.ip6')
 .El
 .Sh DESCRIPTION
 The
-.Nm netinet.ip6
+.Nm
 module provides bindings for Internet Protocol version 6 definitions and
 utilities.
 .Pp

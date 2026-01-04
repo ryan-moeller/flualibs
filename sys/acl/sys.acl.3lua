@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -139,7 +139,7 @@ ACL = require('sys.acl')
 .El
 .Sh DESCRIPTION
 The
-.Nm sys.acl
+.Nm
 module provides bindings for the libc
 .Xr acl 3
 POSIX.1e/NFSv4 ACL security API.

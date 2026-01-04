@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2025 Ryan Moeller
+.\" Copyright (c) 2025-2026 Ryan Moeller
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
@@ -20,7 +20,7 @@ netdb = require('casper.netdb')
 .El
 .Sh DESCRIPTION
 The
-.Nm casper.netdb
+.Nm
 module provides bindings for
 .Xr cap_netdb 3
 function calls.
