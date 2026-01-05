@@ -1,0 +1,262 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd January 5, 2026
+.Dt KVM 3lua
+.Os
+.Sh NAME
+.Nm kvm
+.Nd Lua bindings for
+.Xr kvm 3
+.Sh SYNOPSIS
+.Bd -literal
+kvm = require('kvm')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv kd, errmsg = kvm.open2(execfile , corefile[ , flags[ , resolver ] ] )
+.It Dv kd, errmsg = kvm.openfiles(execfile , corefile , swapfile[ , flags ] )
+.It Dv ok, errmsg, errcode = kd:close( )
+.It Dv ok, errmsg = kd:dpcpu_setcpu(cpu )
+.It Dv maxcpu, errmsg = kd:getmaxcpu( )
+.It Dv ncpus, errmsg = kd:getncpus( )
+.It Dv pcpu, errmsg = kd:getpcpu(cpu )
+.It Dv data, errmsg = kd:read_zpcpu(base , size , cpu )
+.It Dv value = kd:counter_u64_fetch(base )
+.It Dv times, errmsg = kd:getcptime( )
+.It Dv kvm.getcptime_clearcache( )
+.It Dv loadavg, errmsg = kd:getloadavg( )
+.It Dv procs, errmsg = kd:getprocs(op , arg )
+.It Dv proc = procs[idx]
+.It Dv argv, errmsg = kd:getargv(proc[ , nchr ] )
+.It Dv envv, errmsg = kd:getenvv(proc[ , nchr ] )
+.It Dv total, devs_or_errmsg = kd:getswapinfo([ndevs[ , flags ] ] )
+.It Dv kvm.getswapinfo_clearcache( )
+.It Dv isnative = kd:native( )
+.It Dv nlists, ninvalid_or_errmsg = kd:nlist2(names )
+.It Dv data, errmsg = kd:read2(addr , nbytes )
+.It Dv n, errmsg = kd:write(addr , data )
+.It Dv kerndisp = kd:kerndisp( )
+.It Dv ok = kd:walk_pages(callback )
+.It Dv kvm.SWIF_DEV_PREFIX
+.It Dv kvm.LIBKVM_WALK_PAGES_VERSION
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for
+.Xr kvm 3 .
+.Bl -tag -width XXXX
+.It Dv kd, errmsg = kvm.open2(execfile , corefile[ , flags[ , resolver ] ] )
+Wraps
+.Xr kvm_open2 3 .
+The returned value is a
+.Vt kvm_t *
+.Vt userdata
+wrapper object.
+.Fa execfile
+or
+.Fa corefile
+may be
+.Dv nil
+to pass a
+.Dv NULL
+pointer.
+.Fa resolver
+is a function
+.Dl resolver(<string>) -> <integer>
+that resolves a
+.Vt string
+symbol name to an
+.Vt integer
+address, or returns
+.Dv nil
+if resolution fails.
+.It Dv kd, errmsg = kvm.openfiles(execfile , corefile , swapfile[ , flags ] )
+Wraps
+.Xr kvm_openfiles 3 .
+The returned value is a
+.Vt kvm_t *
+.Vt userdata
+wrapper object.
+.Fa execfile ,
+.Fa corefile ,
+or
+.Fa swapfile
+may be
+.Dv nil
+to pass a
+.Dv NULL
+pointer.
+.It Dv ok, errmsg, errcode = kd:close( )
+Wraps
+.Xr kvm_close 3 .
+.It Dv ok, errmsg = kd:dpcpu_setcpu(cpu )
+Wraps
+.Xr kvm_dpcpu_setcpu 3 .
+.It Dv maxcpu, errmsg = kd:getmaxcpu( )
+Wraps
+.Xr kvm_getmaxcpu 3 .
+.It Dv ncpus, errmsg = kd:getncpus( )
+Wraps
+.Fn kvm_getncpus .
+.It Dv pcpu, errmsg = kd:getpcpu(cpu )
+Wraps
+.Xr kvm_getpcpu 3 .
+Returns a
+.Vt userdata
+object.
+The object currently has no methods.
+.It Dv data, errmsg = kd:read_zpcpu(base , size , cpu )
+Wraps
+.Xr kvm_read_zpcpu 3 .
+.It Dv value = kd:counter_u64_fetch(base )
+Wraps
+.Xr kvm_counter_u64_fetch 3 .
+.It Dv times, errmsg = kd:getcptime( )
+Wraps
+.Xr kvm_getcptime 3 .
+Returns a table of the form
+.Bd -literal -compact
+{
+	<integer>,
+	...
+}
+.Ed
+.It Dv kvm.getcptime_clearcache( )
+Wraps
+.Xr kvm_getcptime 3 ,
+passing
+.Dv NULL
+as
+.Fa kd
+to clear the internal cache.
+.It Dv loadavg, errmsg = kd:getloadavg( )
+Wraps
+.Xr kvm_getloadavg 3 .
+Returns a table of the form
+.Bd -literal -compact
+{
+	<number>, -- average over 1 minute
+	<number>, -- average over 5 minutes
+	<number>, -- average over 15 minutes
+}
+.Ed
+.It Dv procs, errmsg = kd:getprocs(op , arg )
+Wraps
+.Xr kvm_getprocs 3 .
+Returns a
+.Vt userdata
+object with
+.Va __index
+and
+.Va __len
+metamethods.
+.It Dv proc = procs[idx]
+Access an individual
+.Vt struct kinfo_proc *
+.Vt userdata
+object.
+.It Dv argv, errmsg = kd:getargv(proc[ , nchr ] )
+Wraps
+.Xr kvm_getargv 3 .
+.It Dv envv, errmsg = kd:getenvv(proc[ , nchr ] )
+Wraps
+.Xr kvm_getenvv 3 .
+.It Dv total, devs_or_errmsg = kd:getswapinfo([ndevs[ , flags ] ] )
+Wraps
+.Xr kvm_getswapinfo 3 .
+The first return value describe the total swap info with a table of the form
+.Bd -literal -compact
+{
+	devname = <string>,
+	total = <integer>,
+	used = <integer>,
+	flags = <integer>,
+}
+.Ed
+and the second return value is an array of tables of the same form.
+Unlike the C API, only the maximum number of devices to return in the second
+table is specified by the first parameter,
+.Fa ndevs .
+The
+.Fa maxswap
+passed to C will be
+.Dl ndevs + 1
+.It Dv kvm.getswapinfo_clearcache( )
+Wraps
+.Xr kvm_getswapinfo 3 ,
+passing
+.Dv NULL
+as
+.Fa kd
+to clear the internal cache.
+.It Dv isnative = kd:native( )
+Wraps
+.Xr kvm_native 3 .
+.It Dv nlists, ninvalid_or_errmsg = kd:nlist2(names )
+Wraps
+.Xr kvm_nlist2 3 .
+.Fa names
+is an array of symbol names as strings.
+Returns a table of the form
+.Bd -literal -compact
+{
+	{
+		name = <string>,
+		type = <integer>,
+		value = <integer>,
+	},
+	...
+}
+.Ed
+as the first result and the number of names that were invalid as the second.
+.It Dv data, errmsg = kd:read2(addr , nbytes )
+Wraps
+.Xr kvm_read2 3 .
+.It Dv n, errmsg = kd:write(addr , data )
+Wraps
+.Xr kvm_write 3 .
+.It Dv kerndisp = kd:kerndisp( )
+Wraps
+.Xr kvm_kerndisp 3 .
+.It Dv ok = kd:walk_pages(callback )
+Wraps
+.Fn kvm_walk_pages .
+.Fa callback
+is a
+.Vt function
+of the form
+.Dl callback(<table>) -> <boolean>
+where the parameter is a table of the form
+.Bd -literal -compact
+{
+	version = <integer>,
+	paddr = <integer>,
+	kmap_vaddr = <integer>,
+	dmap_vaddr = <integer>,
+	prot = <integer>,
+	offset = <integer>,
+	len = <integer>,
+}
+.Ed
+and the result determines whether to continue the walk.
+Any errors raised are ignored and the result is treated as
+.Dv false .
+.El
+.Sh EXAMPLES
+Inspect the live kernel:
+.Bd -literal -offset indent
+kvm = require('kvm')
+
+kd = assert(kvm.open2())
+ncpus = assert(kd:getncpus())
+kd:close()
+print(ncpus)
+.Ed
+.Sh SEE ALSO
+.Xr kvm 3
+.Sh AUTHORS
+.An Ryan Moeller

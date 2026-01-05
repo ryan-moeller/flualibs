@@ -7,6 +7,7 @@ SUBDIR= \
 	libcasper \
 	libfetch \
 	libifconfig \
+	libkvm \
 	libmagic \
 	libmd \
 	libnv \
