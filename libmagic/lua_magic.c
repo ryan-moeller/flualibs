@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Ryan Moeller
+ * Copyright (c) 2025-2026 Ryan Moeller
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -21,30 +21,26 @@ int luaopen_magic(lua_State *);
 static int
 l_magic_open(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 	int flags;
 
 	flags = luaL_optinteger(L, 1, MAGIC_NONE);
 
-	cookiep = lua_newuserdatauv(L, sizeof(*cookiep), 0);
-	luaL_setmetatable(L, MAGIC_METATABLE);
-
-	*cookiep = magic_open(flags);
-	if (*cookiep == NULL) {
+	if ((cookie = magic_open(flags)) == NULL) {
 		return (fail(L, errno));
 	}
-	return (1);
+	return (new(L, cookie, MAGIC_METATABLE));
 }
 
 static int
 l_magic_close(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 
-	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
+	cookie = checkcookienull(L, 1, MAGIC_METATABLE);
 
-	magic_close(*cookiep);
-	*cookiep = NULL;
+	magic_close(cookie);
+	setcookie(L, 1, NULL);
 	return (0);
 }
 
@@ -60,16 +56,15 @@ magicerr(lua_State *L, magic_t cookie)
 static int
 l_magic_descriptor(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 	const char *magic;
 	int fd;
 
-	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
+	cookie = checkcookie(L, 1, MAGIC_METATABLE);
 	fd = checkfd(L, 2);
 
-	magic = magic_descriptor(*cookiep, fd);
-	if (magic == NULL) {
-		return (magicerr(L, *cookiep));
+	if ((magic = magic_descriptor(cookie, fd)) == NULL) {
+		return (magicerr(L, cookie));
 	}
 	lua_pushstring(L, magic);
 	return (1);
@@ -78,15 +73,14 @@ l_magic_descriptor(lua_State *L)
 static int
 l_magic_file(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 	const char *filename, *magic;
 
-	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
+	cookie = checkcookie(L, 1, MAGIC_METATABLE);
 	filename = luaL_optstring(L, 2, NULL);
 
-	magic = magic_file(*cookiep, filename);
-	if (magic == NULL) {
-		return (magicerr(L, *cookiep));
+	if ((magic = magic_file(cookie, filename)) == NULL) {
+		return (magicerr(L, cookie));
 	}
 	lua_pushstring(L, magic);
 	return (1);
@@ -95,16 +89,15 @@ l_magic_file(lua_State *L)
 static int
 l_magic_buffer(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 	const char *buffer, *magic;
 	size_t length;
 
-	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
+	cookie = checkcookie(L, 1, MAGIC_METATABLE);
 	buffer = luaL_checklstring(L, 2, &length);
 
-	magic = magic_buffer(*cookiep, buffer, length);
-	if (magic == NULL) {
-		return (magicerr(L, *cookiep));
+	if ((magic = magic_buffer(cookie, buffer, length)) == NULL) {
+		return (magicerr(L, cookie));
 	}
 	lua_pushstring(L, magic);
 	return (1);
@@ -113,13 +106,12 @@ l_magic_buffer(lua_State *L)
 static int
 l_magic_getflags(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 	int flags;
 
-	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
+	cookie = checkcookie(L, 1, MAGIC_METATABLE);
 
-	flags = magic_getflags(*cookiep);
-	if (flags == -1) {
+	if ((flags = magic_getflags(cookie)) == -1) {
 		return (luaL_error(L, "magic_getflags failed"));
 	}
 	lua_pushinteger(L, flags);
@@ -129,13 +121,13 @@ l_magic_getflags(lua_State *L)
 static int
 l_magic_setflags(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 	int flags;
 
-	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
+	cookie = checkcookie(L, 1, MAGIC_METATABLE);
 	flags = luaL_checkinteger(L, 2);
 
-	if (magic_setflags(*cookiep, flags) == -1) {
+	if (magic_setflags(cookie, flags) == -1) {
 		return (luaL_error(L, "magic_setflags failed"));
 	}
 	return (0);
@@ -144,14 +136,14 @@ l_magic_setflags(lua_State *L)
 static int
 l_magic_check(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 	const char *filename;
 
-	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
+	cookie = checkcookie(L, 1, MAGIC_METATABLE);
 	filename = luaL_optstring(L, 2, NULL);
 
-	if (magic_check(*cookiep, filename) == -1) {
-		return (magicerr(L, *cookiep));
+	if (magic_check(cookie, filename) == -1) {
+		return (magicerr(L, cookie));
 	}
 	return (success(L));
 }
@@ -159,14 +151,14 @@ l_magic_check(lua_State *L)
 static int
 l_magic_compile(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 	const char *filename;
 
-	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
+	cookie = checkcookie(L, 1, MAGIC_METATABLE);
 	filename = luaL_optstring(L, 2, NULL);
 
-	if (magic_compile(*cookiep, filename) == -1) {
-		return (magicerr(L, *cookiep));
+	if (magic_compile(cookie, filename) == -1) {
+		return (magicerr(L, cookie));
 	}
 	return (success(L));
 }
@@ -174,14 +166,14 @@ l_magic_compile(lua_State *L)
 static int
 l_magic_list(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 	const char *filename;
 
-	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
+	cookie = checkcookie(L, 1, MAGIC_METATABLE);
 	filename = luaL_optstring(L, 2, NULL);
 
-	if (magic_list(*cookiep, filename) == -1) {
-		return (magicerr(L, *cookiep));
+	if (magic_list(cookie, filename) == -1) {
+		return (magicerr(L, cookie));
 	}
 	return (success(L));
 }
@@ -189,14 +181,14 @@ l_magic_list(lua_State *L)
 static int
 l_magic_load(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 	const char *filename;
 
-	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
+	cookie = checkcookie(L, 1, MAGIC_METATABLE);
 	filename = luaL_optstring(L, 2, NULL);
 
-	if (magic_load(*cookiep, filename) == -1) {
-		return (magicerr(L, *cookiep));
+	if (magic_load(cookie, filename) == -1) {
+		return (magicerr(L, cookie));
 	}
 	return (success(L));
 }
@@ -206,14 +198,14 @@ l_magic_load(lua_State *L)
 static int
 l_magic_getparam(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 	size_t limit;
 	int param;
 
-	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
+	cookie = checkcookie(L, 1, MAGIC_METATABLE);
 	param = luaL_checkinteger(L, 2);
 
-	if (magic_getparam(*cookiep, param, &limit) == -1) {
+	if (magic_getparam(cookie, param, &limit) == -1) {
 		return (luaL_error(L, "magic_getparam failed"));
 	}
 	lua_pushinteger(L, limit);
@@ -223,15 +215,15 @@ l_magic_getparam(lua_State *L)
 static int
 l_magic_setparam(lua_State *L)
 {
-	magic_t *cookiep;
+	magic_t cookie;
 	size_t limit;
 	int param;
 
-	cookiep = luaL_checkudata(L, 1, MAGIC_METATABLE);
+	cookie = checkcookie(L, 1, MAGIC_METATABLE);
 	param = luaL_checkinteger(L, 2);
 	limit = luaL_checkinteger(L, 3);
 
-	if (magic_setparam(*cookiep, param, &limit) == -1) {
+	if (magic_setparam(cookie, param, &limit) == -1) {
 		return (luaL_error(L, "magic_setparam failed"));
 	}
 	return (0);
@@ -279,14 +271,11 @@ int
 luaopen_magic(lua_State *L)
 {
 	luaL_newmetatable(L, MAGIC_METATABLE);
-
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
-
 	luaL_setfuncs(L, l_magic_meta, 0);
 
 	luaL_newlib(L, l_magic_funcs);
-
 #define DEFINE(ident) ({ \
 	lua_pushinteger(L, MAGIC_ ## ident); \
 	lua_setfield(L, -2, #ident); \
