@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd January 4, 2025
+.Dd January 4, 2026
 .Dt MAGIC 3lua
 .Os
 .Sh NAME
