@@ -108,7 +108,15 @@ Wraps
 Returns a
 .Vt userdata
 object.
-The object currently has no methods.
+.Pp
+The object supports dynamic read-only field access.
+Arrays and embedded structures are marshalled as tables, and pointers are
+marshalled as integers.
+Structures have field name prefixes removed.
+Access to padding fields is not provided.
+See the
+.Pa pcpu.h
+headers for further information on the available fields.
 .It Dv data, errmsg = kd:read_zpcpu(base , size , cpu )
 Wraps
 .Xr kvm_read_zpcpu 3 .
