@@ -238,12 +238,6 @@ l_pcpu_index(lua_State *L)
 
 	/* TODO: This mess should be machine-generated someday. */
 
-#define INTFIELD(name) ({ \
-	if (strcmp(field, #name) == 0) { \
-		lua_pushinteger(L, pcpu->pc_ ## name); \
-		return (1); \
-	} \
-})
 	/* TODO: convenient way to access the values behind the pointers */
 #define PTRFIELD(name) ({ \
 	if (strcmp(field, #name) == 0) { \
@@ -251,11 +245,9 @@ l_pcpu_index(lua_State *L)
 		return (1); \
 	} \
 })
-#define STQEFIELD(name) ({ \
+#define INTFIELD(name) ({ \
 	if (strcmp(field, #name) == 0) { \
-		lua_createtable(L, 0, 1); \
-		lua_pushinteger(L, (uintptr_t)pcpu->pc_ ## name.stqe_next); \
-		lua_setfield(L, -2, "next"); \
+		lua_pushinteger(L, pcpu->pc_ ## name); \
 		return (1); \
 	} \
 })
@@ -269,22 +261,6 @@ l_pcpu_index(lua_State *L)
 		return (1); \
 	} \
 })
-#define RMQUEUEFIELD(name) ({ \
-	if (strcmp(field, #name) == 0) { \
-		lua_createtable(L, 0, 2); \
-		lua_pushinteger(L, (uintptr_t)pcpu->pc_ ## name.rmq_next); \
-		lua_setfield(L, -2, "next"); \
-		lua_pushinteger(L, (uintptr_t)pcpu->pc_ ## name.rmq_prev); \
-		lua_setfield(L, -2, "prev"); \
-		return (1); \
-	} \
-})
-#define MTXFIELD(name) ({ \
-	if (strcmp(field, #name) == 0) { \
-		pushmtx(L, &pcpu->pc_ ## name); \
-		return (1); \
-	} \
-})
 	PTRFIELD(curthread);
 	PTRFIELD(idlethread);
 	PTRFIELD(fpcurthread);
@@ -294,14 +270,29 @@ l_pcpu_index(lua_State *L)
 	INTFIELD(switchtime);
 	INTFIELD(switchticks);
 	INTFIELD(cpuid);
-	STQEFIELD(allcpu);
+	if (strcmp(field, "allcpu") == 0) {
+		lua_createtable(L, 0, 1);
+		lua_pushinteger(L, (uintptr_t)pcpu->pc_allcpu.stqe_next);
+		lua_setfield(L, -2, "next");
+		return (1);
+	}
 	PTRFIELD(spinlocks);
 	INTSFIELD(cp_time, CPUSTATES);
 	PTRFIELD(device);
 	PTRFIELD(netisr);
 	INTFIELD(vfs_freevnodes);
 	INTFIELD(domain);
-	RMQUEUEFIELD(rm_queue);
+	if (strcmp(field, "rm_queue") == 0) {
+		lua_createtable(L, 0, 2);
+#define FIELD(name) ({ \
+		lua_pushinteger(L, (uintptr_t)pcpu->pc_rm_queue.rmq_ ## name); \
+		lua_setfield(L, -2, #name); \
+})
+		FIELD(next);
+		FIELD(prev);
+#undef FIELD
+		return (1);
+	}
 	INTFIELD(dynamic);
 	INTFIELD(early_dummy_counter);
 	INTFIELD(zpcpu_offset);
@@ -442,7 +433,10 @@ l_pcpu_index(lua_State *L)
 	INTFIELD(vfpmvfr0);
 	INTFIELD(vfpmvfr1);
 	PTRFIELD(curpmap);
-	MTXFIELD(cmap_lock);
+	if (strcmp(field, "cmap_lock") == 0) {
+		pushmtx(L, &pcpu->pc_cmap_lock);
+		return (1);
+	}
 	PTRFIELD(cmap1_pte2p);
 	PTRFIELD(cmap2_pte2p);
 	PTRFIELD(cmap1_addr);
@@ -474,20 +468,20 @@ l_pcpu_index(lua_State *L)
 	INTFIELD(qmap_addr);
 	if (strcmp(field, "aim") == 0) {
 		lua_newtable(L);
-#define AINTSFIELD(name, len) ({ \
-		lua_createtable(L, len, 0); \
-		for (int i = 0; i < len; i++) { \
-			lua_pushinteger(L, pcpu->pc_aim.name[i]); \
-			lua_rawseti(L, -2, i + 1); \
-		} \
+#define APTRFIELD(name) ({ \
+		lua_pushinteger(L, (uintptr_t)pcpu->pc_aim.name); \
 		lua_setfield(L, -2, #name); \
 })
 #define AINTFIELD(name) ({ \
 		lua_pushinteger(L, pcpu->pc_aim.name); \
 		lua_setfield(L, -2, #name); \
 })
-#define APTRFIELD(name) ({ \
-		lua_pushinteger(L, (uintptr_t)pcpu->pc_aim.name); \
+#define AINTSFIELD(name, len) ({ \
+		lua_createtable(L, len, 0); \
+		for (int i = 0; i < len; i++) { \
+			lua_pushinteger(L, pcpu->pc_aim.name[i]); \
+			lua_rawseti(L, -2, i + 1); \
+		} \
 		lua_setfield(L, -2, #name); \
 })
 #ifdef __powerpc64__
@@ -522,20 +516,20 @@ l_pcpu_index(lua_State *L)
 	}
 	if (strcmp(field, "booke") == 0) {
 		lua_newtable(L);
-#define BINTSFIELD(name, len) ({ \
-		lua_createtable(L, len, 0); \
-		for (int i = 0; i < len; i++) { \
-			lua_pushinteger(L, pcpu->pc_booke.name[i]); \
-			lua_rawseti(L, -2, i + 1); \
-		} \
+#define BPTRFIELD(name) ({ \
+		lua_pushinteger(L, (uintptr_t)pcpu->pc_booke.name); \
 		lua_setfield(L, -2, #name); \
 })
 #define BINTFIELD(name) ({ \
 		lua_pushinteger(L, pcpu->pc_booke.name); \
 		lua_setfield(L, -2, #name); \
 })
-#define BPTRFIELD(name) ({ \
-		lua_pushinteger(L, (uintptr_t)pcpu->pc_booke.name); \
+#define BINTSFIELD(name, len) ({ \
+		lua_createtable(L, len, 0); \
+		for (int i = 0; i < len; i++) { \
+			lua_pushinteger(L, pcpu->pc_booke.name[i]); \
+			lua_rawseti(L, -2, i + 1); \
+		} \
 		lua_setfield(L, -2, #name); \
 })
 		BINTSFIELD(critsave, BOOKE_CRITSAVE_LEN);
@@ -558,6 +552,9 @@ l_pcpu_index(lua_State *L)
 	INTFIELD(clock);
 #endif
 #endif
+#undef PTRFIELD
+#undef INTFIELD
+#undef INTSFIELD
 	/* No field name match. */
 	return (0);
 }
