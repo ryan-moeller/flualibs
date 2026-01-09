@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Ryan Moeller
+ * Copyright (c) 2024-2026 Ryan Moeller
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -13,6 +13,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 
+#include "signal/lua_signal.h"
 #include "utils.h"
 
 #define MQD_METATABLE "mqd_t"
@@ -125,6 +126,26 @@ l_mq_setattr(lua_State *L)
 	attr.mq_flags = luaL_checkinteger(L, 2);
 
 	if (mq_setattr(*mqp, &attr, NULL) == -1) {
+		return (fail(L, errno));
+	}
+	return (success(L));
+}
+
+static int
+l_mq_notify(lua_State *L)
+{
+	struct sigevent notification, *notificationp;
+	mqd_t *mqp;
+
+	mqp = luaL_checkudata( L, 1, MQD_METATABLE);
+	if (lua_isnoneornil(L, 2)) {
+		notificationp = NULL;
+	} else {
+		notificationp = &notification;
+		checksigevent(L, 2, notificationp);
+	}
+
+	if (mq_notify(*mqp, notificationp) == -1) {
 		return (fail(L, errno));
 	}
 	return (success(L));
@@ -249,9 +270,6 @@ l_mq_gc(lua_State *L)
 	mqd_t mq, *mqp;
 
 	mqp = luaL_checkudata(L, 1, MQD_METATABLE);
-	if (mqp == NULL) {
-		return (0);
-	}
 	mq = *mqp;
 	if (mq == (mqd_t)-1) {
 		return (0);
@@ -275,6 +293,7 @@ static const struct luaL_Reg l_mqd_meta[] = {
 	{"close", l_mq_close},
 	{"getattr", l_mq_getattr},
 	{"setattr", l_mq_setattr},
+	{"notify", l_mq_notify},
 	{"send", l_mq_send},
 	{"receive", l_mq_receive},
 	{"timedsend", l_mq_timedsend},
