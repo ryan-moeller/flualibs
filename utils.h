@@ -139,6 +139,25 @@ checkcookie(lua_State *L, int idx, const char *metatable)
 	return (cookie);
 }
 
+static inline void *
+testcookie(lua_State *L, int idx, const char *metatable)
+{
+	void *cookie = NULL;
+
+	if (lua_getmetatable(L, idx)) {
+		luaL_getmetatable(L, metatable);
+		if (lua_rawequal(L, -1, -2)) {
+			if (getcookie(L, idx) == LUA_TLIGHTUSERDATA) {
+				cookie = lua_touserdata(L, -1);
+			}
+			lua_pop(L, 3);
+		} else {
+			lua_pop(L, 2);
+		}
+	}
+	return (cookie);
+}
+
 static inline int
 checkfd(lua_State *L, int idx)
 {
