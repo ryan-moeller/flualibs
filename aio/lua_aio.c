@@ -19,6 +19,7 @@
 
 #include "sys/uio/lua_uio.h"
 #include "libpthread/refcount.h"
+#include "signal/lua_signal.h"
 #include "luaerror.h"
 #include "utils.h"
 
@@ -263,7 +264,9 @@ l_aiocb_shared(lua_State *L)
 		break;
 	}
 	cb->aio_lio_opcode = luaL_optinteger(L, 4, 0);
-	/* TODO: cb->aio_sigevent */
+	if (!lua_isnoneornil(L, 5)) {
+		checksigevent(L, 5, &cb->aio_sigevent);
+	}
 	return (1);
 }
 
@@ -401,7 +404,6 @@ l_aiocb_index(lua_State *L)
 	INTFIELD(offset);
 	INTFIELD(lio_opcode);
 #undef INTFIELD
-	/* TODO: aio_sigevent */
 	if (strcmp(field, "buf") == 0) {
 		if (aiocb_isvector(cb)) {
 			/* XXX: could concat */
@@ -437,6 +439,10 @@ l_aiocb_index(lua_State *L)
 			getref(L, 1);
 			tcopy(L, -1);
 		}
+		return (1);
+	}
+	if (strcmp(field, "sigevent") == 0) {
+		pushsigevent(L, &cb->aio_sigevent);
 		return (1);
 	}
 	/* No matching field name. */
@@ -712,12 +718,19 @@ rollback_states(struct aiocb **cbs, enum aiocb_state *states, size_t n)
 static int
 l_lio_listio(lua_State *L)
 {
+	struct sigevent sig, *sigp;
 	struct aiocb **cbs;
 	enum aiocb_state *states;
 	int mode, nent, i;
 
 	mode = luaL_checkinteger(L, 1);
 	luaL_checktype(L, 3, LUA_TTABLE);
+	if (lua_isnoneornil(L, 4)) {
+		sigp = NULL;
+	} else {
+		sigp = &sig;
+		checksigevent(L, 4, sigp);
+	}
 
 	nent = luaL_len(L, 2);
 	/* Allocate the arrays as userdata for automatic cleanup. */
@@ -744,8 +757,7 @@ l_lio_listio(lua_State *L)
 		cbs[i] = &rccb->cb;
 		lua_pop(L, 1);
 	}
-	/* TODO: sigevent (signal module) */
-	if (lio_listio(mode, cbs, nent, NULL) == -1) {
+	if (lio_listio(mode, cbs, nent, sigp) == -1) {
 		int error = errno;
 
 		rollback_states(cbs, states, nent);

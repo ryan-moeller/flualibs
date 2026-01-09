@@ -17,9 +17,9 @@ aio = require('aio')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv cb = aio.aiocb.shared(fd | file , offset , bufdesc[ , lio_opcode ] )
+.It Dv cb = aio.aiocb.shared(fd | file , offset , bufdesc[ , lio_opcode[ , sigevent ] ] )
 .It Dv cb = aio.aiocb.retain(cookie )
-.It Dv ok, errmsg, errcode = aio.listio(mode , cbs )
+.It Dv ok, errmsg, errcode = aio.listio(mode , cbs[ , sigevent ] )
 .It Dv status, errmsg, errcode = aio.cancel(fd | file )
 .It Dv ok, errmsg, errcode = aio.suspend(cbs[ , timeout_sec[ , timeout_nsec ] ] )
 .It Dv cb, result_or_errmsg, errcode = aio.waitcomplete([timeout_sec[ , timeout_nsec ] ] )
@@ -56,7 +56,7 @@ module provides bindings for the
 .Xr aio 4
 system calls.
 .Bl -tag -width XXXX
-.It Dv cb = aio.aiocb.shared(fd | file , offset , bufdesc[ , lio_opcode ] )
+.It Dv cb = aio.aiocb.shared(fd | file , offset , bufdesc[ , lio_opcode[ , sigevent ] ] )
 Allocate and initialize a new reference-counted AIO request
 .Vt struct aiocb
 userdata object.
@@ -87,7 +87,7 @@ open while in use.
 Retain a reference to an existing AIO request object, referring to the request
 that produced
 .Fa cookie .
-.It Dv ok, errmsg, errcode = aio.listio(mode , cbs )
+.It Dv ok, errmsg, errcode = aio.listio(mode , cbs[ , sigevent ] )
 Wraps
 .Xr lio_listio 2 .
 .It Dv status, errmsg, errcode = aio.cancel(fd | file )
@@ -171,7 +171,10 @@ print(string.sub(cb.buf, 0, len))
 f:close()
 .Ed
 .Sh SEE ALSO
+.Xr sigevent 3 ,
+.Xr signal 3lua ,
 .Xr sys.uio 3lua ,
-.Xr unistd 3lua
+.Xr unistd 3lua ,
+.Xr aio 4
 .Sh AUTHORS
 .An Ryan Moeller
