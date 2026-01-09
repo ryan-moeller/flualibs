@@ -1,0 +1,177 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd January 9, 2026
+.Dt AIO 3lua
+.Os
+.Sh NAME
+.Nm aio
+.Nd Lua bindings for
+.Xr aio 4
+system calls
+.Sh SYNOPSIS
+.Bd -literal
+aio = require('aio')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv cb = aio.aiocb.shared(fd | file , offset , bufdesc[ , lio_opcode ] )
+.It Dv cb = aio.aiocb.retain(cookie )
+.It Dv ok, errmsg, errcode = aio.listio(mode , cbs )
+.It Dv status, errmsg, errcode = aio.cancel(fd | file )
+.It Dv ok, errmsg, errcode = aio.suspend(cbs[ , timeout_sec[ , timeout_nsec ] ] )
+.It Dv cb, result_or_errmsg, errcode = aio.waitcomplete([timeout_sec[ , timeout_nsec ] ] )
+.It Dv value = cb[field]
+.It Dv cookie = cb:cookie( )
+.It Dv ok, errmsg, errcode = cb:read([flags ] )
+.It Dv ok, errmsg, errcode = cb:write([flags ] )
+.It Dv msg, code_or_errmsg, errcode = cb:error( )
+.It Dv status, errmsg, errcode = cb:_return( )
+.It Dv status, errmsg, errcode = cb:cancel( )
+.It Dv ok, errmsg, errcode = cb:suspend([timeout_sec[ , timeout_nsec ] ] )
+.It Dv ok, errmsg, errcode = cb:mlock( )
+.It Dv ok, errmsg, errcode = cb:fsync(op )
+.It Dv aio.AIO_CANCELED
+.It Dv aio.AIO_NOTCANCELED
+.It Dv aio.AIO_ALLDONE
+.It Dv aio.LIO_NOP
+.It Dv aio.LIO_WRITE
+.It Dv aio.LIO_READ
+.It Dv aio.LIO_VECTORED
+.It Dv aio.LIO_WRITEV
+.It Dv aio.LIO_READV
+.It Dv aio.LIO_FOFFSET
+.It Dv aio.AIO_OP2_FOFFSET
+.It Dv aio.AIO_OP2_VECTORED
+.It Dv aio.LIO_NOWAIT
+.It Dv aio.LIO_WAIT
+.It Dv aio.AIO_LISTIO_MAX
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for the
+.Xr aio 4
+system calls.
+.Bl -tag -width XXXX
+.It Dv cb = aio.aiocb.shared(fd | file , offset , bufdesc[ , lio_opcode ] )
+Allocate and initialize a new reference-counted AIO request
+.Vt struct aiocb
+userdata object.
+The returned object is a reference to the request.
+The request itself is backed by storage allocated from the heap, independent of
+any Lua state.
+It is freed to the heap when all references to it have been collected by GC.
+.Pp
+.Fa bufdesc
+describes the buffer for the request.
+It can be
+.Dv nil
+for operations that will not use a buffer.
+The value may be a
+.Vt string
+or an array of strings for write operations.
+Otherwise, the value should be an
+.Vt integer
+or an array of integers that will used
+to size the read buffer allocations.
+.Pp
+The caller is responsible for keeping
+.Fa fd
+or
+.Fa file
+open while in use.
+.It Dv cb = aio.aiocb.retain(cookie )
+Retain a reference to an existing AIO request object, referring to the request
+that produced
+.Fa cookie .
+.It Dv ok, errmsg, errcode = aio.listio(mode , cbs )
+Wraps
+.Xr lio_listio 2 .
+.It Dv status, errmsg, errcode = aio.cancel(fd | file )
+Wraps
+.Xr aio_cancel 2 .
+.It Dv ok, errmsg, errcode = aio.suspend(cbs[ , timeout_sec[ , timeout_nsec ] ] )
+Wraps
+.Xr aio_suspend 2 .
+.It Dv cb, result_or_errmsg, errcode = aio.waitcomplete([timeout_sec[ , timeout_nsec ] ] )
+Wraps
+.Xr aio_waitcomplete 2 .
+The returned request may be any outstanding AIO request originating from any
+thread in the process, even from outside of Lua.
+The caller is responsible for ensuring
+.Xr aio_return 2
+is not called for any pending request in any thread in this process, and that
+only this module is submitting AIO requests for this process.
+Use at your own risk.
+.It Dv value = cb[field]
+Read-only access to
+.Vt struct aiocb
+fields.
+The
+.Li aio_
+prefix is not included in field names.
+.It Dv cookie = cb:cookie( )
+Obtain a
+.Vt lightuserdata
+value that can be shared between threads and used to retain a reference to the
+value referred to by
+.Va cb .
+The cookie itself does not constitute a reference.
+.It Dv ok, errmsg, errcode = cb:read([flags ] )
+Wraps
+.Xr aio_read2 2
+for a singular buffer or
+.Xr aio_readv 2
+for a buffer array.
+.It Dv ok, errmsg, errcode = cb:write([flags ] )
+Wraps
+.Xr aio_write2 2
+for a singluar buffer or
+.Xr aio_writev 2
+for a buffer array.
+.It Dv msg, code_or_errmsg, errcode = cb:error( )
+Wraps
+.Xr aio_error 2
+and
+.Xr strerror_r 3 .
+.It Dv status, errmsg, errcode = cb:_return( )
+Wraps
+.Xr aio_return 2 .
+.Dv return
+is a keyword in Lua, so the method name is prefixed with an underscore.
+.It Dv status, errmsg, errcode = cb:cancel( )
+Wraps
+.Xr aio_cancel 2 .
+.It Dv ok, errmsg, errcode = cb:suspend([timeout_sec[ , timeout_nsec ] ] )
+Wraps
+.Xr aio_suspend 2 .
+.It Dv ok, errmsg, errcode = cb:mlock( )
+Wraps
+.Xr aio_mlock 2 .
+.It Dv ok, errmsg, errcode = cb:fsync(op )
+Wraps
+.Xr aio_fsync 2 .
+.El
+.Sh EXAMPLES
+Submit and wait for completion of an asynchronous read:
+.Bd -literal -offset indent
+aio = require('aio')
+
+f = io.open('/COPYRIGHT')
+
+cb = aio.aiocb.shared(f, 0, 16384)
+assert(cb:read())
+assert(cb:suspend())
+len = assert(cb:_return())
+print(string.sub(cb.buf, 0, len))
+
+f:close()
+.Ed
+.Sh SEE ALSO
+.Xr sys.uio 3lua ,
+.Xr unistd 3lua
+.Sh AUTHORS
+.An Ryan Moeller

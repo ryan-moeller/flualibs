@@ -1,4 +1,5 @@
 SUBDIR= \
+	aio \
 	b64 \
 	capsicum_helpers \
 	dirent \
