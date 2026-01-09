@@ -19,6 +19,7 @@ SUBDIR= \
 	netinet \
 	pwd \
 	readpassphrase \
+	signal \
 	stdio \
 	sys \
 	syslog \

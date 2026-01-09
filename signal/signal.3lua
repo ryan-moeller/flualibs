@@ -1,0 +1,167 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd January 9, 2026
+.Dt SIGNAL 3lua
+.Os
+.Sh NAME
+.Nm signal
+.Nd Lua bindings for
+libc software signal facilities
+.Sh SYNOPSIS
+.Bd -literal
+local signal = require('signal')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv signal.SIGHUP
+.It Dv signal.SIGINT
+.It Dv signal.SIGQUIT
+.It Dv signal.SIGILL
+.It Dv signal.SIGTRAP
+.It Dv signal.SIGABRT
+.It Dv signal.SIGIOT
+.It Dv signal.SIGEMT
+.It Dv signal.SIGFPE
+.It Dv signal.SIGKILL
+.It Dv signal.SIGBUS
+.It Dv signal.SIGSEGV
+.It Dv signal.SIGSYS
+.It Dv signal.SIGPIPE
+.It Dv signal.SIGALRM
+.It Dv signal.SIGTERM
+.It Dv signal.SIGURG
+.It Dv signal.SIGSTOP
+.It Dv signal.SIGTSTP
+.It Dv signal.SIGCONT
+.It Dv signal.SIGCHLD
+.It Dv signal.SIGTTIN
+.It Dv signal.SIGTTOU
+.It Dv signal.SIGIO
+.It Dv signal.SIGXCPU
+.It Dv signal.SIGXFSZ
+.It Dv signal.SIGVTALRM
+.It Dv signal.SIGPROF
+.It Dv signal.SIGWINCH
+.It Dv signal.SIGINFO
+.It Dv signal.SIGUSR1
+.It Dv signal.SIGUSR2
+.It Dv signal.SIGTHR
+.It Dv signal.SIGLWP
+.It Dv signal.SIGLIBRT
+.It Dv signal.SIGRTMIN
+.It Dv signal.SIGRTMAX
+.It Dv signal.SIG_DFL
+.It Dv signal.SIG_IGN
+.It Dv signal.SIG_ERR
+.It Dv signal.SIG_HOLD
+.It Dv signal.SIGEV_NONE
+.It Dv signal.SIGEV_SIGNAL
+.It Dv signal.SIGEV_THREAD
+.It Dv signal.SIGEV_KEVENT
+.It Dv signal.SIGEV_THREAD_ID
+.It Dv signal.ILL_ILLOPC
+.It Dv signal.ILL_ILLOPN
+.It Dv signal.ILL_ILLADR
+.It Dv signal.ILL_PRVOPC
+.It Dv signal.ILL_PRVREG
+.It Dv signal.ILL_COPROC
+.It Dv signal.ILL_BADSTK
+.It Dv signal.BUS_ADRALN
+.It Dv signal.BUS_ADRERR
+.It Dv signal.BUS_OBJERR
+.It Dv signal.BUS_OOMERR
+.It Dv signal.SEGV_MAPERR
+.It Dv signal.SEGV_ACCERR
+.It Dv signal.SEGV_PKUERR
+.It Dv signal.FPE_INTOVF
+.It Dv signal.FPE_INTDIV
+.It Dv signal.FPE_FLTDIV
+.It Dv signal.FPE_FLTOVF
+.It Dv signal.FPE_FLTUND
+.It Dv signal.FPE_FLTRES
+.It Dv signal.FPE_FLTINV
+.It Dv signal.FPE_FLTSUB
+.It Dv signal.FPE_FLTIDO
+.It Dv signal.TRAP_BRKPT
+.It Dv signal.TRAP_TRACE
+.It Dv signal.TRAP_DTRACE
+.It Dv signal.TRAP_CAP
+.It Dv signal.CLD_EXITED
+.It Dv signal.CLD_KILLED
+.It Dv signal.CLD_DUMPED
+.It Dv signal.CLD_TRAPPED
+.It Dv signal.CLD_STOPPED
+.It Dv signal.CLD_CONTINUED
+.It Dv signal.POLL_IN
+.It Dv signal.POLL_OUT
+.It Dv signal.POLL_MSG
+.It Dv signal.POLL_ERR
+.It Dv signal.POLL_PRI
+.It Dv signal.POLL_HUP
+.It Dv signal.SA_ONSTACK
+.It Dv signal.SA_RESTART
+.It Dv signal.SA_RESETHAND
+.It Dv signal.SA_NODEFER
+.It Dv signal.SA_NOCLDWAIT
+.It Dv signal.SA_SIGINFO
+.It Dv signal.NSIG
+.It Dv signal.SI_NOINFO
+.It Dv signal.SI_USER
+.It Dv signal.SI_QUEUE
+.It Dv signal.SI_TIMER
+.It Dv signal.SI_ASYNCIO
+.It Dv signal.SI_MESGQ
+.It Dv signal.SI_KERNEL
+.It Dv signal.SI_LWP
+.It Dv signal.SI_UNDEFINED
+.It Dv signal.BADSIG
+.It Dv signal.SIG_BLOCK
+.It Dv signal.SIG_UNBLOCK
+.It Dv signal.SIG_SETMASK
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for the software signal facilities in libc.
+.Pp
+.Vt struct sigevent
+function parameters are specified as a table of the form
+.Bd -literal -compact
+{
+	notify = <integer>,
+	notify_kqueue = <integer>,
+	notify_kevent_flags = <integer>,
+	notify_thread_id = <integer>,
+	signo = <integer>,
+	value = <lightuserdata | integer>,
+}
+.Ed
+where the whole structure is initially zeroed, then any fields present are set.
+Note that several field names alias the same structure fields.
+The result when multiple table fields aliased to the same structure field are
+provided is undefined.
+.Pp
+.Vt struct sigevent
+return values have a similar form:
+.Bd -literal -compact
+{
+	notify = <integer>,
+	notify_kqueue = <integer>,
+	notify_kevent_flags = <integer>,
+	notify_thread_id = <integer>,
+	signo = <integer>,
+	value = {
+		ptr = <lightuserdata>,
+		int = <integer>,
+	},
+}
+.Ed
+.Sh SEE ALSO
+.Xr sigaction 2 ,
+.Xr sigevent 3 ,
+.Xr signal 3
+.Sh AUTHORS
+.An Ryan Moeller
