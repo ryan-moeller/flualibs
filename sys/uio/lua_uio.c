@@ -34,6 +34,7 @@ l_readv(lua_State *L)
 		return (fail(L, error));
 	}
 	pushriovecs(L, iovs, niov);
+	freeriovecs(iovs, niov);
 	lua_pushinteger(L, len);
 	return (2);
 }
@@ -58,6 +59,7 @@ l_preadv(lua_State *L)
 		return (fail(L, error));
 	}
 	pushriovecs(L, iovs, niov);
+	freeriovecs(iovs, niov);
 	lua_pushinteger(L, len);
 	return (2);
 }

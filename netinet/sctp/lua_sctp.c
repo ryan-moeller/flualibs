@@ -549,6 +549,7 @@ l_sctp_recvv(lua_State *L)
 		return (fail(L, errno));
 	}
 	pushriovecs(L, iov, iovlen);
+	freeriovecs(iov, iovlen);
 	lua_pushinteger(L, len);
 	pushaddr(L, from);
 	pushrecvvinfo(L, &info, infotype);

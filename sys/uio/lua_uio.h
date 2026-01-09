@@ -63,7 +63,6 @@ pushriovecs(lua_State *L, struct iovec *iovs, size_t n)
 		lua_pushlstring(L, iovs[i].iov_base, iovs[i].iov_len);
 		lua_rawseti(L, -2, i + 1);
 	}
-	freeriovecs(iovs, n);
 }
 
 static inline struct iovec *
