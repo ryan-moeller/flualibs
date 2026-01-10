@@ -422,7 +422,7 @@ l_aiocb_index(lua_State *L)
 		return (1);
 	}
 	if (strcmp(field, "iov") == 0) {
-		if (aiocb_isvector(cb)) {
+		if (!aiocb_isvector(cb)) {
 			/* XXX: could pack */
 			return (0);
 		}
