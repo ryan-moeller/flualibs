@@ -86,6 +86,13 @@ l_kevent(lua_State *L)
 			ident = lua_tointeger(L, -1);
 			lua_pop(L, 1);
 
+			/* Some event sources put a pointer in ident. */
+			type = lua_getfield(L, -1, "cookie");
+			luaL_argcheck(L, type == LUA_TLIGHTUSERDATA, 2,
+			    "`changelist' invalid cookie");
+			ident = (uintptr_t)lua_touserdata(L, -1);
+			lua_pop(L, 1);
+
 			type = lua_getfield(L, -1, "filter");
 			luaL_argcheck(L, type == LUA_TNUMBER, 2,
 			    "`changelist' invalid filter");
@@ -145,6 +152,11 @@ l_kevent(lua_State *L)
 
 	lua_pushstring(L, "ident");
 	lua_pushinteger(L, event.ident);
+	lua_rawset(L, -3);
+
+	/* Some event sources put a pointer in ident (e.g. AIO). */
+	lua_pushstring(L, "cookie");
+	lua_pushlightuserdata(L, (void *)event.ident);
 	lua_rawset(L, -3);
 
 	lua_pushstring(L, "filter");

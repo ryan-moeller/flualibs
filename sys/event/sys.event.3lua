@@ -138,7 +138,7 @@ local function insert_change(ident, filter, flags, handler)
 	table.insert(changelist, {
 		-- Only ident, filter, and flags are required.  The rest of the
 		-- fields may be nil if not used.
-		ident = ident,
+		ident = ident, -- ident = <integer> or cookie = <lightuserdata>
 		filter = filter,
 		flags = flags,
 		-- These fields default to 0 if nil.
