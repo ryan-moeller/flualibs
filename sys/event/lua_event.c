@@ -80,18 +80,20 @@ l_kevent(lua_State *L)
 			luaL_argcheck(L, type == LUA_TTABLE, 2,
 			    "`changelist' invalid");
 
-			type = lua_getfield(L, -1, "ident");
-			luaL_argcheck(L, type == LUA_TNUMBER, 2,
-			    "`changelist' invalid ident");
-			ident = lua_tointeger(L, -1);
-			lua_pop(L, 1);
-
-			/* Some event sources put a pointer in ident. */
-			type = lua_getfield(L, -1, "cookie");
-			luaL_argcheck(L, type == LUA_TLIGHTUSERDATA, 2,
-			    "`changelist' invalid cookie");
-			ident = (uintptr_t)lua_touserdata(L, -1);
-			lua_pop(L, 1);
+			/* Accept "cookie" as an alias for "ident" field. */
+			if (lua_getfield(L, -1, "cookie")
+			    == LUA_TLIGHTUSERDATA) {
+				/* Some event sources put a pointer in ident. */
+				ident = (uintptr_t)lua_touserdata(L, -1);
+				lua_pop(L, 1);
+			} else if (lua_getfield(L, -2, "ident")
+			    == LUA_TNUMBER) {
+				ident = lua_tointeger(L, -1);
+				lua_pop(L, 2);
+			} else {
+				return (luaL_argerror(L, 2,
+				    "`changelist' invalid ident"));
+			}
 
 			type = lua_getfield(L, -1, "filter");
 			luaL_argcheck(L, type == LUA_TNUMBER, 2,
