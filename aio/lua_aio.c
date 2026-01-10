@@ -290,7 +290,6 @@ l_aiocb_retain(lua_State *L)
 	return (new(L, rccb, AIOCB_METATABLE));
 }
 
-
 static int
 l_aiocb_local(lua_State *L)
 {
