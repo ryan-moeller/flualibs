@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd January 9, 2026
+.Dd January 10, 2026
 .Dt SYS.EVENT 3lua
 .Os
 .Sh NAME
@@ -17,11 +17,79 @@ local event = require('sys.event')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv kq, err, code = event.kqueue( )
+.It Dv kq, errmsg, errcode = event.kqueue([flags ] )
 .It Dv kq = event.wrap(fd )
-.It Dv event, err, code = kq:kevent([changelist ] )
-.It Dv ok, err, code = kq:close( )
+.It Dv event, errmsg, errcode = kq:kevent([changelist ] )
+.It Dv ok, errmsg, errcode = kq:close( )
 .It Dv fd = kq:fileno()
+.It Dv event.EV_ADD
+.It Dv event.EV_DELETE
+.It Dv event.EV_ENABLE
+.It Dv event.EV_DISABLE
+.It Dv event.EV_FORCEONESHOT
+.It Dv event.EV_KEEPUDATA
+.It Dv event.EV_ONESHOT
+.It Dv event.EV_CLEAR
+.It Dv event.EV_RECEIPT
+.It Dv event.EV_DISPATCH
+.It Dv event.EV_EOF
+.It Dv event.EV_ERROR
+.It Dv event.EVFILT_READ
+.It Dv event.EVFILT_WRITE
+.It Dv event.EVFILT_AIO
+.It Dv event.EVFILT_VNODE
+.It Dv event.EVFILT_PROC
+.It Dv event.EVFILT_SIGNAL
+.It Dv event.EVFILT_TIMER
+.It Dv event.EVFILT_PROCDESC
+.It Dv event.EVFILT_FS
+.It Dv event.EVFILT_LIO
+.It Dv event.EVFILT_USER
+.It Dv event.EVFILT_SENDFILE
+.It Dv event.EVFILT_EMPTY
+.It Dv event.EVFILT_JAIL
+.It Dv event.EVFILT_JAILDESC
+.It Dv event.NOTE_FFNOP
+.It Dv event.NOTE_FFAND
+.It Dv event.NOTE_FFOR
+.It Dv event.NOTE_FFCOPY
+.It Dv event.NOTE_FFCTRLMASK
+.It Dv event.NOTE_FFLAGSMASK
+.It Dv event.NOTE_TRIGGER
+.It Dv event.NOTE_LOWAT
+.It Dv event.NOTE_FILE_POLL
+.It Dv event.NOTE_DELETE
+.It Dv event.NOTE_WRITE
+.It Dv event.NOTE_EXTEND
+.It Dv event.NOTE_ATTRIB
+.It Dv event.NOTE_LINK
+.It Dv event.NOTE_RENAME
+.It Dv event.NOTE_REVOKE
+.It Dv event.NOTE_OPEN
+.It Dv event.NOTE_CLOSE
+.It Dv event.NOTE_CLOSE_WRITE
+.It Dv event.NOTE_READ
+.It Dv event.NOTE_EXIT
+.It Dv event.NOTE_FORK
+.It Dv event.NOTE_EXEC
+.It Dv event.NOTE_PCTRLMASK
+.It Dv event.NOTE_PDATAMASK
+.It Dv event.NOTE_TRACK
+.It Dv event.NOTE_TRACKERR
+.It Dv event.NOTE_CHILD
+.It Dv event.NOTE_JAIL_CHILD
+.It Dv event.NOTE_JAIL_SET
+.It Dv event.NOTE_JAIL_ATTACH
+.It Dv event.NOTE_JAIL_REMOVE
+.It Dv event.NOTE_JAIL_MULTI
+.It Dv event.NOTE_JAIL_CTRLMASK
+.It Dv event.NOTE_SECONDS
+.It Dv event.NOTE_MSECONDS
+.It Dv event.NOTE_USECONDS
+.It Dv event.NOTE_NSECONDS
+.It Dv event.NOTE_ABSTIME
+.It Dv event.KQUEUE_CLOEXEC
+.It Dv event.KQUEUE_CPONFORK
 .El
 .Sh DESCRIPTION
 The
@@ -32,19 +100,21 @@ and
 .Xr kevent 2
 system calls.
 .Bl -tag -width XXXX
-.It Dv kq, err, code = event.kqueue( )
+.It Dv kq, errmsg, errcode = event.kqueue([flags ] )
 Create a new kernel event queue and return a descriptor.
-This is implemented as kqueuex(KQUEUE_CLOEXEC) so the returned
-file descriptor is automatically closed on execve(2).
+Wraps
+.Xr kqueuex 2 .
 .It Dv kq = event.wrap(fd )
-Wrap a raw kqueue descriptor number in a
+Wrap an existing raw kqueue descriptor number in a
 .Vt userdata
 object.
-.It Dv event, err, code = kq:kevent([changelist ] )
+.It Dv event, errmsg, errcode = kq:kevent([changelist ] )
+Wraps
+.Xr kevent 2 .
 Apply an optional
 .Fa changelist
 to the queue and wait for an event to return.
-.It Dv ok, err, code = kq:close( )
+.It Dv ok, errmsg, errcode = kq:close( )
 Close the kernel event queue descriptor.
 .It Dv fd = kq:fileno()
 Get the underlying file descriptor number for the queue.

@@ -24,18 +24,16 @@ int luaopen_sys_event(lua_State *);
 static int
 l_kqueue(lua_State *L)
 {
-	int kq, *kqp;
+	int *kqp, kq;
+	u_int flags;
+
+	flags = luaL_optinteger(L, 1, 0);
 
 	kqp = lua_newuserdatauv(L, sizeof(int), 0);
-	luaL_setmetatable(L, KQUEUE_METATABLE);
-	*kqp = -1;
-
-	kq = kqueuex(KQUEUE_CLOEXEC);
-	if (kq == -1) {
+	if ((*kqp = kqueuex(flags)) == -1) {
 		return (fail(L, errno));
 	}
-	*kqp = kq;
-
+	luaL_setmetatable(L, KQUEUE_METATABLE);
 	return (1);
 }
 
@@ -252,28 +250,42 @@ luaopen_sys_event(lua_State *L)
 	lua_setfield(L, -2, #ident); \
 })
 	DEFINE(EV_ADD);
+	DEFINE(EV_DELETE);
 	DEFINE(EV_ENABLE);
 	DEFINE(EV_DISABLE);
-	DEFINE(EV_DISPATCH);
-	DEFINE(EV_DELETE);
-	DEFINE(EV_RECEIPT);
-	DEFINE(EV_ONESHOT);
-	DEFINE(EV_CLEAR);
-	DEFINE(EV_EOF);
-	DEFINE(EV_ERROR);
+	DEFINE(EV_FORCEONESHOT);
 #ifdef EV_KEEPUDATA
 	DEFINE(EV_KEEPUDATA);
 #endif
+
+	DEFINE(EV_ONESHOT);
+	DEFINE(EV_CLEAR);
+	DEFINE(EV_RECEIPT);
+	DEFINE(EV_DISPATCH);
+
+	DEFINE(EV_EOF);
+	DEFINE(EV_ERROR);
+
 	DEFINE(EVFILT_READ);
 	DEFINE(EVFILT_WRITE);
-	DEFINE(EVFILT_EMPTY);
 	DEFINE(EVFILT_AIO);
 	DEFINE(EVFILT_VNODE);
 	DEFINE(EVFILT_PROC);
-	DEFINE(EVFILT_PROCDESC);
 	DEFINE(EVFILT_SIGNAL);
 	DEFINE(EVFILT_TIMER);
+	DEFINE(EVFILT_PROCDESC);
+	DEFINE(EVFILT_FS);
+	DEFINE(EVFILT_LIO);
 	DEFINE(EVFILT_USER);
+	DEFINE(EVFILT_SENDFILE);
+	DEFINE(EVFILT_EMPTY);
+#ifdef EVFILT_JAIL
+	DEFINE(EVFILT_JAIL);
+#endif
+#ifdef EVFILT_JAILDESC
+	DEFINE(EVFILT_JAILDESC);
+#endif
+
 	DEFINE(NOTE_FFNOP);
 	DEFINE(NOTE_FFAND);
 	DEFINE(NOTE_FFOR);
@@ -302,11 +314,34 @@ luaopen_sys_event(lua_State *L)
 	DEFINE(NOTE_TRACK);
 	DEFINE(NOTE_TRACKERR);
 	DEFINE(NOTE_CHILD);
+#ifdef NOTE_JAIL_CHILD
+	DEFINE(NOTE_JAIL_CHILD);
+#endif
+#ifdef NOTE_JAIL_SET
+	DEFINE(NOTE_JAIL_SET);
+#endif
+#ifdef NOTE_JAIL_ATTACH
+	DEFINE(NOTE_JAIL_ATTACH);
+#endif
+#ifdef NOTE_JAIL_REMOVE
+	DEFINE(NOTE_JAIL_REMOVE);
+#endif
+#ifdef NOTE_JAIL_MULTI
+	DEFINE(NOTE_JAIL_MULTI);
+#endif
+#ifdef NOTE_JAIL_CTRLMASK
+	DEFINE(NOTE_JAIL_CTRLMASK);
+#endif
 	DEFINE(NOTE_SECONDS);
 	DEFINE(NOTE_MSECONDS);
 	DEFINE(NOTE_USECONDS);
 	DEFINE(NOTE_NSECONDS);
 	DEFINE(NOTE_ABSTIME);
+
+	DEFINE(KQUEUE_CLOEXEC);
+#ifdef KQUEUE_CPONFORK
+	DEFINE(KQUEUE_CPONFORK);
+#endif
 #undef DEFINE
 	return (1);
 }
