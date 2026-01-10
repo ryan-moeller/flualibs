@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 25, 2025
+.Dd January 9, 2026
 .Dt SYS.EVENT 3lua
 .Os
 .Sh NAME
@@ -20,6 +20,7 @@ local event = require('sys.event')
 .It Dv kq, err, code = event.kqueue( )
 .It Dv event, err, code = kq:kevent([changelist ] )
 .It Dv ok, err, code = kq:close( )
+.It Dv fd = kq:fileno()
 .El
 .Sh DESCRIPTION
 The
@@ -40,6 +41,8 @@ Apply an optional
 to the queue and wait for an event to return.
 .It Dv ok, err, code = kq:close( )
 Close the kernel event queue descriptor.
+.It Dv fd = kq:fileno()
+Get the underlying file descriptor number for the queue.
 .El
 .Sh EXAMPLES
 Wait for stdin to be readable using kqueue:

@@ -181,6 +181,20 @@ l_close(struct lua_State *L)
 }
 
 static int
+l_fileno(lua_State *L)
+{
+	int *kqp, kq;
+
+	kqp = luaL_checkudata(L, 1, KQUEUE_METATABLE);
+	kq = *kqp;
+	if (kq == -1) {
+		return (0);
+	}
+	lua_pushinteger(L, kq);
+	return (1);
+}
+
+static int
 l_gc(struct lua_State *L)
 {
 	int kq, *kqp;
@@ -206,6 +220,7 @@ static const struct  luaL_Reg l_kqueue_meta[] = {
 	{"__gc", l_gc},
 	{"close", l_close},
 	{"kevent", l_kevent},
+	{"fileno", l_fileno},
 	{NULL, NULL}
 };
 
