@@ -66,7 +66,10 @@ l_kevent(lua_State *L)
 		luaL_argcheck(L, lua_type(L, 2) == LUA_TTABLE, 2,
 		    "`changelist' expected");
 		nchanges = luaL_len(L, 2);
-		changelist = malloc(nchanges * sizeof(struct kevent));
+		if ((changelist = malloc(nchanges * sizeof(struct kevent)))
+		    == NULL) {
+			return (fatal(L, "malloc", ENOMEM));
+		}
 		for (size_t i = 1; i <= nchanges; ++i) {
 			uintptr_t ident;
 			short filter;
