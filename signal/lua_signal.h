@@ -20,7 +20,9 @@ checksigevent(lua_State *L, int idx, struct sigevent *sig)
 	luaL_checktype(L, idx, LUA_TTABLE);
 #define INTFIELD(name) ({ \
 	lua_getfield(L, idx, #name); \
-	sig->sigev_ ## name = luaL_checkinteger(L, -1); \
+	if (!lua_isnil(L, -1)) { \
+		sig->sigev_ ## name = luaL_checkinteger(L, -1); \
+	} \
 	lua_pop(L, 1); \
 })
 	INTFIELD(notify);
@@ -31,7 +33,7 @@ checksigevent(lua_State *L, int idx, struct sigevent *sig)
 	INTFIELD(signo);
 	if (lua_getfield(L, idx, "value") == LUA_TLIGHTUSERDATA) {
 		sig->sigev_value.sival_ptr = lua_touserdata(L, -1);
-	} else {
+	} else if (!lua_isnil(L, -1)) {
 		sig->sigev_value.sival_int = luaL_checkinteger(L, -1);
 	}
 	lua_pop(L, 1);
