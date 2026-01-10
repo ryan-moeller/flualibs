@@ -24,7 +24,7 @@ int luaopen_sys_event(lua_State *);
 static int
 l_kqueue(lua_State *L)
 {
-	int *kqp, kq;
+	int *kqp;
 	u_int flags;
 
 	flags = luaL_optinteger(L, 1, 0);
@@ -55,11 +55,11 @@ l_kevent(lua_State *L)
 {
 	int *kqp;
 	struct kevent *changelist, event;
-	int nchanges, ret;
+	int nchanges;
 
 	kqp = luaL_checkudata(L, 1, KQUEUE_METATABLE);
 
-	if (lua_gettop(L) == 1 || lua_type(L, 2) == LUA_TNIL) {
+	if (lua_isnoneornil(L, 2)) {
 		changelist = NULL;
 		nchanges = 0;
 	} else {
@@ -145,10 +145,13 @@ l_kevent(lua_State *L)
 		}
 	}
 
-	ret = kevent(*kqp, changelist, nchanges, &event, 1, NULL);
-	if (ret == -1) {
+	/* TODO: Getting more than one event at a time would be nice. */
+	switch (kevent(*kqp, changelist, nchanges, &event, 1, NULL)) {
+	case 1:
+		break;
+	case -1:
 		return (fail(L, errno));
-	} else if (ret != 1) {
+	default:
 		return (luaL_error(L, "kevent failed spectacularly"));
 	}
 
@@ -182,8 +185,7 @@ l_close(struct lua_State *L)
 	int *kqp, kq;
 
 	kqp = luaL_checkudata(L, 1, KQUEUE_METATABLE);
-	kq = *kqp;
-	if (kq == -1) {
+	if ((kq = *kqp) == -1) {
 		/* Already closed.  Return nothing to be safe for <close>. */
 		return (0);
 	}
@@ -200,8 +202,7 @@ l_fileno(lua_State *L)
 	int *kqp, kq;
 
 	kqp = luaL_checkudata(L, 1, KQUEUE_METATABLE);
-	kq = *kqp;
-	if (kq == -1) {
+	if ((kq = *kqp) == -1) {
 		return (0);
 	}
 	lua_pushinteger(L, kq);
@@ -211,11 +212,10 @@ l_fileno(lua_State *L)
 static int
 l_gc(struct lua_State *L)
 {
-	int kq, *kqp;
+	int *kqp, kq;
 
 	kqp = luaL_checkudata(L, 1, KQUEUE_METATABLE);
-	kq = *kqp;
-	if (kq == -1) {
+	if ((kq = *kqp) == -1) {
 		return (0);
 	}
 	close(kq);
