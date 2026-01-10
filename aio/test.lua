@@ -98,3 +98,32 @@ do -- :mlock(), :write(), and :fsync()
 
 	print(cb.buf)
 end
+
+do -- buffer vectors
+	local ucl = require('ucl')
+
+	local f <close> = assert(io.open('/COPYRIGHT'))
+
+	local cb = assert(aio.aiocb.shared(f, 0, {1, 86, 2, 44, 2}))
+	assert(cb:read())
+	assert(cb:suspend())
+	local len = assert(cb:_return())
+	print(len)
+	local iov = cb.iov
+	print('after read:', ucl.to_json(iov))
+
+	local f <close> = assert(io.tmpfile())
+
+	local cb = assert(aio.aiocb.shared(f, 0, iov))
+	print('before write:', ucl.to_json(cb.iov))
+	assert(cb:write())
+	assert(cb:suspend())
+	local len = assert(cb:_return())
+	print(len)
+	print('after write:', ucl.to_json(cb.iov))
+	assert(cb:read())
+	assert(cb:suspend())
+	local len = assert(cb:_return())
+	print(len)
+	print('after reread:', ucl.to_json(cb.iov))
+end
