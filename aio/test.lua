@@ -127,3 +127,20 @@ do -- buffer vectors
 	print(len)
 	print('after reread:', ucl.to_json(cb.iov))
 end
+
+do -- cancellation & error
+	local socket = require('sys.socket')
+	local unistd = require('unistd')
+
+	local rd, wd = assert(socket.socketpair(socket.PF_LOCAL, socket.SOCK_STREAM, 0))
+
+	local cb = assert(aio.aiocb.shared(rd, 0, 512))
+	assert(cb:read())
+	-- the read blocks in the kernel because we never write anything
+	assert(cb:cancel())
+	print(cb:error())
+	local _, _msg, code = cb:_return()
+	assert(code == 85) -- ECANCELED
+	assert(unistd.close(rd))
+	assert(unistd.close(wd))
+end
