@@ -78,3 +78,23 @@ do -- multiple threads sharing cbs with an event queue
 		assert(thread:join())
 	end
 end
+
+do -- :mlock(), :write(), and :fsync()
+	local fcntl = require('fcntl')
+
+	local f <close> = assert(io.tmpfile())
+
+	local cb = assert(aio.aiocb.shared(f, 0,
+	    "The request knows where it is by knowing where it isn't."))
+	assert(cb:mlock())
+	assert(cb:suspend())
+	assert(cb:_return())
+	assert(cb:write())
+	assert(cb:suspend())
+	assert(cb:_return())
+	assert(cb:fsync(fcntl.O_DSYNC))
+	assert(cb:suspend())
+	assert(cb:_return())
+
+	print(cb.buf)
+end
