@@ -40,6 +40,19 @@ l_kqueue(lua_State *L)
 }
 
 static int
+l_wrap(lua_State *L)
+{
+	int *kqp, kq;
+
+	kq = luaL_checkinteger(L, 1);
+
+	kqp = lua_newuserdatauv(L, sizeof(int), 0);
+	*kqp = kq;
+	luaL_setmetatable(L, KQUEUE_METATABLE);
+	return (1);
+}
+
+static int
 l_kevent(lua_State *L)
 {
 	int *kqp;
@@ -212,6 +225,7 @@ l_gc(struct lua_State *L)
 
 static const struct luaL_Reg l_kqueue_funcs[] = {
 	{"kqueue", l_kqueue},
+	{"wrap", l_wrap},
 	{NULL, NULL}
 };
 

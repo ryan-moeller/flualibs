@@ -18,6 +18,7 @@ local event = require('sys.event')
 .Pp
 .Bl -tag -width XXXX -compact
 .It Dv kq, err, code = event.kqueue( )
+.It Dv kq = event.wrap(fd )
 .It Dv event, err, code = kq:kevent([changelist ] )
 .It Dv ok, err, code = kq:close( )
 .It Dv fd = kq:fileno()
@@ -35,6 +36,10 @@ system calls.
 Create a new kernel event queue and return a descriptor.
 This is implemented as kqueuex(KQUEUE_CLOEXEC) so the returned
 file descriptor is automatically closed on execve(2).
+.It Dv kq = event.wrap(fd )
+Wrap a raw kqueue descriptor number in a
+.Vt userdata
+object.
 .It Dv event, err, code = kq:kevent([changelist ] )
 Apply an optional
 .Fa changelist
