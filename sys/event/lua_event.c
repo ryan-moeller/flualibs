@@ -74,10 +74,8 @@ l_kevent(lua_State *L)
 			u_int fflags;
 			int64_t data;
 			void *udata;
-			int type;
 
-			type = lua_geti(L, 2, i);
-			luaL_argcheck(L, type == LUA_TTABLE, 2,
+			luaL_argcheck(L, lua_geti(L, 2, i) == LUA_TTABLE, 2,
 			    "`changelist' invalid");
 
 			/* Accept "cookie" as an alias for "ident" field. */
@@ -95,38 +93,35 @@ l_kevent(lua_State *L)
 				    "`changelist' invalid ident"));
 			}
 
-			type = lua_getfield(L, -1, "filter");
-			luaL_argcheck(L, type == LUA_TNUMBER, 2,
-			    "`changelist' invalid filter");
-			filter = lua_tointeger(L, -1);
-			lua_pop(L, 1);
-
-			type = lua_getfield(L, -1, "flags");
-			luaL_argcheck(L, type == LUA_TNUMBER, 2,
-			    "`changelist' invalid flags");
-			flags = lua_tointeger(L, -1);
-			lua_pop(L, 1);
-
-			type = lua_getfield(L, -1, "fflags");
-			luaL_argcheck(L,
-			    type == LUA_TNIL || type == LUA_TNUMBER, 2,
-			    "`changelist' invalid fflags");
-			fflags = luaL_optinteger(L, -1, 0);
-			lua_pop(L, 1);
-
-			type = lua_getfield(L, -1, "data");
-			luaL_argcheck(L,
-			    type == LUA_TNIL || type == LUA_TNUMBER, 2,
-			    "`changelist' invalid data");
-			data = luaL_optinteger(L, -1, 0);
-			lua_pop(L, 1);
-
-			type = lua_getfield(L, -1, "udata");
-			if (type == LUA_TNIL) {
+#define INTFIELD(name) ({ \
+			luaL_argcheck(L, \
+			    lua_getfield(L, -1, #name) == LUA_TNUMBER, 2, \
+			    "`changelist' invalid " #name); \
+			name = lua_tointeger(L, -1); \
+			lua_pop(L, 1); \
+})
+			INTFIELD(filter);
+			INTFIELD(flags);
+#undef INTFIELD
+#define OPTINTFIELD(name) ({ \
+			if (lua_getfield(L, -1, #name) == LUA_TNIL) { \
+				name = 0; \
+			} else if (lua_isinteger(L, -1)) { \
+				name = lua_tointeger(L, -1); \
+			} else { \
+				return (luaL_argerror(L, 2, \
+				    "`changelist' invalid " #name)); \
+			} \
+			lua_pop(L, 1); \
+})
+			OPTINTFIELD(fflags);
+			OPTINTFIELD(data);
+#undef OPTINTFIELD
+			switch (lua_getfield(L, -1, "udata")) {
+			case LUA_TNIL:
 				udata = NULL;
-			} else {
-				luaL_argcheck(L, type == LUA_TTHREAD, 2,
-				    "`changelist' invalid udata");
+				break;
+			case LUA_TTHREAD:
 				/*
 				 * XXX: This pointer has to outlive the event in
 				 * the kqueue, but the kernel doesn't tell us
@@ -134,6 +129,10 @@ l_kevent(lua_State *L)
 				 * is up to the user...
 				 */
 				udata = lua_tothread(L, -1);
+				break;
+			default:
+				return (luaL_argerror(L, 2,
+				    "`changelist' invalid udata"));
 			}
 			lua_pop(L, 1);
 
@@ -151,39 +150,26 @@ l_kevent(lua_State *L)
 	}
 
 	lua_newtable(L);
-
-	lua_pushstring(L, "ident");
-	lua_pushinteger(L, event.ident);
-	lua_rawset(L, -3);
-
+#define INTFIELD(name) ({ \
+	lua_pushinteger(L, event.name); \
+	lua_setfield(L, -2, #name); \
+})
+	INTFIELD(ident);
 	/* Some event sources put a pointer in ident (e.g. AIO). */
-	lua_pushstring(L, "cookie");
 	lua_pushlightuserdata(L, (void *)event.ident);
-	lua_rawset(L, -3);
-
-	lua_pushstring(L, "filter");
-	lua_pushinteger(L, event.filter);
-	lua_rawset(L, -3);
-
-	lua_pushstring(L, "flags");
-	lua_pushinteger(L, event.flags);
-	lua_rawset(L, -3);
-
-	lua_pushstring(L, "fflags");
-	lua_pushinteger(L, event.fflags);
-	lua_rawset(L, -3);
-
-	lua_pushstring(L, "data");
-	lua_pushinteger(L, event.data);
-	lua_rawset(L, -3);
-
+	lua_setfield(L, -2, "cookie");
+	INTFIELD(filter);
+	INTFIELD(flags);
+	INTFIELD(fflags);
+	INTFIELD(data);
+	/* FIXME: coroutine must be from same thread state */
 	if (event.udata != NULL) {
 		lua_pushstring(L, "udata");
 		lua_pushthread(event.udata);
 		lua_xmove(event.udata, L, 1);
 		lua_rawset(L, -3);
 	}
-
+#undef INTFIELD
 	return (1);
 }
 
