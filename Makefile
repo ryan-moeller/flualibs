@@ -14,6 +14,7 @@ SUBDIR= \
 	libnv \
 	libpathconv \
 	libpthread \
+	libutil \
 	mqueue \
 	netdb \
 	netinet \

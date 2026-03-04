@@ -1,0 +1,65 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd March 3, 2026
+.Dt UTIL 3lua
+.Os
+.Sh NAME
+.Nm util
+.Nd Lua bindings for
+.Xr expand_number 3 ,
+.Xr humanize_number 3
+.Sh SYNOPSIS
+.Bd -literal
+util = require('util')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv num, errmsg, errcode = util.expand_number(str )
+.It Dv num, errmsg, errcode = util.expand_unsigned(str )
+.It Dv res = util.humanize_number(width , num , scale , flags )
+.It Dv util.HN_DECIMAL
+.It Dv util.HN_NOSPACE
+.It Dv util.HN_B
+.It Dv util.HN_DIVISOR_1000
+.It Dv util.HN_IEC_PREFIXES
+.It Dv util.HN_GETSCALE
+.It Dv util.HN_AUTOSCALE
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for System Utilities Library
+.Pq libutil
+function calls.
+.Bl -tag -width XXXX
+.It Dv num, errmsg, errcode = util.expand_number(str )
+Wraps
+.Xr expand_number 3 .
+.It Dv num, errmsg, errcode = util.expand_unsigned(str )
+Wraps
+.Fn expand_unsigned .
+.It Dv res = util.humanize_number(width , num , scale , flags )
+Wraps
+.Xr humanize_number 3 .
+.Fa width
+is used to size a buffer with an added byte for null-termination.
+.El
+.Sh EXAMPLES
+Round-trip a quantity:
+.Bd -literal -offset indent
+util = require('util')
+
+quantity = "123456789K"
+number = util.expand_number(quantity)
+human = util.humanize_number(#quantity, number, "", util.HN_AUTOSCALE,
+    util.HN_NOSPACE)
+assert(quantity == human)
+.Ed
+.Sh SEE ALSO
+.Xr expand_number 3 ,
+.Xr humanize_number 3
+.Sh AUTHORS
+.An Ryan Moeller
