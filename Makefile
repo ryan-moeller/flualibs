@@ -35,6 +35,7 @@ SUBDIR+=libbsddialog
 .endif
 .if exists(/usr/include/libnvpair.h)
 SUBDIR+=libbe
+SUBDIR+=libnvpair
 .endif
 .if exists(/usr/include/dpv.h)
 SUBDIR+=libdpv
