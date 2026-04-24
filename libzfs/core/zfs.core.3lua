@@ -1,0 +1,287 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd April 25, 2026
+.Dt ZFS.CORE 3lua
+.Os
+.Sh NAME
+.Nm zfs.core
+.Nd Lua bindings for libzfs_core
+.Pq 3
+.Sh SYNOPSIS
+.Bd -literal
+lzc = require('zfs.core')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv lzc.init( )
+.It Dv lzc.fini( )
+.It Dv ok_or_errlist, errmsg, errcode = lzc.snapshot(snaps[ , props ] )
+.It Dv ok, errmsg, errcode = lzc.create(dsname , type , props[ , wkey ] )
+.It Dv ok_or_errsnap, errmsg, errcode = lzc.promote(dsname )
+.It Dv ok_or_errlist, errmsg, errcode = lzc.destroy_snaps(snaps[ , defer ] )
+.It Dv ok_or_errlist, errmsg, errcode = lzc.bookmark(bookmarks )
+.It Dv bookmarks, errmsg, errcode = lzc.get_bookmarks(dsname , props )
+.It Dv props, errmsg, errcode = lzc.get_bookmark_props(bookmark )
+.It Dv errlist, errmsg, errcode = lzc.destroy_bookmarks(bookmarks )
+.It Dv ok, errmsg, errcode = lzc.load_key(dsname , noop , wkey )
+.It Dv ok, errmsg, errcode = lzc.unload_key(dsname )
+.It Dv ok, errmsg, errcode = lzc.change_key(dsname , crypt_cmd[ , props[ , wkey ] ] )
+.It Dv ok_or_errlist, errmsg, errcode = lzc.initialize(poolname , cmd_type , vdevs )
+.It Dv ok_or_errlist, errmsg, errcode = lzc.trim(poolname , cmd_type , rate, secure , vdevs )
+.It Dv ok, errmsg, errcode = lzc.redact(snapshot , bookmark , snaplist )
+.It Dv used, errmsg, errcode = lzc.snaprange_space(firstsnap , lastsnap )
+.It Dv ok_or_errlist, errmsg, errcode = lzc.hold(holds[ , cleanup_fd ] )
+.It Dv ok_or_errlist, errmsg, errcode = lzc.release(holds )
+.It Dv holds, errmsg, errcode = lzc.get_holds(snapname )
+.It Dv props, errmsg, errcode = lzc.get_props(poolname )
+.It Dv ok, errmsg, errcode = lzc.send(snapname , [from ] , fd[ , flags ] )
+.It Dv ok, errmsg, errcode = lzc.send_resume(snapname , [from ] , fd , [flags ] , resumeobj , resumeoff )
+.It Dv ok, errmsg, errcode = lzc.send_redacted(snapname , [from ] , fd[ , flags[ , redactbook ] ] )
+.It Dv ok, errmsg, errcode = lzc.send_resume_redacted(snapname , [from ] , fd[ , resumeobj , resumeoff[ , redactbook ] ] )
+.It Dv space, errmsg, errcode = lzc.send_space(snapname[ , from[ , flags ] ] )
+.It Dv space, errmsg, errcode = lzc.send_space_resume_redacted(snapname[ , from[ , resumeobj , resumeoff , resume_bytes[ , redactbook[ , fd ] ] ] ] )
+.It Dv bytes_written, blocks_visited_or_errmsg, errcode = lzc.send_progress(snapname , fd )
+.It Dv ok, errmsg, errcode = lzc.receive(snapname , [props ] , [origin ] , force , raw , fd )
+.It Dv ok, errmsg, errcode = lzc.receive_resumable(snapname , [props ] , [origin ] , force , raw , fd )
+.It Dv exists = lzc.exists(dsname )
+.It Dv snapname, errmsg, errcode = lzc.rollback(dsname )
+.It Dv ok, errmsg, errcode = lzc.rollback_to(dsname , snapname )
+.It Dv ok, errmsg, errcode = lzc.rename(source , target )
+.It Dv ok, errmsg, errcode = lzc.destroy(dsname )
+.It Dv ok_or_result, errmsg, errcode = lzc.channel_program(poolname , program , [instrlimit ] , [memlimit ] , arg )
+.It Dv ok_or_result, errmsg, errcode = lzc.channel_program_nosync(poolname , program , [instrlimit ] , [memlimit ] , arg )
+.It Dv ok_or_results, errmsg, errcode = lzc.sync(poolname[ , args ] )
+.It Dv ok, errmsg, errcode = lzc.reopen(poolname[ , scrub_restart ] )
+.It Dv ok, errmsg, errcode = lzc.pool_checkpoint(poolname )
+.It Dv ok, errmsg, errcode = lzc.pool_checkpoint_discard(poolname )
+.It Dv waited, errmsg, errcode = lzc.wait(poolname , activity )
+.It Dv waited, errmsg, errcode = lzc.wait_tag(poolname , activity[ , tag ] )
+.It Dv ok, errmsg, errcode = lzc.pool_prefetch(poolname , type )
+.It Dv waited, errmsg, errcode = lzc.wait_fs(fsname , activity )
+.It Dv ok, errmsg, errcode = lzc.set_bootenv(poolname , props )
+.It Dv props, errmsg, errcode = lzc.get_bootenv(poolname )
+.It Dv ok_or_result, errmsg, errcode = lzc.get_vdev_prop(poolname , args )
+.It Dv ok_or_result, errmsg, errcode = lzc.set_vdev_prop(poolname , args )
+.It Dv ok_or_result, errmsg, errcode = lzc.scrub(poolname , args )
+.It Dv ok, errmsg, errcode = lzc.ddt_prune(poolname , unit , amount )
+.It Dv lzc.LZC_DATSET_TYPE_ZFS
+.It Dv lzc.LZC_DATSET_TYPE_ZVOL
+.It Dv lzc.LZC_SEND_FLAG_EMBED_DATA
+.It Dv lzc.LZC_SEND_FLAG_LARGE_BLOCK
+.It Dv lzc.LZC_SEND_FLAG_COMPRESS
+.It Dv lzc.LZC_SEND_FLAG_RAW
+.It Dv lzc.LZC_SEND_FLAG_SAVED
+.It Dv lzc.POOL_INITIALIZE_START
+.It Dv lzc.POOL_INITIALIZE_CANCEL
+.It Dv lzc.POOL_INITIALIZE_SUSPEND
+.It Dv lzc.POOL_INITIALIZE_UNINIT
+.It Dv lzc.POOL_INITIALIZE_FUNCS
+.It Dv lzc.POOL_TRIM_START
+.It Dv lzc.POOL_TRIM_CANCEL
+.It Dv lzc.POOL_TRIM_SUSPEND
+.It Dv lzc.POOL_TRIM_FUNCS
+.It Dv lzc.ZPOOL_WAIT_CKPT_DISCARD
+.It Dv lzc.ZPOOL_WAIT_FREE
+.It Dv lzc.ZPOOL_WAIT_INITIALIZE
+.It Dv lzc.ZPOOL_WAIT_REPLACE
+.It Dv lzc.ZPOOL_WAIT_REMOVE
+.It Dv lzc.ZPOOL_WAIT_RESILVER
+.It Dv lzc.ZPOOL_WAIT_SCRUB
+.It Dv lzc.ZPOOL_WAIT_TRIM
+.It Dv lzc.ZPOOL_WAIT_RAIDZ_EXPAND
+.It Dv lzc.ZPOOL_WAIT_NUM_ACTIVITIES
+.It Dv lzc.ZFS_WAIT_DELETEQ
+.It Dv lzc.ZFS_WAIT_NUM_ACTIVITIES
+.It Dv lzc.ZPOOL_PREFETCH_NONE
+.It Dv lzc.ZPOOL_PREFETCH_DDT
+.It Dv lzc.ZPOOL_PREFETCH_BRT
+.It Dv lzc.ZPOOL_DDT_PRUNE_NONE
+.It Dv lzc.ZPOOL_DDT_PRUNE_AGE
+.It Dv lzc.ZPOOL_DDT_PRUNE_PERCENTAGE
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for OpenZFS libzfs_core
+.Pq 3
+function calls.
+.Pp
+The functions in this module return errors from libzfs_core to the caller.
+.Bl -tag -width XXXX
+.It Dv lzc.init( )
+Wraps
+.Fn libzfs_core_init .
+.It Dv lzc.fini( )
+Wraps
+.Fn libzfs_core_fini .
+.It Dv ok_or_errlist, errmsg, errcode = lzc.snapshot(snaps[ , props ] )
+Wraps
+.Fn lzc_snapshot .
+.It Dv ok, errmsg, errcode = lzc.create(dsname , type , props[ , wkey ] )
+Wraps
+.Fn lzc_create .
+.It Dv ok_or_errsnap, errmsg, errcode = lzc.promote(dsname )
+Wraps
+.Fn lzc_promote .
+.It Dv ok_or_errlist, errmsg, errcode = lzc.destroy_snaps(snaps[ , defer ] )
+Wraps
+.Fn lzc_destroy_snaps .
+.It Dv ok_or_errlist, errmsg, errcode = lzc.bookmark(bookmarks )
+Wraps
+.Fn lzc_bookmark .
+.It Dv bookmarks, errmsg, errcode = lzc.get_bookmarks(dsname , props )
+Wraps
+.Fn lzc_get_bookmarks .
+.It Dv props, errmsg, errcode = lzc.get_bookmark_props(bookmark )
+Wraps
+.Fn lzc_get_bookmark_props .
+.It Dv errlist, errmsg, errcode = lzc.destroy_bookmarks(bookmarks )
+Wraps
+.Fn lzc_destroy_bookmarks .
+.It Dv ok, errmsg, errcode = lzc.load_key(dsname , noop , wkey )
+Wraps
+.Fn lzc_load_key .
+.It Dv ok, errmsg, errcode = lzc.unload_key(dsname )
+Wraps
+.Fn lzc_unload_key .
+.It Dv ok, errmsg, errcode = lzc.change_key(dsname , crypt_cmd[ , props[ , wkey ] ] )
+Wraps
+.Fn lzc_change_key .
+.It Dv ok_or_errlist, errmsg, errcode = lzc.initialize(poolname , cmd_type , vdevs )
+Wraps
+.Fn lzc_initialize .
+.It Dv ok_or_errlist, errmsg, errcode = lzc.trim(poolname , cmd_type , rate, secure , vdevs )
+Wraps
+.Fn lzc_trim .
+.It Dv ok, errmsg, errcode = lzc.redact(snapshot , bookmark , snaplist )
+Wraps
+.Fn lzc_redact .
+.It Dv used, errmsg, errcode = lzc.snaprange_space(firstsnap , lastsnap )
+Wraps
+.Fn lzc_snaprange_space .
+.It Dv ok_or_errlist, errmsg, errcode = lzc.hold(holds[ , cleanup_fd ] )
+Wraps
+.Fn lzc_hold .
+.It Dv ok_or_errlist, errmsg, errcode = lzc.release(holds )
+Wraps
+.Fn lzc_release .
+.It Dv holds, errmsg, errcode = lzc.get_holds(snapname )
+Wraps
+.Fn lzc_get_holds .
+.It Dv props, errmsg, errcode = lzc.get_props(poolname )
+Wraps
+.Fn lzc_get_props .
+.It Dv ok, errmsg, errcode = lzc.send(snapname , [from ] , fd[ , flags ] )
+Wraps
+.Fn lzc_send .
+.It Dv ok, errmsg, errcode = lzc.send_resume(snapname , [from ] , fd , [flags ] , resumeobj , resumeoff )
+Wraps
+.Fn lzc_send_resume .
+.It Dv ok, errmsg, errcode = lzc.send_redacted(snapname , [from ] , fd[ , flags[ , redactbook ] ] )
+Wraps
+.Fn lzc_send_redacted .
+.It Dv ok, errmsg, errcode = lzc.send_resume_redacted(snapname , [from ] , fd[ , resumeobj , resumeoff[ , redactbook ] ] )
+Wraps
+.Fn lzc_send_resume_redacted .
+.It Dv space, errmsg, errcode = lzc.send_space(snapname[ , from[ , flags ] ] )
+Wraps
+.Fn lzc_send_space .
+.It Dv space, errmsg, errcode = lzc.send_space_resume_redacted(snapname[ , from[ , resumeobj , resumeoff , resume_bytes[ , redactbook[ , fd ] ] ] ] )
+Wraps
+.Fn lzc_send_space_resume_redacted .
+.It Dv bytes_written, blocks_visited_or_errmsg, errcode = lzc.send_progress(snapname , fd )
+Wraps
+.Fn lzc_send_progress .
+.It Dv ok, errmsg, errcode = lzc.receive(snapname , [props ] , [origin ] , force , raw , fd )
+Wraps
+.Fn lzc_receive .
+.It Dv ok, errmsg, errcode = lzc.receive_resumable(snapname , [props ] , [origin ] , force , raw , fd )
+Wraps
+.Fn lzc_receive_resumable .
+.It Dv exists = lzc.exists(dsname )
+Wraps
+.Fn lzc_exists .
+.It Dv snapname, errmsg, errcode = lzc.rollback(dsname )
+Wraps
+.Fn lzc_rollback .
+.It Dv ok, errmsg, errcode = lzc.rollback_to(dsname , snapname )
+Wraps
+.Fn lzc_rollback_to .
+.It Dv ok, errmsg, errcode = lzc.rename(source , target )
+Wraps
+.Fn lzc_rename .
+.It Dv ok, errmsg, errcode = lzc.destroy(dsname )
+Wraps
+.Fn lzc_destroy .
+.It Dv ok_or_result, errmsg, errcode = lzc.channel_program(poolname , program , [instrlimit ] , [memlimit ] , arg )
+Wraps
+.Fn lzc_channel_program .
+.It Dv ok_or_result, errmsg, errcode = lzc.channel_program_nosync(poolname , program , [instrlimit ] , [memlimit ] , arg )
+Wraps
+.Fn lzc_channel_program_nosync .
+.It Dv ok_or_results, errmsg, errcode = lzc.sync(poolname[ , args ] )
+Wraps
+.Fn lzc_sync .
+.It Dv ok, errmsg, errcode = lzc.reopen(poolname[ , scrub_restart ] )
+Wraps
+.Fn lzc_reopen .
+.It Dv ok, errmsg, errcode = lzc.pool_checkpoint(poolname )
+Wraps
+.Fn lzc_pool_checkpoint .
+.It Dv ok, errmsg, errcode = lzc.pool_checkpoint_discard(poolname )
+Wraps
+.Fn lzc_pool_checkpoint_discard .
+.It Dv waited, errmsg, errcode = lzc.wait(poolname , activity )
+Wraps
+.Fn lzc_pool_checkpoint_discard .
+.It Dv waited, errmsg, errcode = lzc.wait_tag(poolname , activity[ , tag ] )
+Wraps
+.Fn lzc_wait_tag .
+.It Dv ok, errmsg, errcode = lzc.pool_prefetch(poolname , type )
+Wraps
+.Fn lzc_pool_prefetch .
+.It Dv waited, errmsg, errcode = lzc.wait_fs(fsname , activity )
+Wraps
+.Fn lzc_wait_fs .
+.It Dv ok, errmsg, errcode = lzc.set_bootenv(poolname , props )
+Wraps
+.Fn lzc_set_bootenv .
+.It Dv props, errmsg, errcode = lzc.get_bootenv(poolname )
+Wraps
+.Fn lzc_get_bootenv .
+.It Dv ok_or_result, errmsg, errcode = lzc.get_vdev_prop(poolname , args )
+Wraps
+.Fn lzc_get_vdev_prop .
+.It Dv ok_or_result, errmsg, errcode = lzc.set_vdev_prop(poolname , args )
+Wraps
+.Fn lzc_set_vdev_prop .
+.It Dv ok_or_result, errmsg, errcode = lzc.scrub(poolname , args )
+Wraps
+.Fn lzc_scrub
+with
+.Dv ZFS_IOC_POOL_SCRUB
+hardcoded as the command.
+.It Dv ok, errmsg, errcode = lzc.ddt_prune(poolname , unit , amount )
+Wraps
+.Fn lzc_ddt_prune .
+.El
+.Sh EXAMPLES
+Get properties of a pool:
+.Bd -literal -offset indent
+nvpair = require('nvpair')
+lzc = require('zfs.core')
+
+lzc.init()
+props = lzc.get_props('system')
+prop = props:lookup_nvlist('guid')
+guid = prop:lookup_uint64('value')
+print(('%u'):format(guid))
+lzc.fini()
+.Ed
+.Sh SEE ALSO
+.Xr nvpair 3lua
+.Sh AUTHORS
+.An Ryan Moeller
