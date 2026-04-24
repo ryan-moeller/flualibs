@@ -16,13 +16,12 @@ nvpair = require('nvpair')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
-.It Dv nvl = nvpair.nvlist( )
-.It Dv nvl = nvpair.unpack(buffer )
-.It Dv size = nvl:size( )
-.It Dv buffer = nvl:pack( )
+.It Dv nvl = nvpair.nvlist([flags ] )
+.It Dv nvl = nvpair.unpack(buffer , [encoding ] )
+.It Dv size = nvl:size([encoding ] )
+.It Dv buffer = nvl:pack([encoding ] )
 .It Dv nvl1 = nvl:dup( )
 .It Dv nvl:merge(nvl1 )
-.It Dv num = nvl:num_pairs( )
 .It Dv nvl:add_boolean(name )
 .It Dv nvl:add_boolean_value(name , value )
 .It Dv nvl:add_byte(name , value )
@@ -36,6 +35,8 @@ nvpair = require('nvpair')
 .It Dv nvl:add_uint64(name , value )
 .It Dv nvl:add_string(name , value )
 .It Dv nvl:add_nvlist(name , value )
+.It Dv nvl:add_hrtime(name , value )
+.It Dv nvl:add_double(name , value )
 .It Dv nvl:add_boolean_array(name , values )
 .It Dv nvl:add_byte_array(name , values )
 .It Dv nvl:add_int8_array(name , values )
@@ -62,6 +63,8 @@ nvpair = require('nvpair')
 .It Dv value = nvl:lookup_uint64(name )
 .It Dv value = nvl:lookup_string(name )
 .It Dv value = nvl:lookup_nvlist(name )
+.It Dv value = nvl:lookup_hrtime(name )
+.It Dv value = nvl:lookup_double(name )
 .It Dv values = nvl:lookup_boolean_array(name )
 .It Dv values = nvl:lookup_byte_array(name )
 .It Dv values = nvl:lookup_int8_array(name )
@@ -72,6 +75,10 @@ nvpair = require('nvpair')
 .It Dv values = nvl:lookup_uint32_array(name )
 .It Dv values = nvl:lookup_int64_array(name )
 .It Dv values = nvl:lookup_uint64_array(name )
+.It Dv nvpair.NV_ENCODE_NATIVE
+.It Dv nvpair.NV_ENCODE_XDR
+.It Dv nvpair.NV_UNIQUE_NAME
+.It Dv nvpair.NV_UNIQUE_NAME_TYPE
 .El
 .Sh DESCRIPTION
 The
@@ -80,177 +87,201 @@ module provides bindings for Solaris name/value pairs library
 .Pq libnvpair
 function calls.
 .Pp
-Functions in this module rely on fnvlist for the time being and assert on error.
-This should be replaced with error handling in the future.
+The functions in this module raise errors to the caller.
 .Bl -tag -width XXXX
-.It Dv nvl = nvpair.nvlist( )
+.It Dv nvl = nvpair.nvlist([flags ] )
 Wraps
-.Fn fnvlist_alloc .
-.It Dv nvl = nvpair.unpack(buffer )
+.Fn nvlist_alloc .
+.Fa flags
+is
+.Dv nvpair.NV_UNIQUE_NAME
+by default.
+.It Dv nvl = nvpair.unpack(buffer , [encoding ] )
 Wraps
-.Fn fnvlist_unpack .
-.It Dv size = nvl:size( )
+.Fn nvlist_unpack .
+.Fa encoding
+is
+.Dv nvpair.NV_ENCODE_NATIVE
+by default.
+.It Dv size = nvl:size([encoding ] )
 Wraps
-.Fn fnvlist_size .
-.It Dv buffer = nvl:pack( )
+.Fn nvlist_size .
+.Fa encoding
+is
+.Dv nvpair.NV_ENCODE_NATIVE
+by default.
+.It Dv buffer = nvl:pack([encoding ] )
 Wraps
-.Fn fnvlist_pack .
+.Fn nvlist_pack .
+.Fa encoding
+is
+.Dv nvpair.NV_ENCODE_NATIVE
+by default.
 .It Dv nvl1 = nvl:dup( )
 Wraps
-.Fn fnvlist_dup .
+.Fn nvlist_dup .
 .It Dv nvl:merge(nvl1 )
 Wraps
-.Fn fnvlist_merge .
-.It Dv num = nvl:num_pairs( )
-Wraps
-.Fn fnvlist_num_pairs .
+.Fn nvlist_merge .
 .It Dv nvl:add_boolean(name )
 Wraps
-.Fn fnvlist_add_boolean .
+.Fn nvlist_add_boolean .
 .It Dv nvl:add_boolean_value(name , value )
 Wraps
-.Fn fnvlist_add_boolean_value .
+.Fn nvlist_add_boolean_value .
 .It Dv nvl:add_byte(name , value )
 Wraps
-.Fn fnvlist_add_byte .
+.Fn nvlist_add_byte .
 .It Dv nvl:add_int8(name , value )
 Wraps
-.Fn fnvlist_add_int8 .
+.Fn nvlist_add_int8 .
 .It Dv nvl:add_uint8(name , value )
 Wraps
-.Fn fnvlist_add_uint8 .
+.Fn nvlist_add_uint8 .
 .It Dv nvl:add_int16(name , value )
 Wraps
-.Fn fnvlist_add_int16 .
+.Fn nvlist_add_int16 .
 .It Dv nvl:add_uint16(name , value )
 Wraps
-.Fn fnvlist_add_uint16 .
+.Fn nvlist_add_uint16 .
 .It Dv nvl:add_int32(name , value )
 Wraps
-.Fn fnvlist_add_int32 .
+.Fn nvlist_add_int32 .
 .It Dv nvl:add_uint32(name , value )
 Wraps
-.Fn fnvlist_add_uint32 .
+.Fn nvlist_add_uint32 .
 .It Dv nvl:add_int64(name , value )
 Wraps
-.Fn fnvlist_add_int64 .
+.Fn nvlist_add_int64 .
 .It Dv nvl:add_uint64(name , value )
 Wraps
-.Fn fnvlist_add_uint64 .
+.Fn nvlist_add_uint64 .
 .It Dv nvl:add_string(name , value )
 Wraps
-.Fn fnvlist_add_string .
+.Fn nvlist_add_string .
 .It Dv nvl:add_nvlist(name , value )
 Wraps
-.Fn fnvlist_add_nvlist .
+.Fn nvlist_add_nvlist .
+.It Dv nvl:add_hrtime(name , value )
+Wraps
+.Fn nvlist_add_hrtime .
+.It Dv nvl:add_double(name , value )
+Wraps
+.Fn nvlist_add_double .
 .It Dv nvl:add_boolean_array(name , values )
 Wraps
-.Fn fnvlist_add_boolean_array .
+.Fn nvlist_add_boolean_array .
 .It Dv nvl:add_byte_array(name , values )
 Wraps
-.Fn fnvlist_add_byte_array .
+.Fn nvlist_add_byte_array .
 .It Dv nvl:add_int8_array(name , values )
 Wraps
-.Fn fnvlist_add_int8_array .
+.Fn nvlist_add_int8_array .
 .It Dv nvl:add_uint8_array(name , values )
 Wraps
-.Fn fnvlist_add_uint8_array .
+.Fn nvlist_add_uint8_array .
 .It Dv nvl:add_int16_array(name , values )
 Wraps
-.Fn fnvlist_add_int16_array .
+.Fn nvlist_add_int16_array .
 .It Dv nvl:add_uint16_array(name , values )
 Wraps
-.Fn fnvlist_add_uint16_array .
+.Fn nvlist_add_uint16_array .
 .It Dv nvl:add_int32_array(name , values )
 Wraps
-.Fn fnvlist_add_int32_array .
+.Fn nvlist_add_int32_array .
 .It Dv nvl:add_uint32_array(name , values )
 Wraps
-.Fn fnvlist_add_uint32_array .
+.Fn nvlist_add_uint32_array .
 .It Dv nvl:add_int64_array(name , values )
 Wraps
-.Fn fnvlist_add_int64_array .
+.Fn nvlist_add_int64_array .
 .It Dv nvl:add_uint64_array(name , values )
 Wraps
-.Fn fnvlist_add_uint64_array .
+.Fn nvlist_add_uint64_array .
 .It Dv nvl:add_string_array(name , values )
 Wraps
-.Fn fnvlist_add_string_array .
+.Fn nvlist_add_string_array .
 .It Dv nvl:add_nvlist_array(name , values )
 Wraps
-.Fn fnvlist_add_nvlist_array .
+.Fn nvlist_add_nvlist_array .
 .It Dv nvl:remove(name )
 Wraps
-.Fn fnvlist_remove .
+.Fn nvlist_remove .
 .It Dv value = nvl:lookup_boolean(name )
 Wraps
-.Fn fnvlist_lookup_boolean .
+.Fn nvlist_lookup_boolean .
 .It Dv value = nvl:lookup_boolean_value(name )
 Wraps
-.Fn fnvlist_lookup_boolean_value .
+.Fn nvlist_lookup_boolean_value .
 .It Dv value = nvl:lookup_byte(name )
 Wraps
-.Fn fnvlist_lookup_byte .
+.Fn nvlist_lookup_byte .
 .It Dv value = nvl:lookup_int8(name )
 Wraps
-.Fn fnvlist_lookup_int8 .
+.Fn nvlist_lookup_int8 .
 .It Dv value = nvl:lookup_uint8(name )
 Wraps
-.Fn fnvlist_lookup_uint8 .
+.Fn nvlist_lookup_uint8 .
 .It Dv value = nvl:lookup_int16(name )
 Wraps
-.Fn fnvlist_lookup_int16 .
+.Fn nvlist_lookup_int16 .
 .It Dv value = nvl:lookup_uint16(name )
 Wraps
-.Fn fnvlist_lookup_uint16 .
+.Fn nvlist_lookup_uint16 .
 .It Dv value = nvl:lookup_int32(name )
 Wraps
-.Fn fnvlist_lookup_int32 .
+.Fn nvlist_lookup_int32 .
 .It Dv value = nvl:lookup_uint32(name )
 Wraps
-.Fn fnvlist_lookup_uint32 .
+.Fn nvlist_lookup_uint32 .
 .It Dv value = nvl:lookup_int64(name )
 Wraps
-.Fn fnvlist_lookup_int64 .
+.Fn nvlist_lookup_int64 .
 .It Dv value = nvl:lookup_uint64(name )
 Wraps
-.Fn fnvlist_lookup_uint64 .
+.Fn nvlist_lookup_uint64 .
 .It Dv value = nvl:lookup_string(name )
 Wraps
-.Fn fnvlist_lookup_string .
+.Fn nvlist_lookup_string .
 .It Dv value = nvl:lookup_nvlist(name )
 Wraps
-.Fn fnvlist_lookup_nvlist .
+.Fn nvlist_lookup_nvlist .
+.It Dv value = nvl:lookup_hrtime(name )
+Wraps
+.Fn nvlist_lookup_hrtime .
+.It Dv value = nvl:lookup_double(name )
+Wraps
+.Fn nvlist_lookup_double .
 .It Dv values = nvl:lookup_boolean_array(name )
 Wraps
-.Fn fnvlist_lookup_boolean_array .
+.Fn nvlist_lookup_boolean_array .
 .It Dv values = nvl:lookup_byte_array(name )
 Wraps
-.Fn fnvlist_lookup_byte_array .
+.Fn nvlist_lookup_byte_array .
 .It Dv values = nvl:lookup_int8_array(name )
 Wraps
-.Fn fnvlist_lookup_int8_array .
+.Fn nvlist_lookup_int8_array .
 .It Dv values = nvl:lookup_uint8_array(name )
 Wraps
-.Fn fnvlist_lookup_uint8_array .
+.Fn nvlist_lookup_uint8_array .
 .It Dv values = nvl:lookup_int16_array(name )
 Wraps
-.Fn fnvlist_lookup_int16_array .
+.Fn nvlist_lookup_int16_array .
 .It Dv values = nvl:lookup_uint16_array(name )
 Wraps
-.Fn fnvlist_lookup_uint16_array .
+.Fn nvlist_lookup_uint16_array .
 .It Dv values = nvl:lookup_int32_array(name )
 Wraps
-.Fn fnvlist_lookup_int32_array .
+.Fn nvlist_lookup_int32_array .
 .It Dv values = nvl:lookup_uint32_array(name )
 Wraps
-.Fn fnvlist_lookup_uint32_array .
+.Fn nvlist_lookup_uint32_array .
 .It Dv values = nvl:lookup_int64_array(name )
 Wraps
-.Fn fnvlist_lookup_int64_array .
+.Fn nvlist_lookup_int64_array .
 .It Dv values = nvl:lookup_uint64_array(name )
 Wraps
-.Fn fnvlist_lookup_uint64_array .
+.Fn nvlist_lookup_uint64_array .
 .El
 .Sh EXAMPLES
 Construct and pack a simple name/value list:
