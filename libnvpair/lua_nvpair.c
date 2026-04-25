@@ -26,18 +26,6 @@ typedef uint64_t hrtime_t;
 
 int luaopen_nvpair(lua_State *);
 
-static inline void
-pushnvlist(lua_State *L, nvlist_t *nvl)
-{
-	new(L, nvl, NVLIST_METATABLE);
-}
-
-static inline nvlist_t *
-checknvlist(lua_State *L, int idx)
-{
-	return (checkcookie(L, idx, NVLIST_METATABLE));
-}
-
 #define NVPAIR_SCALAR_TYPES(X) \
 	X(boolean_value, boolean_t,    lua_toboolean    , lua_pushboolean) \
 	X(byte,          uchar_t,      luaL_checkinteger, lua_pushinteger) \
@@ -83,7 +71,8 @@ l_nvpair_nvlist(lua_State *L)
 		return (fatal(L, "nvlist_alloc", error));
 	}
 	/* TODO: optional table initializer */
-	return (new(L, nvl, NVLIST_METATABLE));
+	pushnvlist(L, nvl);
+	return (1);
 }
 
 static int
@@ -98,7 +87,8 @@ l_nvpair_unpack(lua_State *L)
 	if ((error = nvlist_unpack(packed, size, &nvl, 0)) != 0) {
 		return (fatal(L, "nvlist_unpack", error));
 	}
-	return (new(L, nvl, NVLIST_METATABLE));
+	pushnvlist(L, nvl);
+	return (1);
 }
 
 static int
@@ -157,7 +147,8 @@ l_nvlist_dup(lua_State *L)
 	if ((error = nvlist_dup(nvl, &dupnvl, 0)) != 0) {
 		return (fatal(L, "nvlist_dup", error));
 	}
-	return (new(L, dupnvl, NVLIST_METATABLE));
+	pushnvlist(L, dupnvl);
+	return (1);
 }
 
 static int
