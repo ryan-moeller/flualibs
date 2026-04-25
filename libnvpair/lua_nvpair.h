@@ -15,7 +15,6 @@
 #include "utils.h"
 
 #define NVLIST_METATABLE "nvlist_t*"
-#define NVPAIR_METATABLE "nvpair_t*"
 
 static inline void
 pushnvlist(lua_State *L, nvlist_t *nvl)

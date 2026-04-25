@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd April 23, 2026
+.Dd April 24, 2026
 .Dt NVPAIR 3lua
 .Os
 .Sh NAME
@@ -22,6 +22,7 @@ nvpair = require('nvpair')
 .It Dv buffer = nvl:pack([encoding ] )
 .It Dv nvl1 = nvl:dup( )
 .It Dv nvl:merge(nvl1 )
+.It Dv flags = nvl:nvflag( )
 .It Dv nvl:add_boolean(name )
 .It Dv nvl:add_boolean_value(name , value )
 .It Dv nvl:add_byte(name , value )
@@ -75,6 +76,7 @@ nvpair = require('nvpair')
 .It Dv values = nvl:lookup_uint32_array(name )
 .It Dv values = nvl:lookup_int64_array(name )
 .It Dv values = nvl:lookup_uint64_array(name )
+.It Dv for _, name, value, type in pairs(nvl) do end
 .It Dv nvpair.NV_ENCODE_NATIVE
 .It Dv nvpair.NV_ENCODE_XDR
 .It Dv nvpair.NV_UNIQUE_NAME
@@ -123,6 +125,9 @@ Wraps
 .It Dv nvl:merge(nvl1 )
 Wraps
 .Fn nvlist_merge .
+.It Dv flags = nvl:nvflag( )
+Wraps
+.Fn nvlist_nvflag .
 .It Dv nvl:add_boolean(name )
 Wraps
 .Fn nvlist_add_boolean .
@@ -282,6 +287,9 @@ Wraps
 .It Dv values = nvl:lookup_uint64_array(name )
 Wraps
 .Fn nvlist_lookup_uint64_array .
+.It Dv for _, name, value, type in pairs(nvl) do end
+Loops over pairs using
+.Fn nvlist_next_nvpair .
 .El
 .Sh EXAMPLES
 Construct and pack a simple name/value list:
