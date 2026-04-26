@@ -1,0 +1,237 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd April 26, 2026
+.Dt ZFS 3lua
+.Os
+.Sh NAME
+.Nm zfs
+.Nd Lua bindings for libzfs
+.Pq 3
+.Sh SYNOPSIS
+.Bd -literal
+zfs = require('zfs')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv libzfs_hdl, errmsg, errcode = zfs.init( )
+.It Dv prop = zfs.prop(propname )
+.It Dv default = prop:default_string( )
+.It Dv default = prop:default_numeric( )
+.It Dv column = prop:column_name( )
+.It Dv align_right = prop:align_right( )
+.It Dv name = prop:to_name( )
+.It Dv values = prop:values( )
+.It Dv is_string = prop:is_string( )
+.It Dv libzfs_hdl:fini( )
+.It Dv libzfs_hdl:print_on_error(printerr )
+.It Dv errno = libzfs_hdl:errno( )
+.It Dv action = libzfs_hdl:error_action( )
+.It Dv description = libzfs_hdl:error_description( )
+.It Dv libzfs_hdl:mnttab_cache(enable )
+.It Dv mnttab, errmsg, errcode = libzfs_hdl:mnttab_find(fsname )
+.It Dv libzfs_hdl:mnttab_add(special , mountp , mntopts )
+.It Dv libzfs_hdl:mnttab_remove(fsname )
+.It Dv validated, errmsg, errcode = libzfs_hdl:valid_proplist(type , props , zoned , [zfs_hdl ] , [pool_hdl ] , key_params_ok , errprefix )
+.It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open(poolname )
+.It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open_canfail(poolname )
+.It Dv zpool_hdl:close( )
+.It Dv name = zpool_hdl:get_name( )
+.It Dv state = zpool_hdl:get_state( )
+.It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:zfs_open(path , types )
+.It Dv zfs_hdl:close( )
+.It Dv zfs_hdl_dup, errmsg, errcode = zfs_hdl:handle_dup( )
+.It Dv type = zfs_hdl:get_type( )
+.It Dv type = zfs_hdl:get_underlying_type( )
+.It Dv name = zfs_hdl:get_name( )
+.It Dv pool_name = zfs_hdl:get_pool_name( )
+.It Dv ok, errmsg, errcode = zfs_hdl:prop_set(propname , propval )
+.It Dv ok, errmsg, errcode = zfs_hdl:prop_set_list(props )
+.It Dv ok, errmsg, errcode = zfs_hdl:prop_set_list_flags(props , flags )
+.It Dv property, source_or_errmsg, sourcename_or_errcode = zfs_hdl:prop_get(prop , literal )
+.It Dv property, errmsg, errcode = zfs_hdl:prop_get_recvd(propname , literal )
+.It Dv value, source_or_errmsg, sourcename_or_errcode = zfs_hdl:prop_get_numeric(prop )
+.It Dv value, errmsg, errcode = zfs_hdl:prop_get_userquota_int(propname )
+.It Dv value, errmsg, errcode = zfs_hdl:prop_get_userquota(propname , literal )
+.It Dv value, errmsg, errcode = zfs_hdl:prop_get_written_int(propname )
+.It Dv value, errmsg, errcode = zfs_hdl:prop_get_written(propname , literal )
+.It Dv value = zfs_hdl:getprop_uint64(prop )
+.It Dv value = zfs_hdl:prop_get_int(prop )
+.It Dv ok, errmsg, errcode = zfs_hdl:prop_inherit(propname , received )
+.It Dv props, errmsg, errcode = zfs_hdl:get_all_props( )
+.It Dv props, errmsg, errcode = zfs_hdl:get_user_props( )
+.It Dv props, errmsg, errcode = zfs_hdl:get_recvd_props( )
+.It Dv props, errmsg, errcode = zfs_hdl:get_clones_nvl( )
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for OpenZFS libzfs
+.Pq 3
+function calls.
+.Pp
+The functions in this module return errors from libzfs to the caller.
+.Bl -tag -width XXXX
+.It Dv libzfs_hdl, errmsg, errcode = zfs.init( )
+Wraps
+.Fn libzfs_init .
+.It Dv prop = zfs.prop(propname )
+Wraps
+.Fn zfs_name_to_prop .
+.It Dv default = prop:default_string( )
+Wraps
+.Fn zfs_prop_default_string .
+.It Dv default = prop:default_numeric( )
+Wraps
+.Fn zfs_prop_default_numeric .
+.It Dv column = prop:column_name( )
+Wraps
+.Fn zfs_prop_column_name .
+.It Dv align_right = prop:align_right( )
+Wraps
+.Fn zfs_prop_align_right .
+.It Dv name = prop:to_name( )
+Wraps
+.Fn zfs_prop_to_name .
+.It Dv values = prop:values( )
+Wraps
+.Fn zfs_prop_values .
+.It Dv is_string = prop:is_string( )
+Wraps
+.Fn zfs_prop_is_string .
+.It Dv libzfs_hdl:fini( )
+Wraps
+.Fn libzfs_fini .
+.It Dv libzfs_hdl:print_on_error(printerr )
+Wraps
+.Fn libzfs_print_on_error .
+.It Dv errno = libzfs_hdl:errno( )
+Wraps
+.Fn libzfs_errno .
+.It Dv action = libzfs_hdl:error_action( )
+Wraps
+.Fn libzfs_error_action .
+.It Dv description = libzfs_hdl:error_description( )
+Wraps
+.Fn libzfs_error_description .
+.It Dv libzfs_hdl:mnttab_cache(enable )
+Wraps
+.Fn libzfs_mnttab_cache .
+.It Dv mnttab, errmsg, errcode = libzfs_hdl:mnttab_find(fsname )
+Wraps
+.Fn libzfs_mnttab_find .
+.It Dv libzfs_hdl:mnttab_add(special , mountp , mntopts )
+Wraps
+.Fn libzfs_mnttab_add .
+.It Dv libzfs_hdl:mnttab_remove(fsname )
+Wraps
+.Fn libzfs_mnttab_remove .
+.It Dv validated, errmsg, errcode = libzfs_hdl:valid_proplist(type , props , zoned , [zfs_hdl ] , [pool_hdl ] , key_params_ok , errprefix )
+Wraps
+.Fn zfs_valid_proplist .
+.It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open(poolname )
+Wraps
+.Fn zpool_open .
+.It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open_canfail(poolname )
+Wraps
+.Fn zpool_open_canfail .
+.It Dv zpool_hdl:close( )
+Wraps
+.Fn zpool_close .
+.It Dv name = zpool_hdl:get_name( )
+Wraps
+.Fn zpool_get_name .
+.It Dv state = zpool_hdl:get_state( )
+Wraps
+.Fn zpool_get_state .
+.It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:zfs_open(path , types )
+Wraps
+.Fn zfs_open .
+.It Dv zfs_hdl:close( )
+Wraps
+.Fn zfs_close .
+.It Dv zfs_hdl_dup, errmsg, errcode = zfs_hdl:handle_dup( )
+Wraps
+.Fn zfs_handle_dup .
+.It Dv type = zfs_hdl:get_type( )
+Wraps
+.Fn zfs_get_type .
+.It Dv type = zfs_hdl:get_underlying_type( )
+Wraps
+.Fn zfs_get_underlying_type .
+.It Dv name = zfs_hdl:get_name( )
+Wraps
+.Fn zfs_get_name .
+.It Dv pool_name = zfs_hdl:get_pool_name( )
+Wraps
+.Fn zfs_get_pool_name .
+.It Dv ok, errmsg, errcode = zfs_hdl:prop_set(propname , propval )
+Wraps
+.Fn zfs_prop_set .
+.It Dv ok, errmsg, errcode = zfs_hdl:prop_set_list(props )
+Wraps
+.Fn zfs_prop_set_list .
+.It Dv ok, errmsg, errcode = zfs_hdl:prop_set_list_flags(props , flags )
+Wraps
+.Fn zfs_prop_set_list_flags .
+.It Dv property, source_or_errmsg, sourcename_or_errcode = zfs_hdl:prop_get(prop , literal )
+Wraps
+.Fn zfs_prop_get .
+.It Dv property, errmsg, errcode = zfs_hdl:prop_get_recvd(propname , literal )
+Wraps
+.Fn zfs_prop_get_recvd .
+.It Dv value, source_or_errmsg, sourcename_or_errcode = zfs_hdl:prop_get_numeric(prop )
+Wraps
+.Fn zfs_prop_get_numeric .
+.It Dv value, errmsg, errcode = zfs_hdl:prop_get_userquota_int(propname )
+Wraps
+.Fn zfs_prop_get_userquota_int .
+.It Dv value, errmsg, errcode = zfs_hdl:prop_get_userquota(propname , literal )
+Wraps
+.Fn zfs_prop_get_userquota .
+.It Dv value, errmsg, errcode = zfs_hdl:prop_get_written_int(propname )
+Wraps
+.Fn zfs_prop_get_written_int .
+.It Dv value, errmsg, errcode = zfs_hdl:prop_get_written(propname , literal )
+Wraps
+.Fn zfs_prop_get_written .
+.It Dv value = zfs_hdl:getprop_uint64(prop )
+Wraps
+.Fn getprop_uint64 .
+.It Dv value = zfs_hdl:prop_get_int(prop )
+Wraps
+.Fn zfs_prop_get_int .
+.It Dv ok, errmsg, errcode = zfs_hdl:prop_inherit(propname , received )
+Wraps
+.Fn zfs_prop_inherit .
+.It Dv props, errmsg, errcode = zfs_hdl:get_all_props( )
+Wraps
+.Fn zfs_get_all_props .
+.It Dv props, errmsg, errcode = zfs_hdl:get_user_props( )
+Wraps
+.Fn zfs_get_user_props .
+.It Dv props, errmsg, errcode = zfs_hdl:get_recvd_props( )
+Wraps
+.Fn zfs_get_recvd_props .
+.It Dv props, errmsg, errcode = zfs_hdl:get_clones_nvl( )
+Wraps
+.Fn zfs_get_clones_nvl .
+.El
+.Sh EXAMPLES
+Get properties of a dataset:
+.Bd -literal -offset indent
+libzfs = require('zfs').init()
+
+fs = libzfs:zfs_open('zroot', libzfs.ZFS_TYPE_FILESYSTEM)
+props = fs:get_all_props()
+for _, name, value in pairs(props) do
+	print(name, value:lookup('value'))
+end
+.Ed
+.Sh SEE ALSO
+.Xr nvpair 3lua ,
+.Xr zfs.core 3lua
+.Sh AUTHORS
+.An Ryan Moeller
