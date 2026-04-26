@@ -46,6 +46,10 @@ lzc = require('zfs.core')
 .It Dv bytes_written, blocks_visited_or_errmsg, errcode = lzc.send_progress(snapname , fd )
 .It Dv ok, errmsg, errcode = lzc.receive(snapname , [props ] , [origin ] , force , raw , fd )
 .It Dv ok, errmsg, errcode = lzc.receive_resumable(snapname , [props ] , [origin ] , force , raw , fd )
+.It Dv ok, errmsg, errcode = lzc.receive_with_header(snapname , [props ] , [origin ] , force , resumable , raw , fd , header )
+.It Dv read_bytes, errflags_or_errmsg, errlist_or_errcode, errflags = lzc.receive_one(snapname , [props ] , [origin ] , force , resumable , raw , fd , header )
+.It Dv read_bytes, errflags_or_errmsg, errlist_or_errcode, errflags = lzc.receive_with_cmdprops(snapname , [props ] , [cmdprops ] , [wkey ] , [origin ] , force , resumable , raw , fd , header )
+.It Dv read_bytes, errflags_or_errmsg, errlist_or_errcode, errflags = lzc.receive_with_heal(snapname , [props ] , [cmdprops ] , [wkey ] , [origin ] , force , heal , resumable , raw , fd , header )
 .It Dv exists = lzc.exists(dsname )
 .It Dv snapname, errmsg, errcode = lzc.rollback(dsname )
 .It Dv ok, errmsg, errcode = lzc.rollback_to(dsname , snapname )
@@ -201,6 +205,18 @@ Wraps
 .It Dv ok, errmsg, errcode = lzc.receive_resumable(snapname , [props ] , [origin ] , force , raw , fd )
 Wraps
 .Fn lzc_receive_resumable .
+.It Dv ok, errmsg, errcode = lzc.receive_with_header(snapname , [props ] , [origin ] , force , resumable , raw , fd , header )
+Wraps
+.Fn lzc_receive_with_header .
+.It Dv read_bytes, errflags_or_errmsg, errlist_or_errcode, errflags = lzc.receive_one(snapname , [props ] , [origin ] , force , resumable , raw , fd , header )
+Wraps
+.Fn lzc_receive_one .
+.It Dv read_bytes, errflags_or_errmsg, errlist_or_errcode, errflags = lzc.receive_with_cmdprops(snapname , [props ] , [cmdprops ] , [wkey ] , [origin ] , force , resumable , raw , fd , header )
+Wraps
+.Fn lzc_receive_with_cmdprops .
+.It Dv read_bytes, errflags_or_errmsg, errlist_or_errcode, errflags = lzc.receive_with_heal(snapname , [props ] , [cmdprops ] , [wkey ] , [origin ] , force , heal , resumable , raw , fd , header )
+Wraps
+.Fn lzc_receive_with_heal .
 .It Dv exists = lzc.exists(dsname )
 Wraps
 .Fn lzc_exists .

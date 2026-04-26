@@ -6,6 +6,7 @@
 
 #include <sys/param.h>
 #include <sys/zfs_context.h>
+#include <sys/zfs_ioctl.h>
 #include <libnvpair.h>
 #include <libzfs_core.h>
 
@@ -638,27 +639,162 @@ l_lzc_receive_resumable(lua_State *L)
 	return (success(L));
 }
 
-#if 0 /* TODO: unmarshall a dmu_replay_record */
 static int
 l_lzc_receive_with_header(lua_State *L)
 {
+	const char *snapname, *origin;
+	nvlist_t *props;
+	const dmu_replay_record_t *header;
+	size_t headerlen;
+	boolean_t force, resumable, raw;
+	int fd, error;
+
+	snapname = luaL_checkstring(L, 1);
+	props = optnvlist(L, 2, NULL);
+	origin = luaL_optstring(L, 3, NULL);
+	force = lua_toboolean(L, 4);
+	resumable = lua_toboolean(L, 5);
+	raw = lua_toboolean(L, 6);
+	fd = checkfd(L, 7);
+	header = (const void *)luaL_checklstring(L, 8, &headerlen);
+	luaL_argcheck(L, headerlen == sizeof(*header), 8, "invalid header");
+
+	if ((error = lzc_receive_with_header(snapname, props, origin, force,
+	    resumable, raw, fd, header)) != 0) {
+		return (fail(L, error));
+	}
+	return (success(L));
 }
 
 static int
 l_lzc_receive_one(lua_State *L)
 {
+	const char *snapname, *origin;
+	nvlist_t *props, *errlist;
+	const dmu_replay_record_t *header;
+	size_t headerlen;
+	uint64_t read_bytes, errflags;
+	boolean_t force, resumable, raw;
+	int fd, error;
+
+	snapname = luaL_checkstring(L, 1);
+	props = optnvlist(L, 2, NULL);
+	origin = luaL_optstring(L, 3, NULL);
+	force = lua_toboolean(L, 4);
+	resumable = lua_toboolean(L, 5);
+	raw = lua_toboolean(L, 6);
+	fd = checkfd(L, 7);
+	header = (const void *)luaL_checklstring(L, 8, &headerlen);
+	luaL_argcheck(L, headerlen == sizeof(*header), 8, "invalid header");
+
+	if ((error = lzc_receive_one(snapname, props, origin, force,
+	    resumable, raw, fd, header, -1, &read_bytes, &errflags, NULL,
+	    &errlist)) != 0) {
+		fail(L, error);
+		if (errlist != NULL) {
+			pushnvlist(L, errlist);
+			lua_replace(L, -3);
+		}
+		lua_pushinteger(L, errflags);
+		return (4);
+	}
+	lua_pushinteger(L, read_bytes);
+	lua_pushinteger(L, errflags);
+	if (errlist != NULL) {
+		pushnvlist(L, errlist);
+		return (3);
+	}
+	return (2);
 }
 
 static int
 l_lzc_receive_with_cmdprops(lua_State *L)
 {
+	const char *snapname, *origin;
+	nvlist_t *props, *cmdprops, *errlist;
+	uint8_t *wkeydata;
+	const dmu_replay_record_t *header;
+	size_t wkeylen, headerlen;
+	uint64_t read_bytes, errflags;
+	boolean_t force, resumable, raw;
+	int fd, error;
+
+	snapname = luaL_checkstring(L, 1);
+	props = optnvlist(L, 2, NULL);
+	cmdprops = optnvlist(L, 3, NULL);
+	wkeydata = __DECONST(uint8_t *, luaL_optlstring(L, 4, NULL, &wkeylen));
+	origin = luaL_optstring(L, 5, NULL);
+	force = lua_toboolean(L, 6);
+	resumable = lua_toboolean(L, 7);
+	raw = lua_toboolean(L, 8);
+	fd = checkfd(L, 9);
+	header = (const void *)luaL_checklstring(L, 10, &headerlen);
+	luaL_argcheck(L, headerlen == sizeof(*header), 10, "invalid header");
+
+	if ((error = lzc_receive_with_cmdprops(snapname, props, cmdprops,
+	    wkeydata, wkeylen, origin, force, resumable, raw, fd, header, -1,
+	    &read_bytes, &errflags, NULL, &errlist)) != 0) {
+		fail(L, error);
+		if (errlist != NULL) {
+			pushnvlist(L, errlist);
+			lua_replace(L, -3);
+		}
+		lua_pushinteger(L, errflags);
+		return (4);
+	}
+	lua_pushinteger(L, read_bytes);
+	lua_pushinteger(L, errflags);
+	if (errlist != NULL) {
+		pushnvlist(L, errlist);
+		return (3);
+	}
+	return (2);
 }
 
 static int
 l_lzc_receive_with_heal(lua_State *L)
 {
+	const char *snapname, *origin;
+	nvlist_t *props, *cmdprops, *errlist;
+	uint8_t *wkeydata;
+	const dmu_replay_record_t *header;
+	size_t wkeylen, headerlen;
+	uint64_t read_bytes, errflags;
+	boolean_t force, heal, resumable, raw;
+	int fd, error;
+
+	snapname = luaL_checkstring(L, 1);
+	props = optnvlist(L, 2, NULL);
+	cmdprops = optnvlist(L, 3, NULL);
+	wkeydata = __DECONST(uint8_t *, luaL_checklstring(L, 4, &wkeylen));
+	origin = luaL_optstring(L, 5, NULL);
+	force = lua_toboolean(L, 6);
+	heal = lua_toboolean(L, 7),
+	resumable = lua_toboolean(L, 8);
+	raw = lua_toboolean(L, 9);
+	fd = checkfd(L, 10);
+	header = (const void *)luaL_checklstring(L, 11, &headerlen);
+	luaL_argcheck(L, headerlen == sizeof(*header), 11, "invalid header");
+
+	if ((error = lzc_receive_with_heal(snapname, props, cmdprops,
+	    wkeydata, wkeylen, origin, force, heal, resumable, raw, fd, header,
+	    -1, &read_bytes, &errflags, NULL, &errlist)) != 0) {
+		fail(L, error);
+		if (errlist != NULL) {
+			pushnvlist(L, errlist);
+			lua_replace(L, -3);
+		}
+		lua_pushinteger(L, errflags);
+		return (4);
+	}
+	lua_pushinteger(L, read_bytes);
+	lua_pushinteger(L, errflags);
+	if (errlist != NULL) {
+		pushnvlist(L, errlist);
+		return (3);
+	}
+	return (2);
 }
-#endif
 
 static int
 l_lzc_exists(lua_State *L)
@@ -1112,12 +1248,10 @@ static const struct luaL_Reg l_lzc_funcs[] = {
 #endif
 	{"receive", l_lzc_receive},
 	{"receive_resumable", l_lzc_receive_resumable},
-#if 0 /* TODO */
 	{"receive_with_header", l_lzc_receive_with_header},
 	{"receive_one", l_lzc_receive_one},
 	{"receive_with_cmdprops", l_lzc_receive_with_cmdprops},
 	{"receive_with_heal", l_lzc_receive_with_heal},
-#endif
 	{"exists", l_lzc_exists},
 	{"rollback", l_lzc_rollback},
 	{"rollback_to", l_lzc_rollback_to},
