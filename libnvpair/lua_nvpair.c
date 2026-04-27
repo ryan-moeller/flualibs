@@ -402,7 +402,8 @@ l_nvlist_lookup_boolean(lua_State *L)
 	if ((error = nvlist_lookup_boolean(nvl, name)) != 0) {
 		return (fatal(L, "nvlist_lookup_boolean", error));
 	}
-	return (0);
+	lua_pushboolean(L, B_TRUE);
+	return (1);
 }
 
 #define NVLIST_LOOKUP(ftype, ctype, _dtype, _lcheck, lpush) \
