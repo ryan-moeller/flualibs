@@ -102,21 +102,11 @@ l_nvlist_gc(lua_State *L)
 	return (0);
 }
 
-static int
-l_nvlist_pairs_iter(lua_State *L)
+static inline void
+pushvalue(lua_State *L, nvpair_t *nvp)
 {
-	nvlist_t *nvl;
-	nvpair_t *nvp, *next;
 	int error;
 
-	nvl = checknvlist(L, 1);
-	nvp = lua_touserdata(L, 2);
-
-	if (nvp == NULL) {
-		return (0);
-	}
-	lua_pushlightuserdata(L, nvlist_next_nvpair(nvl, nvp));
-	lua_pushstring(L, nvpair_name(nvp));
 	switch (nvpair_type(nvp)) {
 	case DATA_TYPE_BOOLEAN:
 		lua_pushboolean(L, true);
@@ -126,7 +116,7 @@ l_nvlist_pairs_iter(lua_State *L)
 		ctype value; \
 \
 		if ((error = nvpair_value_##ftype(nvp, &value)) != 0) { \
-			return (fatal(L, "nvpair_value_"#ftype, error)); \
+			fatal(L, "nvpair_value_"#ftype, error); \
 		} \
 		lpush(L, value); \
 		break; \
@@ -140,8 +130,7 @@ l_nvlist_pairs_iter(lua_State *L)
 \
 		if ((error = nvpair_value_##ftype##_array(nvp, \
 		    &values, &len)) != 0) { \
-			return (fatal(L, \
-			    "nvpair_value_"#ftype"_array", error)); \
+			fatal(L, "nvpair_value_"#ftype"_array", error); \
 		} \
 		lua_createtable(L, len, 0); \
 		for (uint_t i = 0; i < len; i++) { \
@@ -157,7 +146,7 @@ l_nvlist_pairs_iter(lua_State *L)
 
 		if ((error = nvpair_value_string_array(nvp, &values, &len))
 		    != 0) {
-			return (fatal(L, "nvpair_value_string_array", error));
+			fatal(L, "nvpair_value_string_array", error);
 		}
 		lua_createtable(L, len, 0);
 		for (uint_t i = 0; i < len; i++) {
@@ -172,7 +161,7 @@ l_nvlist_pairs_iter(lua_State *L)
 
 		if ((error = nvpair_value_nvlist_array(nvp, &values, &len))
 		    != 0) {
-			return (fatal(L, "nvpair_value_nvlist_array", error));
+			fatal(L, "nvpair_value_nvlist_array", error);
 		}
 		lua_createtable(L, len, 0);
 		for (uint_t i = 0; i < len; i++) {
@@ -184,8 +173,26 @@ l_nvlist_pairs_iter(lua_State *L)
 	}
 #undef NVPAIR_VALUE_ARRAY
 	default:
-		return (luaL_error(L, "unexpected type"));
+		luaL_error(L, "unexpected type");
 	}
+}
+
+static int
+l_nvlist_pairs_iter(lua_State *L)
+{
+	nvlist_t *nvl;
+	nvpair_t *nvp, *next;
+	int error;
+
+	nvl = checknvlist(L, 1);
+	nvp = lua_touserdata(L, 2);
+
+	if (nvp == NULL) {
+		return (0);
+	}
+	lua_pushlightuserdata(L, nvlist_next_nvpair(nvl, nvp));
+	lua_pushstring(L, nvpair_name(nvp));
+	pushvalue(L, nvp);
 	lua_pushinteger(L, nvpair_type(nvp));
 	return (4);
 }
@@ -365,6 +372,25 @@ l_nvlist_remove(lua_State *L)
 }
 
 static int
+l_nvlist_lookup(lua_State *L)
+{
+	nvlist_t *nvl;
+	const char *name;
+	nvpair_t *nvp;
+	int error;
+
+	nvl = checknvlist(L, 1);
+	name = luaL_checkstring(L, 2);
+
+	if ((error = nvlist_lookup_nvpair(nvl, name, &nvp)) != 0) {
+		return (0);
+	}
+	pushvalue(L, nvp);
+	lua_pushinteger(L, nvpair_type(nvp));
+	return (2);
+}
+
+static int
 l_nvlist_lookup_boolean(lua_State *L)
 {
 	nvlist_t *nvl;
@@ -449,6 +475,7 @@ static const struct luaL_Reg l_nvlist_meta[] = {
 	NVPAIR_ARRAY_TYPES(NVLIST_ADD_ARRAY)
 #undef NVLIST_ADD_ARRAY
 	{"remove", l_nvlist_remove},
+	{"lookup", l_nvlist_lookup},
 	{"lookup_boolean", l_nvlist_lookup_boolean},
 #define NVLIST_LOOKUP(ftype, _ctype, _dtype, _lcheck, _lpush) \
 	{"lookup_"#ftype, l_nvlist_lookup_##ftype},

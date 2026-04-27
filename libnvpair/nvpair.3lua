@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd April 24, 2026
+.Dd April 27, 2026
 .Dt NVPAIR 3lua
 .Os
 .Sh NAME
@@ -51,6 +51,7 @@ nvpair = require('nvpair')
 .It Dv nvl:add_string_array(name , values )
 .It Dv nvl:add_nvlist_array(name , values )
 .It Dv nvl:remove(name )
+.It Dv value, type = nvl:lookup(name )
 .It Dv value = nvl:lookup_boolean(name )
 .It Dv value = nvl:lookup_boolean_value(name )
 .It Dv value = nvl:lookup_byte(name )
@@ -212,6 +213,9 @@ Wraps
 .It Dv nvl:remove(name )
 Wraps
 .Fn nvlist_remove .
+.It Dv value, type = nvl:lookup(name )
+Wraps
+.Fn nvlist_lookup_nvpair .
 .It Dv value = nvl:lookup_boolean(name )
 Wraps
 .Fn nvlist_lookup_boolean .
