@@ -361,6 +361,27 @@ l_zpool_iter(lua_State *L)
 }
 
 static int
+l_zpool_create(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *poolname;
+	nvlist_t *nvroot, *props, *fsprops;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	poolname = luaL_checkstring(L, 2);
+	nvroot = checknvlist(L, 3);
+	props = optnvlist(L, 4, NULL);
+	fsprops = optnvlist(L, 5, NULL);
+
+	if ((error = zpool_create(hdl, poolname, nvroot, props, fsprops))
+	    != 0) {
+		return (libzfsfail(L, hdl, error, "zpool_create"));
+	}
+	return (success(L));
+}
+
+static int
 l_zfs_open(lua_State *L)
 {
 	libzfs_handle_t *hdl;
@@ -1011,6 +1032,7 @@ static const struct luaL_Reg l_libzfs_meta[] = {
 	{"zpool_open", l_zpool_open},
 	{"zpool_open_canfail", l_zpool_open_canfail},
 	{"zpool_iter", l_zpool_iter},
+	{"zpool_create", l_zpool_create},
 	/* TODO: lots more stuff */
 	{"zfs_open", l_zfs_open},
 	{"valid_proplist", l_zfs_valid_proplist},
@@ -1061,6 +1083,7 @@ luaopen_zfs(lua_State *L)
 	lua_pushinteger(L, ident); \
 	lua_setfield(L, -2, #ident); \
 })
+	DEFINE(SPA_MINDEVSIZE);
 	DEFINE(ZFS_MAXPROPLEN);
 	DEFINE(ZPOOL_MAXPROPLEN);
 
