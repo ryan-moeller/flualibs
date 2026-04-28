@@ -316,6 +316,51 @@ l_zpool_open_canfail(lua_State *L)
 }
 
 static int
+zpool_iter_cb(zpool_handle_t *zhp, void *data)
+{
+	lua_State *L = data;
+	int nargs = lua_gettop(L) - 1;
+	int error;
+
+	/* Copy the function. */
+	lua_pushvalue(L, -nargs); /* hdl, cb, ..., cb */
+	new(L, zhp, ZPOOL_HANDLE_METATABLE); /* hdl, cb, ..., cb, zhp */
+	/* Copy any additional args. */
+	for (int i = 1; i < nargs; i++) {
+		lua_pushvalue(L, -nargs);
+	}
+	if ((error = lua_pcall(L, nargs, 0, 0)) != LUA_OK) {
+		luaL_pushfail(L);
+		lua_insert(L, -2);
+		return (-1);
+	}
+	return (0);
+}
+
+static int
+l_zpool_iter(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	int top = lua_gettop(L);
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	luaL_argcheck(L, lua_isfunction(L, 2), 2, "callback function required");
+
+	if ((error = zpool_iter(hdl, zpool_iter_cb, L)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zpool_iter failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
 l_zfs_open(lua_State *L)
 {
 	libzfs_handle_t *hdl;
@@ -965,6 +1010,7 @@ static const struct luaL_Reg l_libzfs_meta[] = {
 	{"mnttab_remove", l_libzfs_mnttab_remove},
 	{"zpool_open", l_zpool_open},
 	{"zpool_open_canfail", l_zpool_open_canfail},
+	{"zpool_iter", l_zpool_iter},
 	/* TODO: lots more stuff */
 	{"zfs_open", l_zfs_open},
 	{"valid_proplist", l_zfs_valid_proplist},
