@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd April 26, 2026
+.Dd April 27, 2026
 .Dt ZFS 3lua
 .Os
 .Sh NAME
@@ -27,6 +27,7 @@ zfs = require('zfs')
 .It Dv is_string = prop:is_string( )
 .It Dv libzfs_hdl:fini( )
 .It Dv libzfs_hdl:print_on_error(printerr )
+.It Dv libzfs_hdl:log_history(message )
 .It Dv errno = libzfs_hdl:errno( )
 .It Dv action = libzfs_hdl:error_action( )
 .It Dv description = libzfs_hdl:error_description( )
@@ -107,6 +108,9 @@ Wraps
 .It Dv libzfs_hdl:print_on_error(printerr )
 Wraps
 .Fn libzfs_print_on_error .
+.It Dv libzfs_hdl:log_history(message )
+Wraps
+.Fn zpool_log_history .
 .It Dv errno = libzfs_hdl:errno( )
 Wraps
 .Fn libzfs_errno .

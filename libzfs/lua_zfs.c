@@ -162,6 +162,26 @@ l_libzfs_print_on_error(lua_State *L)
 	return (0);
 }
 
+/*
+ * XXX: This function can only be called once after the handle has successfully
+ * performed a command that allows logging.
+ */
+static int
+l_zpool_log_history(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *message;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	message = luaL_checkstring(L, 2);
+
+	if ((error = zpool_log_history(hdl, message)) != 0) {
+		return (fail(L, error));
+	}
+	return (success(L));
+}
+
 static int
 l_libzfs_errno(lua_State *L)
 {
@@ -935,6 +955,7 @@ static const struct luaL_Reg l_libzfs_meta[] = {
 	{"__gc", l_libzfs_fini},
 	{"fini", l_libzfs_fini},
 	{"print_on_error", l_libzfs_print_on_error},
+	{"log_history", l_zpool_log_history},
 	{"errno", l_libzfs_errno},
 	{"error_action", l_libzfs_error_action},
 	{"error_description", l_libzfs_error_description},
