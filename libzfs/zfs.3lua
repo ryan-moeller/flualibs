@@ -44,6 +44,22 @@ zfs = require('zfs')
 .It Dv name = zpool_hdl:get_name( )
 .It Dv state = zpool_hdl:get_state( )
 .It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:zfs_open(path , types )
+.It Dv ok, errmsg = libzfs_hdl:zfs_iter_root(callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_children(callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_dependents(allowrecursion , callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_filesystems(callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_snapshots(simple , [min_txg ] , [max_txg ] , callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_snapshots_sorted([min_txg ] , [max_txg ] , callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_snapspec(snapspec , callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_bookmarks(callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_children_v2(flags , callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_dependents_v2(flags , allowrecursion , callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_filesystems_v2(flags , callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_snapshots_v2(flags , min_txg , max_txg , callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_snapshots_sorted_v2(flags , min_txg , max_txg , callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_snapspec_v2(flags , snapspec , callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_bookmarks_v2(flags , callback , ... )
+.It Dv ok, errmsg = zfs_hdl:iter_mounted(callback , ... )
 .It Dv zfs_hdl:close( )
 .It Dv zfs_hdl_dup, errmsg, errcode = zfs_hdl:handle_dup( )
 .It Dv type = zfs_hdl:get_type( )
@@ -163,6 +179,86 @@ Wraps
 .It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:zfs_open(path , types )
 Wraps
 .Fn zfs_open .
+.It Dv ok, errmsg = libzfs_hdl:zfs_iter_root(callback , ... )
+Wraps
+.Fn zfs_iter_root .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_children(callback , ... )
+Wraps
+.Fn zfs_iter_children .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_dependents(allowrecursion , callback , ... )
+Wraps
+.Fn zfs_iter_dependents .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_filesystems(callback , ... )
+Wraps
+.Fn zfs_iter_filesystems .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_snapshots(simple , [min_txg ] , [max_txg ] , callback , ... )
+Wraps
+.Fn zfs_iter_snapshots .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_snapshots_sorted([min_txg ] , [max_txg ] , callback , ... )
+Wraps
+.Fn zfs_iter_snapshots_sorted .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_snapspec(snapspec , callback , ... )
+Wraps
+.Fn zfs_iter_snapspec .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_bookmarks(callback , ... )
+Wraps
+.Fn zfs_iter_bookmarks .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_children_v2(flags , callback , ... )
+Wraps
+.Fn zfs_iter_children_v2 .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_dependents_v2(flags , allowrecursion , callback , ... )
+Wraps
+.Fn zfs_iter_dependents_v2 .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_filesystems_v2(flags , callback , ... )
+Wraps
+.Fn zfs_iter_filesystems_v2 .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_snapshots_v2(flags , min_txg , max_txg , callback , ... )
+Wraps
+.Fn zfs_iter_snapshots_v2 .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_snapshots_sorted_v2(flags , min_txg , max_txg , callback , ... )
+Wraps
+.Fn zfs_iter_snapshots_sorted_v2 .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_snapspec_v2(flags , snapspec , callback , ... )
+Wraps
+.Fn zfs_iter_snapspec_v2 .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_bookmarks_v2(flags , callback , ... )
+Wraps
+.Fn zfs_iter_bookmarks_v2 .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
+.It Dv ok, errmsg = zfs_hdl:iter_mounted(callback , ... )
+Wraps
+.Fn zfs_iter_mounted .
+.Fa callback
+receives a zfs handle followed by any additional args provided by the caller.
 .It Dv zfs_hdl:close( )
 Wraps
 .Fn zfs_close .

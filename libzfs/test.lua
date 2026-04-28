@@ -2,19 +2,17 @@ nvpair = require('nvpair')
 zfs = require('zfs')
 
 hdl = zfs.init()
-hdl:zpool_iter(function(zhp)
-	name = zhp:get_name()
-	state = zhp:get_state()
+assert(hdl:zpool_iter(function(pool)
+	name = pool:get_name()
+	state = pool:get_state()
 	print('pool:', name, 'state:', state)
-end)
-zhp = hdl:zfs_open('storage/zts', zfs.ZFS_TYPE_FILESYSTEM)
-props = zhp:get_all_props()
-for _, name, value in pairs(props) do
-	value, type = value:lookup('value')
-	if type == nvpair.DATA_TYPE_UINT64 then
-		print(name, ("%u"):format(value))
-	elseif type then
-		print(name, value)
-	end
-end
+	pool:close()
+end))
+hdl:fini()
+hdl = zfs.init()
+assert(hdl:zfs_iter_root(function(ds)
+	name = ds:get_name()
+	print('root:', name)
+	ds:close()
+end))
 hdl:fini()

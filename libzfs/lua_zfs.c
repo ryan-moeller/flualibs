@@ -400,6 +400,52 @@ l_zfs_open(lua_State *L)
 }
 
 static int
+zfs_iter_cb(zfs_handle_t *zhp, void *arg)
+{
+	lua_State *L = arg;
+	int nargs = lua_gettop(L) - 1;
+	int error;
+
+	/* Copy the function. */
+	lua_pushvalue(L, -nargs); /* hdl, cb, ..., cb */
+	new(L, zhp, ZFS_HANDLE_METATABLE); /* hdl, cb, ..., cb, zhp */
+	/* Copy any additional args. */
+	for (int i = 1; i < nargs; i++) {
+		lua_pushvalue(L, -nargs);
+	}
+	if ((error = lua_pcall(L, nargs, 0, 0)) != LUA_OK) {
+		luaL_pushfail(L);
+		lua_insert(L, -2);
+		return (-1);
+	}
+	return (0);
+}
+
+static int
+l_zfs_iter_root(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	int top = lua_gettop(L);
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	luaL_argcheck(L, lua_isfunction(L, 2), 2, "callback function required");
+
+	if ((error = zfs_iter_root(hdl, zfs_iter_cb, L)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_root failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
 l_zfs_valid_proplist(lua_State *L)
 {
 	libzfs_handle_t *hdl;
@@ -844,6 +890,455 @@ l_zfs_get_clones_nvl(lua_State *L)
 }
 
 static int
+l_zfs_iter_children(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	int top = lua_gettop(L);
+	int error;
+
+	zhp = checkzfs(L, 1);
+	luaL_argcheck(L, lua_isfunction(L, 2), 2, "callback function required");
+
+	if ((error = zfs_iter_children(zhp, zfs_iter_cb, L)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_children failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_dependents(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	boolean_t allowrecursion;
+	int top, error;
+
+	zhp = checkzfs(L, 1);
+	allowrecursion = lua_toboolean(L, 2);
+	luaL_argcheck(L, lua_isfunction(L, 3), 3, "callback function required");
+
+	/* Massage the stack to fit zfs_iter_cb. */
+	lua_remove(L, 2);
+	top = lua_gettop(L);
+
+	if ((error = zfs_iter_dependents(zhp, allowrecursion, zfs_iter_cb, L))
+	    != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_dependents failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_filesystems(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	int top = lua_gettop(L);
+	int error;
+
+	zhp = checkzfs(L, 1);
+	luaL_argcheck(L, lua_isfunction(L, 2), 2, "callback function required");
+
+	if ((error = zfs_iter_filesystems(zhp, zfs_iter_cb, L)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_filesystems failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_snapshots(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	uint64_t min_txg, max_txg;
+	boolean_t simple;
+	int top, error;
+
+	zhp = checkzfs(L, 1);
+	simple = lua_toboolean(L, 2);
+	min_txg = luaL_optinteger(L, 3, 0);
+	max_txg = luaL_optinteger(L, 4, 0);
+	luaL_argcheck(L, lua_isfunction(L, 5), 5, "callback function required");
+
+	/* Massage the stack to fit zfs_iter_cb. */
+	lua_remove(L, 2);
+	lua_remove(L, 3);
+	lua_remove(L, 4);
+	top = lua_gettop(L);
+
+	if ((error = zfs_iter_snapshots(zhp, simple, zfs_iter_cb, L, min_txg,
+	    max_txg)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_snapshots failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_snapshots_sorted(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	uint64_t min_txg, max_txg;
+	int top, error;
+
+	zhp = checkzfs(L, 1);
+	min_txg = luaL_optinteger(L, 2, 0);
+	max_txg = luaL_optinteger(L, 3, 0);
+	luaL_argcheck(L, lua_isfunction(L, 4), 4, "callback function required");
+
+	/* Massage the stack to fit zfs_iter_cb. */
+	lua_remove(L, 2);
+	lua_remove(L, 3);
+	top = lua_gettop(L);
+
+	if ((error = zfs_iter_snapshots_sorted(zhp, zfs_iter_cb, L, min_txg,
+	    max_txg)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_snapshots_sorted failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+/* XXX: this shouldn't be externally visible, please break */
+extern char *zfs_strdup(libzfs_handle_t *, const char *);
+
+static int
+l_zfs_iter_snapspec(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *snapspec;
+	char *snapspeccopy;
+	int top, error;
+
+	zhp = checkzfs(L, 1);
+	snapspec = luaL_checkstring(L, 2);
+	luaL_argcheck(L, lua_isfunction(L, 3), 3, "callback function required");
+
+	/* Massage the stack to fit zfs_iter_cb. */
+	snapspeccopy = zfs_strdup(zfs_get_handle(zhp), snapspec);
+	lua_remove(L, 2);
+	top = lua_gettop(L);
+
+	error = zfs_iter_snapspec(zhp, snapspeccopy, zfs_iter_cb, L);
+	free(snapspeccopy);
+	if (error != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_snapspec failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_bookmarks(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	int top = lua_gettop(L);
+	int error;
+
+	zhp = checkzfs(L, 1);
+	luaL_argcheck(L, lua_isfunction(L, 2), 2, "callback function required");
+
+	if ((error = zfs_iter_bookmarks(zhp, zfs_iter_cb, L)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_bookmarks failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_children_v2(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	int flags, top, error;
+
+	zhp = checkzfs(L, 1);
+	flags = luaL_checkinteger(L, 2);
+	luaL_argcheck(L, lua_isfunction(L, 3), 3, "callback function required");
+
+	/* Massage the stack to fit zfs_iter_cb. */
+	lua_remove(L, 2);
+	top = lua_gettop(L);
+
+	if ((error = zfs_iter_children_v2(zhp, flags, zfs_iter_cb, L)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_children_v2 failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_dependents_v2(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	boolean_t allowrecursion;
+	int flags, top, error;
+
+	zhp = checkzfs(L, 1);
+	flags = luaL_checkinteger(L, 2);
+	allowrecursion = lua_toboolean(L, 3);
+	luaL_argcheck(L, lua_isfunction(L, 4), 4, "callback function required");
+
+	/* Massage the stack to fit zfs_iter_cb. */
+	lua_remove(L, 2);
+	lua_remove(L, 3);
+	top = lua_gettop(L);
+
+	if ((error = zfs_iter_dependents_v2(zhp, flags, allowrecursion,
+	    zfs_iter_cb, L)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_dependents_v2 failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_filesystems_v2(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	int flags, top, error;
+
+	zhp = checkzfs(L, 1);
+	flags = luaL_checkinteger(L, 2);
+	luaL_argcheck(L, lua_isfunction(L, 3), 3, "callback function required");
+
+	/* Massage the stack to fit zfs_iter_cb. */
+	lua_remove(L, 2);
+	top = lua_gettop(L);
+
+	if ((error = zfs_iter_filesystems_v2(zhp, flags, zfs_iter_cb, L))
+	    != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_filesystems_v2 failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_snapshots_v2(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	uint64_t min_txg, max_txg;
+	int flags, top, error;
+
+	zhp = checkzfs(L, 1);
+	flags = luaL_checkinteger(L, 2);
+	min_txg = luaL_optinteger(L, 3, 0);
+	max_txg = luaL_optinteger(L, 4, 0);
+	luaL_argcheck(L, lua_isfunction(L, 5), 5, "callback function required");
+
+	/* Massage the stack to fit zfs_iter_cb. */
+	lua_remove(L, 2);
+	lua_remove(L, 3);
+	lua_remove(L, 4);
+	top = lua_gettop(L);
+
+	if ((error = zfs_iter_snapshots_v2(zhp, flags, zfs_iter_cb, L, min_txg,
+	    max_txg)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_snapshots_v2 failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_snapshots_sorted_v2(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	uint64_t min_txg, max_txg;
+	int flags, top, error;
+
+	zhp = checkzfs(L, 1);
+	flags = luaL_checkinteger(L, 2);
+	min_txg = luaL_optinteger(L, 3, 0);
+	max_txg = luaL_optinteger(L, 4, 0);
+	luaL_argcheck(L, lua_isfunction(L, 5), 5, "callback function required");
+
+	/* Massage the stack to fit zfs_iter_cb. */
+	lua_remove(L, 2);
+	lua_remove(L, 3);
+	lua_remove(L, 4);
+	top = lua_gettop(L);
+
+	if ((error = zfs_iter_snapshots_sorted_v2(zhp, flags, zfs_iter_cb, L,
+	    min_txg, max_txg)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_snapshots_sorted_v2 failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_snapspec_v2(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *snapspec;
+	char *snapspeccopy;
+	int flags, top, error;
+
+	zhp = checkzfs(L, 1);
+	flags = luaL_checkinteger(L, 2);
+	snapspec = luaL_checkstring(L, 3);
+	luaL_argcheck(L, lua_isfunction(L, 4), 4, "callback function required");
+
+	/* Massage the stack to fit zfs_iter_cb. */
+	snapspeccopy = zfs_strdup(zfs_get_handle(zhp), snapspec);
+	lua_remove(L, 2);
+	lua_remove(L, 3);
+	top = lua_gettop(L);
+
+	error = zfs_iter_snapspec_v2(zhp, flags, snapspeccopy, zfs_iter_cb, L);
+	free(snapspeccopy);
+	if (error != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_snapspec_v2 failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_bookmarks_v2(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	int flags, top, error;
+
+	zhp = checkzfs(L, 1);
+	flags = luaL_checkinteger(L, 2);
+	luaL_argcheck(L, lua_isfunction(L, 3), 3, "callback function required");
+
+	/* Massage the stack to fit zfs_iter_cb. */
+	lua_remove(L, 2);
+	top = lua_gettop(L);
+
+	if ((error = zfs_iter_bookmarks_v2(zhp, flags, zfs_iter_cb, L)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_bookmarks_v2 failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_iter_mounted(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	int top = lua_gettop(L);
+	int error;
+
+	zhp = checkzfs(L, 1);
+	luaL_argcheck(L, lua_isfunction(L, 2), 2, "callback function required");
+
+	if ((error = zfs_iter_mounted(zhp, zfs_iter_cb, L)) != 0) {
+		int nresults = lua_gettop(L) - top;
+
+		if (nresults > 0) {
+			return (nresults);
+		}
+		/* XXX: We don't get useful error info back. */
+		luaL_pushfail(L);
+		lua_pushliteral(L, "zfs_iter_mounted failed");
+		return (2);
+	}
+	return (success(L));
+}
+
+static int
 l_zpool_close(lua_State *L)
 {
 	zpool_handle_t *zhp;
@@ -1002,6 +1497,21 @@ static const struct luaL_Reg l_zfs_meta[] = {
 	{"get_user_props", l_zfs_get_user_props},
 	{"get_recvd_props", l_zfs_get_recvd_props},
 	{"get_clones_nvl", l_zfs_get_clones_nvl},
+	{"iter_children", l_zfs_iter_children},
+	{"iter_dependents", l_zfs_iter_dependents},
+	{"iter_filesystems", l_zfs_iter_filesystems},
+	{"iter_snapshots", l_zfs_iter_snapshots},
+	{"iter_snapshots_sorted", l_zfs_iter_snapshots_sorted},
+	{"iter_snapspec", l_zfs_iter_snapspec},
+	{"iter_bookmarks", l_zfs_iter_bookmarks},
+	{"iter_children_v2", l_zfs_iter_children_v2},
+	{"iter_dependents_v2", l_zfs_iter_dependents_v2},
+	{"iter_filesystems_v2", l_zfs_iter_filesystems_v2},
+	{"iter_snapshots_v2", l_zfs_iter_snapshots_v2},
+	{"iter_snapshots_sorted_v2", l_zfs_iter_snapshots_sorted_v2},
+	{"iter_snapspec_v2", l_zfs_iter_snapspec_v2},
+	{"iter_bookmarks_v2", l_zfs_iter_bookmarks_v2},
+	{"iter_mounted", l_zfs_iter_mounted},
 	/* TODO: so much more */
 	{NULL, NULL}
 };
@@ -1035,6 +1545,7 @@ static const struct luaL_Reg l_libzfs_meta[] = {
 	{"zpool_create", l_zpool_create},
 	/* TODO: lots more stuff */
 	{"zfs_open", l_zfs_open},
+	{"zfs_iter_root", l_zfs_iter_root},
 	{"valid_proplist", l_zfs_valid_proplist},
 	{NULL, NULL}
 };
@@ -1516,6 +2027,14 @@ luaopen_zfs(lua_State *L)
 	DEFINE(ZPROP_ERR_NORESTORE);
 
 	DEFINE(ZFS_MAX_DATASET_NAME_LEN);
+
+	DEFINE(ZFS_ITER_RECURSE);
+	DEFINE(ZFS_ITER_ARGS_CAN_BE_PATHS);
+	DEFINE(ZFS_ITER_PROP_LISTSNAPS);
+	DEFINE(ZFS_ITER_DEPTH_LIMIT);
+	DEFINE(ZFS_ITER_RECVD_PROPS);
+	DEFINE(ZFS_ITER_LITERAL_PROPS);
+	DEFINE(ZFS_ITER_SIMPLE);
 #undef DEFINE
 
 #define	DEFINE(ident) ({ \
