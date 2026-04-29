@@ -37,6 +37,7 @@ zfs = require('zfs')
 .It Dv libzfs_hdl:mnttab_remove(fsname )
 .It Dv validated, errmsg, errcode = libzfs_hdl:valid_proplist(type , props , zoned , [zfs_hdl ] , [pool_hdl ] , key_params_ok , errprefix )
 .It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:path_to_zhandle(path , type )
+.It Dv exists = libzfs_hdl:dataset_exists(path , type )
 .It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open(poolname )
 .It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open_canfail(poolname )
 .It Dv ok, errmsg = libzfs_hdl:zpool_iter(callback , ... )
@@ -157,6 +158,9 @@ Wraps
 .It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:path_to_zhandle(path , type )
 Wraps
 .Fn zfs_path_to_zhandle .
+.It Dv exists = libzfs_hdl:dataset_exists(path , type )
+Wraps
+.Fn zfs_dataset_exists .
 .It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open(poolname )
 Wraps
 .Fn zpool_open .

@@ -493,6 +493,21 @@ l_zfs_path_to_zhandle(lua_State *L)
 }
 
 static int
+l_zfs_dataset_exists(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *path;
+	zfs_type_t type;
+
+	hdl = checklibzfs(L, 1);
+	path = luaL_checkstring(L, 2);
+	type = luaL_checkinteger(L, 3);
+
+	lua_pushboolean(L, zfs_dataset_exists(hdl, path, type));
+	return (1);
+}
+
+static int
 l_zfs_close(lua_State *L)
 {
 	zfs_handle_t *zhp;
@@ -1566,6 +1581,7 @@ static const struct luaL_Reg l_libzfs_meta[] = {
 	{"zfs_iter_root", l_zfs_iter_root},
 	{"valid_proplist", l_zfs_valid_proplist},
 	{"path_to_zhandle", l_zfs_path_to_zhandle},
+	{"dataset_exists", l_zfs_dataset_exists},
 	{NULL, NULL}
 };
 
