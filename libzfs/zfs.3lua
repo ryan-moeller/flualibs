@@ -42,6 +42,7 @@ zfs = require('zfs')
 .It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open_canfail(poolname )
 .It Dv ok, errmsg = libzfs_hdl:zpool_iter(callback , ... )
 .It Dv ok, errmsg, errcode = libzfs_hdl:zpool_create(poolname , nvroot , [props ] , [fsprops ] )
+.It Dv action = libzfs_hdl:zpool_explain_recover(poolname , reason , config )
 .It Dv zpool_hdl:close( )
 .It Dv name = zpool_hdl:get_name( )
 .It Dv state = zpool_hdl:get_state( )
@@ -175,6 +176,9 @@ receives a zpool handle followed by any additional args provided by the caller.
 .It Dv ok, errmsg, errcode = libzfs_hdl:zpool_create(poolname , nvroot , [props ] , [fsprops ] )
 Wraps
 .Fn zpool_create .
+.It Dv action = libzfs_hdl:zpool_explain_recover(poolname , reason , config )
+Wraps
+.Fn zpool_explain_recover .
 .It Dv zpool_hdl:close( )
 Wraps
 .Fn zpool_close .

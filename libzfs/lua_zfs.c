@@ -382,6 +382,25 @@ l_zpool_create(lua_State *L)
 }
 
 static int
+l_zpool_explain_recover(lua_State *L)
+{
+	char buf[PAGE_SIZE/2];
+	libzfs_handle_t *hdl;
+	const char *name;
+	int reason;
+	nvlist_t *config;
+
+	hdl = checklibzfs(L, 1);
+	name = luaL_checkstring(L, 2);
+	reason = luaL_checkinteger(L, 3);
+	config = checknvlist(L, 4);
+
+	zpool_explain_recover(hdl, name, reason, config, buf, sizeof(buf));
+	lua_pushstring(L, buf);
+	return (1);
+}
+
+static int
 l_zfs_open(lua_State *L)
 {
 	libzfs_handle_t *hdl;
@@ -1576,6 +1595,7 @@ static const struct luaL_Reg l_libzfs_meta[] = {
 	{"zpool_open_canfail", l_zpool_open_canfail},
 	{"zpool_iter", l_zpool_iter},
 	{"zpool_create", l_zpool_create},
+	{"zpool_explain_recover", l_zpool_explain_recover},
 	/* TODO: lots more stuff */
 	{"zfs_open", l_zfs_open},
 	{"zfs_iter_root", l_zfs_iter_root},
