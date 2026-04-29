@@ -63,6 +63,13 @@ zfs = require('zfs')
 .It Dv ok, errmsg = zfs_hdl:iter_snapspec_v2(flags , snapspec , callback , ... )
 .It Dv ok, errmsg = zfs_hdl:iter_bookmarks_v2(flags , callback , ... )
 .It Dv ok, errmsg = zfs_hdl:iter_mounted(callback , ... )
+.It Dv wkey, errmsg, errcode = libzfs_hdl:zfs_crypto_create([parent_name ] , props , pool_props , stdin_available )
+.It Dv ok, errmsg, errcode = libzfs_hdl:zfs_crypto_clone_check(origin_zhp , props )
+.It Dv ok, errmsg, errcode = libzfs_hdl:zfs_crypto_attempt_load_keys(fsname )
+.It Dv is_encroot, encroot_or_errmsg, errcode = zfs_hdl:crypto_get_encryption_root( )
+.It Dv ok, errmsg, errcode = zfs_hdl:crypto_load_key(noop[ , alt_keylocation ] )
+.It Dv ok, errmsg, errcode = zfs_hdl:crypto_unload_key( )
+.It Dv ok, errmsg, errcode = zfs_hdl:crypto_rewrap(raw_props , inherit_key )
 .It Dv zfs_hdl:close( )
 .It Dv zfs_hdl_dup, errmsg, errcode = zfs_hdl:handle_dup( )
 .It Dv type = zfs_hdl:get_type( )
@@ -188,6 +195,27 @@ Wraps
 .It Dv state = zpool_hdl:get_state( )
 Wraps
 .Fn zpool_get_state .
+.It Dv wkey, errmsg, errcode = libzfs_hdl:zfs_crypto_create([parent_name ] , props , pool_props , stdin_available )
+Wraps
+.Fn zfs_crypto_create .
+.It Dv ok, errmsg, errcode = libzfs_hdl:zfs_crypto_clone_check(origin_zhp , props )
+Wraps
+.Fn zfs_crypto_clone_check .
+.It Dv ok, errmsg, errcode = libzfs_hdl:zfs_crypto_attempt_load_keys(fsname )
+Wraps
+.Fn zfs_crypto_attempt_load_keys .
+.It Dv is_encroot, encroot_or_errmsg, errcode = zfs_hdl:crypto_get_encryption_root( )
+Wraps
+.Fn zfs_crypto_get_encryption_root .
+.It Dv ok, errmsg, errcode = zfs_hdl:crypto_load_key(noop[ , alt_keylocation ] )
+Wraps
+.Fn zfs_crypto_load_key .
+.It Dv ok, errmsg, errcode = zfs_hdl:crypto_unload_key( )
+Wraps
+.Fn zfs_crypto_unload_key .
+.It Dv ok, errmsg, errcode = zfs_hdl:crypto_rewrap(raw_props , inherit_key )
+Wraps
+.Fn zfs_crypto_rewrap .
 .It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:zfs_open(path , types )
 Wraps
 .Fn zfs_open .

@@ -384,7 +384,9 @@ l_zpool_create(lua_State *L)
 static int
 l_zpool_explain_recover(lua_State *L)
 {
+#if __FreeBSD_version > 1500023
 	char buf[PAGE_SIZE/2];
+#endif
 	libzfs_handle_t *hdl;
 	const char *name;
 	int reason;
@@ -395,9 +397,14 @@ l_zpool_explain_recover(lua_State *L)
 	reason = luaL_checkinteger(L, 3);
 	config = checknvlist(L, 4);
 
+#if __FreeBSD_version > 1500023
 	zpool_explain_recover(hdl, name, reason, config, buf, sizeof(buf));
 	lua_pushstring(L, buf);
 	return (1);
+#else
+	zpool_explain_recover(hdl, name, reason, config);
+	return (0);
+#endif
 }
 
 static int
@@ -460,6 +467,67 @@ l_zfs_iter_root(lua_State *L)
 		luaL_pushfail(L);
 		lua_pushliteral(L, "zfs_iter_root failed");
 		return (2);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_crypto_create(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *parent_name;
+	nvlist_t *props, *pool_props;
+	uint8_t *wkeydata;
+	uint_t wkeylen;
+	boolean_t stdin_available;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	parent_name = luaL_optstring(L, 2, NULL);
+	props = checknvlist(L, 3);
+	pool_props = checknvlist(L, 4);
+	stdin_available = lua_toboolean(L, 5);
+
+	if ((error = zfs_crypto_create(hdl, __DECONST(char *, parent_name),
+	    props, pool_props, stdin_available, &wkeydata, &wkeylen)) != 0) {
+		return (libzfsfail(L, hdl, error, "zfs_crypto_create"));
+	}
+	lua_pushlstring(L, (char *)wkeydata, wkeylen);
+	return (1);
+}
+
+static int
+l_zfs_crypto_clone_check(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	zfs_handle_t *origin_zhp;
+	nvlist_t *props;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	origin_zhp = checkzfs(L, 2);
+	props = checknvlist(L, 3);
+
+	if ((error = zfs_crypto_clone_check(hdl, origin_zhp, NULL, props))
+	    != 0) {
+		return (libzfsfail(L, hdl, error, "zfs_crypto_clone_check"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_crypto_attempt_load_keys(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *fsname;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	fsname = luaL_checkstring(L, 2);
+
+	if ((error = zfs_crypto_attempt_load_keys(hdl, fsname)) != 0) {
+		return (libzfsfail(L, hdl, error,
+		    "zfs_crypto_attempt_load_keys"));
 	}
 	return (success(L));
 }
@@ -1391,6 +1459,76 @@ l_zfs_iter_mounted(lua_State *L)
 }
 
 static int
+l_zfs_crypto_get_encryption_root(lua_State *L)
+{
+	char encroot[ZFS_MAX_DATASET_NAME_LEN];
+	zfs_handle_t *zhp;
+	boolean_t is_encroot;
+	int error;
+
+	zhp = checkzfs(L, 1);
+
+	if ((error = zfs_crypto_get_encryption_root(zhp, &is_encroot, encroot))
+	    != 0) {
+		return (zfsfail(L, zhp, error,
+		    "zfs_crypto_get_encryption_root"));
+	}
+	lua_pushboolean(L, is_encroot);
+	lua_pushstring(L, encroot);
+	return (2);
+}
+
+static int
+l_zfs_crypto_load_key(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *alt_keylocation;
+	boolean_t noop;
+	int error;
+
+	zhp = checkzfs(L, 1);
+	noop = lua_toboolean(L, 2);
+	alt_keylocation = luaL_optstring(L, 3, NULL);
+
+	if ((error = zfs_crypto_load_key(zhp, noop, alt_keylocation)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_crypto_load_key"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_crypto_unload_key(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	int error;
+
+	zhp = checkzfs(L, 1);
+
+	if ((error = zfs_crypto_unload_key(zhp)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_crypto_unload_key"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_crypto_rewrap(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	nvlist_t *raw_props;
+	boolean_t inherit_key;
+	int error;
+
+	zhp = checkzfs(L, 1);
+	raw_props = checknvlist(L, 2);
+	inherit_key = lua_toboolean(L, 3);
+
+	if ((error = zfs_crypto_rewrap(zhp, raw_props, inherit_key)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_crypto_rewrap"));
+	}
+	return (success(L));
+}
+
+static int
 l_zpool_close(lua_State *L)
 {
 	zpool_handle_t *zhp;
@@ -1564,6 +1702,10 @@ static const struct luaL_Reg l_zfs_meta[] = {
 	{"iter_snapspec_v2", l_zfs_iter_snapspec_v2},
 	{"iter_bookmarks_v2", l_zfs_iter_bookmarks_v2},
 	{"iter_mounted", l_zfs_iter_mounted},
+	{"crypto_get_encryption_root", l_zfs_crypto_get_encryption_root},
+	{"crypto_load_key", l_zfs_crypto_load_key},
+	{"crypto_unload_key", l_zfs_crypto_unload_key},
+	{"crypto_rewrap", l_zfs_crypto_rewrap},
 	/* TODO: so much more */
 	{NULL, NULL}
 };
@@ -1599,6 +1741,9 @@ static const struct luaL_Reg l_libzfs_meta[] = {
 	/* TODO: lots more stuff */
 	{"zfs_open", l_zfs_open},
 	{"zfs_iter_root", l_zfs_iter_root},
+	{"zfs_crypto_create", l_zfs_crypto_create},
+	{"zfs_crypto_clone_check", l_zfs_crypto_clone_check},
+	{"zfs_crypto_attempt_load_keys", l_zfs_crypto_attempt_load_keys},
 	{"valid_proplist", l_zfs_valid_proplist},
 	{"path_to_zhandle", l_zfs_path_to_zhandle},
 	{"dataset_exists", l_zfs_dataset_exists},
