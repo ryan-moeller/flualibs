@@ -382,6 +382,170 @@ l_zpool_create(lua_State *L)
 }
 
 static int
+l_zpool_label_disk(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	zpool_handle_t *zhp;
+	const char *name;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	zhp = luaL_opt(L, checkzpool, 2, NULL);
+	name = luaL_checkstring(L, 3);
+
+	if ((error = zpool_label_disk(hdl, zhp, name)) != 0) {
+		return (libzfsfail(L, hdl, error, "zpool_label_disk"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_prepare_and_label_disk(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	zpool_handle_t *zhp;
+	const char *name, *prepare_str;
+	nvlist_t *vdev_nv;
+	char **lines;
+	int nlines, error;
+
+	hdl = checklibzfs(L, 1);
+	zhp = luaL_opt(L, checkzpool, 2, NULL);
+	name = luaL_checkstring(L, 3);
+	vdev_nv = checknvlist(L, 4);
+	prepare_str = luaL_optstring(L, 5, NULL);
+
+	if ((error = zpool_prepare_and_label_disk(hdl, zhp, name, vdev_nv,
+	    prepare_str, &lines, &nlines)) != 0) {
+		return (libzfsfail(L, hdl, error,
+		    "zpool_prepare_and_label_disk"));
+	}
+	lua_createtable(L, nlines, 0);
+	for (int i = 0; i < nlines; i++) {
+		lua_pushstring(L, lines[i]);
+		lua_rawseti(L, -2, i + 1);
+	}
+	libzfs_free_str_array(lines, nlines);
+	return (1);
+}
+
+static int
+l_zpool_import(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	nvlist_t *config;
+	const char *newname, *altroot;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	config = checknvlist(L, 2);
+	newname = luaL_optstring(L, 3, NULL);
+	altroot = luaL_optstring(L, 4, NULL);
+
+	if ((error = zpool_import(hdl, config, newname,
+	    __DECONST(char *, altroot))) != 0) {
+		return (libzfsfail(L, hdl, error, "zpool_import"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_import_props(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	nvlist_t *config, *props;
+	const char *newname;
+	int flags, error;
+
+	hdl = checklibzfs(L, 1);
+	config = checknvlist(L, 2);
+	newname = luaL_optstring(L, 3, NULL);
+	props = optnvlist(L, 4, NULL);
+	flags = luaL_checkinteger(L, 5);
+
+	if ((error = zpool_import_props(hdl, config, newname, props, flags))
+	    != 0) {
+		return (libzfsfail(L, hdl, error, "zpool_import_props"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_vdev_name(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	zpool_handle_t *zhp;
+	nvlist_t *nvl;
+	char *name;
+	int name_flags;
+
+	hdl = checklibzfs(L, 1);
+	zhp = luaL_opt(L, checkzpool, 2, NULL);
+	nvl = checknvlist(L, 3);
+	name_flags = luaL_optinteger(L, 4, 0);
+
+	if ((name = zpool_vdev_name(hdl, zhp, nvl, name_flags)) == NULL) {
+		return (libzfsfail(L, hdl, ENOMEM, "zpool_vdev_name"));
+	}
+	lua_pushstring(L, name);
+	free(name);
+	return (1);
+}
+
+static int
+l_zpool_events_next(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	nvlist_t *nvl;
+	unsigned flags;
+	int dropped, zevent_fd, error;
+
+	hdl = checklibzfs(L, 1);
+	flags = luaL_checkinteger(L, 2);
+	zevent_fd = checkfd(L, 3);
+
+	if ((error = zpool_events_next(hdl, &nvl, &dropped, flags, zevent_fd))
+	    != 0) {
+		return (libzfsfail(L, hdl, error, "zpool_events_next"));
+	}
+	pushnvlist(L, nvl);
+	lua_pushinteger(L, dropped);
+	return (2);
+}
+
+static int
+l_zpool_events_clear(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	int count, error;
+
+	hdl = checklibzfs(L, 1);
+
+	if ((error = zpool_events_clear(hdl, &count)) != 0) {
+		return (libzfsfail(L, hdl, error, "zpool_events_clear"));
+	}
+	lua_pushinteger(L, count);
+	return (1);
+}
+
+static int
+l_zpool_events_seek(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	uint64_t eid;
+	int zevent_fd, error;
+
+	hdl = checklibzfs(L, 1);
+	eid = luaL_checkinteger(L, 2);
+	zevent_fd = checkfd(L, 3);
+
+	if ((error = zpool_events_seek(hdl, eid, zevent_fd)) != 0) {
+		return (libzfsfail(L, hdl, error, "zpool_events_seek"));
+	}
+	return (success(L));
+}
+
+static int
 l_zpool_explain_recover(lua_State *L)
 {
 #if __FreeBSD_version > 1500023
@@ -408,24 +572,6 @@ l_zpool_explain_recover(lua_State *L)
 }
 
 static int
-l_zfs_open(lua_State *L)
-{
-	libzfs_handle_t *hdl;
-	const char *path;
-	zfs_handle_t *zhp;
-	int types;
-
-	hdl = checklibzfs(L, 1);
-	path = luaL_checkstring(L, 2);
-	types = luaL_checkinteger(L, 3);
-
-	if ((zhp = zfs_open(hdl, path, types)) == NULL) {
-		return (libzfsfail(L, hdl, libzfs_errno(hdl), "zfs_open"));
-	}
-	return (new(L, zhp, ZFS_HANDLE_METATABLE));
-}
-
-static int
 zfs_iter_cb(zfs_handle_t *zhp, void *arg)
 {
 	lua_State *L = arg;
@@ -445,6 +591,62 @@ zfs_iter_cb(zfs_handle_t *zhp, void *arg)
 		return (-1);
 	}
 	return (0);
+}
+
+static int
+l_zfs_foreach_mountpoint(lua_State *L)
+{
+	luaL_Buffer b;
+	libzfs_handle_t *hdl;
+	zfs_handle_t **handles;
+	size_t num_handles;
+	uint_t nthr;
+	int ref, top;
+
+	hdl = checklibzfs(L, 1);
+	luaL_argcheck(L, lua_istable(L, 2), 2, "expected table of zfs handles");
+	num_handles = luaL_len(L, 2);
+	nthr = luaL_checkinteger(L, 3);
+	luaL_argcheck(L, lua_isfunction(L, 4), 4, "callback function required");
+
+	/* Stash a reference to the handles table to protect it from GC. */
+	handles = lua_newuserdatauv(L, num_handles * sizeof(*handles), 1);
+	for (int i = 0; i < num_handles; i++) {
+		/* XXX */
+		lua_rawgeti(L, 2, i + 1);
+		handles[i] = checkzfs(L, -1);
+	}
+	lua_pushvalue(L, 2);
+	lua_setiuservalue(L, -2, 1);
+	ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+	/* Massage the stack to fit zfs_iter_cb. */
+	lua_pop(L, num_handles);
+	lua_remove(L, 2);
+	lua_remove(L, 3);
+
+	top = lua_gettop(L);
+	zfs_foreach_mountpoint(hdl, handles, num_handles, zfs_iter_cb, L, nthr);
+	luaL_unref(L, LUA_REGISTRYINDEX, ref);
+	return (lua_gettop(L) - top);
+}
+
+static int
+l_zfs_open(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *path;
+	zfs_handle_t *zhp;
+	int types;
+
+	hdl = checklibzfs(L, 1);
+	path = luaL_checkstring(L, 2);
+	types = luaL_checkinteger(L, 3);
+
+	if ((zhp = zfs_open(hdl, path, types)) == NULL) {
+		return (libzfsfail(L, hdl, libzfs_errno(hdl), "zfs_open"));
+	}
+	return (new(L, zhp, ZFS_HANDLE_METATABLE));
 }
 
 static int
@@ -1737,8 +1939,16 @@ static const struct luaL_Reg l_libzfs_meta[] = {
 	{"zpool_open_canfail", l_zpool_open_canfail},
 	{"zpool_iter", l_zpool_iter},
 	{"zpool_create", l_zpool_create},
-	{"zpool_explain_recover", l_zpool_explain_recover},
-	/* TODO: lots more stuff */
+	{"label_disk", l_zpool_label_disk},
+	{"prepare_and_label_disk", l_zpool_prepare_and_label_disk},
+	{"import", l_zpool_import},
+	{"import_props", l_zpool_import_props},
+	{"vdev_name", l_zpool_vdev_name},
+	{"events_next", l_zpool_events_next},
+	{"events_clear", l_zpool_events_clear},
+	{"events_seek", l_zpool_events_seek},
+	{"explain_recover", l_zpool_explain_recover},
+	{"foreach_mountpoint", l_zfs_foreach_mountpoint},
 	{"zfs_open", l_zfs_open},
 	{"zfs_iter_root", l_zfs_iter_root},
 	{"zfs_crypto_create", l_zfs_crypto_create},

@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd April 28, 2026
+.Dd April 29, 2026
 .Dt ZFS 3lua
 .Os
 .Sh NAME
@@ -42,10 +42,19 @@ zfs = require('zfs')
 .It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open_canfail(poolname )
 .It Dv ok, errmsg = libzfs_hdl:zpool_iter(callback , ... )
 .It Dv ok, errmsg, errcode = libzfs_hdl:zpool_create(poolname , nvroot , [props ] , [fsprops ] )
-.It Dv action = libzfs_hdl:zpool_explain_recover(poolname , reason , config )
+.It Dv ok, errmsg, errcode = libzfs_hdl:label_disk([zpool_hdl ] , name )
+.It Dv lines, errmsg, errcode = libzfs_hdl:prepare_and_label_disk([zpool_hdl ] , name , vdev_nvl[ , prepare_str ] )
+.It Dv ok, errmsg, errcode = libzfs_hdl:import(config , [newname ] , [altroot ] )
+.It Dv ok, errmsg, errcode = libzfs_hdl:import_props(config , [newname ] , [props ] , flags )
+.It Dv name, errmsg, errcode = libzfs_hdl:vdev_name([zpool_hdl ] , nvl[ , name_flags ] )
+.It Dv event, dropped_or_errmsg, errcode = libzfs_hdl:events_next(flags , zevent_fd )
+.It Dv count, errmsg, errcode = libzfs_hdl:events_clear( )
+.It Dv ok, errmsg, errcode = libzfs_hdl:events_seek(eid , zevent_fd )
+.It Dv action = libzfs_hdl:explain_recover(poolname , reason , config )
 .It Dv zpool_hdl:close( )
 .It Dv name = zpool_hdl:get_name( )
 .It Dv state = zpool_hdl:get_state( )
+.It Dv ... = libzfs_hdl:foreach_mountpoint(zfs_handles , nthreads , callback , ... )
 .It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:zfs_open(path , types )
 .It Dv ok, errmsg = libzfs_hdl:zfs_iter_root(callback , ... )
 .It Dv ok, errmsg = zfs_hdl:iter_children(callback , ... )
@@ -183,7 +192,31 @@ receives a zpool handle followed by any additional args provided by the caller.
 .It Dv ok, errmsg, errcode = libzfs_hdl:zpool_create(poolname , nvroot , [props ] , [fsprops ] )
 Wraps
 .Fn zpool_create .
-.It Dv action = libzfs_hdl:zpool_explain_recover(poolname , reason , config )
+.It Dv ok, errmsg, errcode = libzfs_hdl:label_disk([zpool_hdl ] , name )
+Wraps
+.Fn zpool_label_disk .
+.It Dv lines, errmsg, errcode = libzfs_hdl:prepare_and_label_disk([zpool_hdl ] , name , vdev_nvl[ , prepare_str ] )
+Wraps
+.Fn zpool_prepare_and_label_disk .
+.It Dv ok, errmsg, errcode = libzfs_hdl:import(config , [newname ] , [altroot ] )
+Wraps
+.Fn zpool_import .
+.It Dv ok, errmsg, errcode = libzfs_hdl:import_props(config , [newname ] , [props ] , flags )
+Wraps
+.Fn zpool_import_props .
+.It Dv name, errmsg, errcode = libzfs_hdl:vdev_name([zpool_hdl ] , nvl[ , name_flags ] )
+Wraps
+.Fn zpool_vdev_name .
+.It Dv event, dropped_or_errmsg, errcode = libzfs_hdl:events_next(flags , zevent_fd )
+Wraps
+.Fn zpool_events_next .
+.It Dv count, errmsg, errcode = libzfs_hdl:events_clear( )
+Wraps
+.Fn zpool_events_clear .
+.It Dv ok, errmsg, errcode = libzfs_hdl:events_seek(eid , zevent_fd )
+Wraps
+.Fn zpool_events_seek .
+.It Dv action = libzfs_hdl:explain_recover(poolname , reason , config )
 Wraps
 .Fn zpool_explain_recover .
 .It Dv zpool_hdl:close( )
@@ -195,6 +228,11 @@ Wraps
 .It Dv state = zpool_hdl:get_state( )
 Wraps
 .Fn zpool_get_state .
+.It Dv ... = libzfs_hdl:foreach_mountpoint(zfs_handles , nthreads , callback , ... )
+Wraps
+.Fn zfs_foreach_mountpoint .
+.Fa zfs_handles
+must be a raw array of zfs handles.
 .It Dv wkey, errmsg, errcode = libzfs_hdl:zfs_crypto_create([parent_name ] , props , pool_props , stdin_available )
 Wraps
 .Fn zfs_crypto_create .
