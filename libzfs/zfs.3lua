@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd April 29, 2026
+.Dd May 1, 2026
 .Dt ZFS 3lua
 .Os
 .Sh NAME
@@ -38,10 +38,23 @@ zfs = require('zfs')
 .It Dv validated, errmsg, errcode = libzfs_hdl:valid_proplist(type , props , zoned , [zfs_hdl ] , [pool_hdl ] , key_params_ok , errprefix )
 .It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:path_to_zhandle(path , type )
 .It Dv exists = libzfs_hdl:dataset_exists(path , type )
-.It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open(poolname )
-.It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open_canfail(poolname )
-.It Dv ok, errmsg = libzfs_hdl:zpool_iter(callback , ... )
-.It Dv ok, errmsg, errcode = libzfs_hdl:zpool_create(poolname , nvroot , [props ] , [fsprops ] )
+.It Dv ok, errmsg, errcode = libzfs_hdl:create(path , type[ , props ] )
+.It Dv ok, errmsg, errcode = libzfs_hdl:create_ancestors(path )
+.It Dv ok, errmsg, errcode = libzfs_hdl:create_ancestors_props(path[ , props ] )
+.It Dv ok, errmsg, errcode = libzfs_hdl:destroy_snaps_nvl(snaps , defer )
+.It Dv ok, errmsg, errcode = libzfs_hdl:snapshot(path , recursive[ , props ] )
+.It Dv ok, errmsg, errcode = libzfs_hdl:snapshot_nvl(snaps[ , props ] )
+.It Dv ok, errmsg, errcode = libzfs_hdl:send_resume(flags , outfd , resume_token )
+.It Dv nvl, errmsg, errcode = libzfs_hdl:send_resume_token_to_nvlist(resume_token )
+.It Dv ok, errmsg, errcode = libzfs_hdl:receive(tosnap , [props ] , flags , infd )
+.It Dv mounted, where = libzfs_hdl:is_mounted(special )
+.It Dv num, errmsg, errcode = libzfs_hdl:nicestrtonum(str )
+.It Dv in_use, namestr_or_errmsg, state_or_errcode = libzfs_hdl:pool_in_use(fd )
+.It Dv ok, errmsg, errcode = libzfs_hdl:nextboot(pool_guid , vdev_guid , command )
+.It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:open_pool(poolname )
+.It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:open_pool_canfail(poolname )
+.It Dv ok, errmsg = libzfs_hdl:iter_pools(callback , ... )
+.It Dv ok, errmsg, errcode = libzfs_hdl:create_pool(poolname , nvroot , [props ] , [fsprops ] )
 .It Dv ok, errmsg, errcode = libzfs_hdl:label_disk([zpool_hdl ] , name )
 .It Dv lines, errmsg, errcode = libzfs_hdl:prepare_and_label_disk([zpool_hdl ] , name , vdev_nvl[ , prepare_str ] )
 .It Dv ok, errmsg, errcode = libzfs_hdl:import(config , [newname ] , [altroot ] )
@@ -55,8 +68,8 @@ zfs = require('zfs')
 .It Dv name = zpool_hdl:get_name( )
 .It Dv state = zpool_hdl:get_state( )
 .It Dv ... = libzfs_hdl:foreach_mountpoint(zfs_handles , nthreads , callback , ... )
-.It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:zfs_open(path , types )
-.It Dv ok, errmsg = libzfs_hdl:zfs_iter_root(callback , ... )
+.It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:open(path , types )
+.It Dv ok, errmsg = libzfs_hdl:iter_root(callback , ... )
 .It Dv ok, errmsg = zfs_hdl:iter_children(callback , ... )
 .It Dv ok, errmsg = zfs_hdl:iter_dependents(allowrecursion , callback , ... )
 .It Dv ok, errmsg = zfs_hdl:iter_filesystems(callback , ... )
@@ -72,13 +85,38 @@ zfs = require('zfs')
 .It Dv ok, errmsg = zfs_hdl:iter_snapspec_v2(flags , snapspec , callback , ... )
 .It Dv ok, errmsg = zfs_hdl:iter_bookmarks_v2(flags , callback , ... )
 .It Dv ok, errmsg = zfs_hdl:iter_mounted(callback , ... )
-.It Dv wkey, errmsg, errcode = libzfs_hdl:zfs_crypto_create([parent_name ] , props , pool_props , stdin_available )
-.It Dv ok, errmsg, errcode = libzfs_hdl:zfs_crypto_clone_check(origin_zhp , props )
-.It Dv ok, errmsg, errcode = libzfs_hdl:zfs_crypto_attempt_load_keys(fsname )
+.It Dv missing, waited_or_errmsg, errcode = zfs_hdl:wait_status(activity )
+.It Dv wkey, errmsg, errcode = libzfs_hdl:crypto_create([parent_name ] , props , pool_props , stdin_available )
+.It Dv ok, errmsg, errcode = libzfs_hdl:crypto_clone_check(origin_zhp , props )
+.It Dv ok, errmsg, errcode = libzfs_hdl:crypto_attempt_load_keys(fsname )
 .It Dv is_encroot, encroot_or_errmsg, errcode = zfs_hdl:crypto_get_encryption_root( )
 .It Dv ok, errmsg, errcode = zfs_hdl:crypto_load_key(noop[ , alt_keylocation ] )
 .It Dv ok, errmsg, errcode = zfs_hdl:crypto_unload_key( )
 .It Dv ok, errmsg, errcode = zfs_hdl:crypto_rewrap(raw_props , inherit_key )
+.It Dv is_encrypted = zfs_hdl:is_encrypted( )
+.It Dv ok, errmsg, errcode = zfs_hdl:destroy(defer )
+.It Dv ok, errmsg, errcode = zfs_hdl:destroy_snaps(snapname , defer )
+.It Dv ok, errmsg, errcode = zfs_hdl:clone(target[ , props ] )
+.It Dv ok, errmsg, errcode = zfs_hdl:rollback(snap , force )
+.It Dv ok, errmsg, errcode = zfs_hdl:rename(target , flags )
+.It Dv ok, errmsg, errcode = zfs_hdl:send([fromsnap ] , [tosnap ] , flags , outfd[ , callback , ... ] )
+.It Dv ok, errmsg, errcode = zfs_hdl:send_one([fromsnap ] , outfd , flags[ , redactbook ] )
+.It Dv bytes_written, blocks_visited_or_errmsg, errcode = zfs_hdl:send_progress(outfd )
+.It Dv ok, errmsg, errcode = zfs_hdl:send_saved(flags , outfd , resume_token )
+.It Dv ok, errmsg, errcode = zfs_hdl:promote( )
+.It Dv ok, errmsg, errcode = zfs_hdl:hold(snapname , tag , recursive , cleanup_fd )
+.It Dv ok, errmsg, errcode = zfs_hdl:hold_nvl(cleanup_fd , nvl )
+.It Dv ok, errmsg, errcode = zfs_hdl:release(snapname , tag , recursive )
+.It Dv holds, errmsg, errcode = zfs_hdl:get_holds( )
+.It Dv zfs_hdl:refresh_properties( )
+.It Dv parent, errmsg, errcode = zfs_hdl:parent_name( )
+.It Dv version, errmsg, errcode = zfs_hdl:spa_version( )
+.It Dv is_mounted, where = zfs_hdl:is_mounted( )
+.It Dv ok, errmsg, errcode = zfs_hdl:mount([options ] , [flags ] )
+.It Dv ok, errmsg, errcode = zfs_hdl:mount_at([options ] , [flags ] , mountpoint )
+.It Dv ok, errmsg, errcode = zfs_hdl:unmount([mountpoint ] , [flags ] )
+.It Dv ok, errmsg, errcode = zfs_hdl:unmountall([flags ] )
+.It Dv ok, errmsg, errcode = zfs_hdl:jail(jid , attach )
 .It Dv zfs_hdl:close( )
 .It Dv zfs_hdl_dup, errmsg, errcode = zfs_hdl:handle_dup( )
 .It Dv type = zfs_hdl:get_type( )
@@ -178,18 +216,57 @@ Wraps
 .It Dv exists = libzfs_hdl:dataset_exists(path , type )
 Wraps
 .Fn zfs_dataset_exists .
-.It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open(poolname )
+.It Dv ok, errmsg, errcode = libzfs_hdl:create(path , type[ , props ] )
+Wraps
+.Fn zfs_create .
+.It Dv ok, errmsg, errcode = libzfs_hdl:create_ancestors(path )
+Wraps
+.Fn zfs_create_ancestors .
+.It Dv ok, errmsg, errcode = libzfs_hdl:create_ancestors_props(path[ , props ] )
+Wraps
+.Fn zfs_create_ancestors_props .
+.It Dv ok, errmsg, errcode = libzfs_hdl:destroy_snaps_nvl(snaps , defer )
+Wraps
+.Fn zfs_destroy_snaps_nvl .
+.It Dv ok, errmsg, errcode = libzfs_hdl:snapshot(path , recursive[ , props ] )
+Wraps
+.Fn zfs_snapshot .
+.It Dv ok, errmsg, errcode = libzfs_hdl:snapshot_nvl(snaps[ , props ] )
+Wraps
+.Fn zfs_snapshot_nvl .
+.It Dv ok, errmsg, errcode = libzfs_hdl:send_resume(flags , outfd , resume_token )
+Wraps
+.Fn zfs_send_resume .
+.It Dv nvl, errmsg, errcode = libzfs_hdl:send_resume_token_to_nvlist(resume_token )
+Wraps
+.Fn zfs_send_resume_token_to_nvlist .
+.It Dv ok, errmsg, errcode = libzfs_hdl:receive(tosnap , [props ] , flags , infd )
+Wraps
+.Fn zfs_receive .
+.It Dv mounted, where = libzfs_hdl:is_mounted(special )
+Wraps
+.Fn is_mounted .
+.It Dv num, errmsg, errcode = libzfs_hdl:nicestrtonum(str )
+Wraps
+.Fn zfs_nicestrtonum .
+.It Dv in_use, namestr_or_errmsg, state_or_errcode = libzfs_hdl:pool_in_use(fd )
+Wraps
+.Fn zpool_in_use .
+.It Dv ok, errmsg, errcode = libzfs_hdl:nextboot(pool_guid , vdev_guid , command )
+Wraps
+.Fn zpool_nextboot .
+.It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:open_pool(poolname )
 Wraps
 .Fn zpool_open .
-.It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:zpool_open_canfail(poolname )
+.It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:open_pool_canfail(poolname )
 Wraps
 .Fn zpool_open_canfail .
-.It Dv libzfs_hdl:zpool_iter(callback , ... )
+.It Dv libzfs_hdl:iter_pool(callback , ... )
 Wraps
 .Fn zpool_iter .
 .Fa callback
 receives a zpool handle followed by any additional args provided by the caller.
-.It Dv ok, errmsg, errcode = libzfs_hdl:zpool_create(poolname , nvroot , [props ] , [fsprops ] )
+.It Dv ok, errmsg, errcode = libzfs_hdl:create_pool(poolname , nvroot , [props ] , [fsprops ] )
 Wraps
 .Fn zpool_create .
 .It Dv ok, errmsg, errcode = libzfs_hdl:label_disk([zpool_hdl ] , name )
@@ -233,31 +310,10 @@ Wraps
 .Fn zfs_foreach_mountpoint .
 .Fa zfs_handles
 must be a raw array of zfs handles.
-.It Dv wkey, errmsg, errcode = libzfs_hdl:zfs_crypto_create([parent_name ] , props , pool_props , stdin_available )
-Wraps
-.Fn zfs_crypto_create .
-.It Dv ok, errmsg, errcode = libzfs_hdl:zfs_crypto_clone_check(origin_zhp , props )
-Wraps
-.Fn zfs_crypto_clone_check .
-.It Dv ok, errmsg, errcode = libzfs_hdl:zfs_crypto_attempt_load_keys(fsname )
-Wraps
-.Fn zfs_crypto_attempt_load_keys .
-.It Dv is_encroot, encroot_or_errmsg, errcode = zfs_hdl:crypto_get_encryption_root( )
-Wraps
-.Fn zfs_crypto_get_encryption_root .
-.It Dv ok, errmsg, errcode = zfs_hdl:crypto_load_key(noop[ , alt_keylocation ] )
-Wraps
-.Fn zfs_crypto_load_key .
-.It Dv ok, errmsg, errcode = zfs_hdl:crypto_unload_key( )
-Wraps
-.Fn zfs_crypto_unload_key .
-.It Dv ok, errmsg, errcode = zfs_hdl:crypto_rewrap(raw_props , inherit_key )
-Wraps
-.Fn zfs_crypto_rewrap .
-.It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:zfs_open(path , types )
+.It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:open(path , types )
 Wraps
 .Fn zfs_open .
-.It Dv ok, errmsg = libzfs_hdl:zfs_iter_root(callback , ... )
+.It Dv ok, errmsg = libzfs_hdl:iter_root(callback , ... )
 Wraps
 .Fn zfs_iter_root .
 .Fa callback
@@ -337,6 +393,102 @@ Wraps
 .Fn zfs_iter_mounted .
 .Fa callback
 receives a zfs handle followed by any additional args provided by the caller.
+.It Dv missing, waited_or_errmsg, errcode = zfs_hdl:wait_status(activity )
+Wraps
+.Fn zfs_wait_status .
+.It Dv wkey, errmsg, errcode = libzfs_hdl:crypto_create([parent_name ] , props , pool_props , stdin_available )
+Wraps
+.Fn zfs_crypto_create .
+.It Dv ok, errmsg, errcode = libzfs_hdl:crypto_clone_check(origin_zhp , props )
+Wraps
+.Fn zfs_crypto_clone_check .
+.It Dv ok, errmsg, errcode = libzfs_hdl:crypto_attempt_load_keys(fsname )
+Wraps
+.Fn zfs_crypto_attempt_load_keys .
+.It Dv is_encroot, encroot_or_errmsg, errcode = zfs_hdl:crypto_get_encryption_root( )
+Wraps
+.Fn zfs_crypto_get_encryption_root .
+.It Dv ok, errmsg, errcode = zfs_hdl:crypto_load_key(noop[ , alt_keylocation ] )
+Wraps
+.Fn zfs_crypto_load_key .
+.It Dv ok, errmsg, errcode = zfs_hdl:crypto_unload_key( )
+Wraps
+.Fn zfs_crypto_unload_key .
+.It Dv ok, errmsg, errcode = zfs_hdl:crypto_rewrap(raw_props , inherit_key )
+Wraps
+.Fn zfs_crypto_rewrap .
+.It Dv is_encrypted = zfs_hdl:is_encrypted( )
+Wraps
+.Fn zfs_is_encrypted .
+.It Dv ok, errmsg, errcode = zfs_hdl:destroy(defer )
+Wraps
+.Fn zfs_destroy .
+.It Dv ok, errmsg, errcode = zfs_hdl:destroy_snaps(snapname , defer )
+Wraps
+.Fn zfs_destroy_snaps .
+.It Dv ok, errmsg, errcode = zfs_hdl:clone(target[ , props ] )
+Wraps
+.Fn zfs_clone .
+.It Dv ok, errmsg, errcode = zfs_hdl:rollback(snap , force )
+Wraps
+.Fn zfs_rollback .
+.It Dv ok, errmsg, errcode = zfs_hdl:rename(target , flags )
+Wraps
+.Fn zfs_rename .
+.It Dv ok, errmsg, errcode = zfs_hdl:send([fromsnap ] , [tosnap ] , flags , outfd[ , callback , ... ] )
+Wraps
+.Fn zfs_send .
+.It Dv ok, errmsg, errcode = zfs_hdl:send_one([fromsnap ] , outfd , flags[ , redactbook ] )
+Wraps
+.Fn zfs_send_one .
+.It Dv bytes_written, blocks_visited_or_errmsg, errcode = zfs_hdl:send_progress(outfd )
+Wraps
+.Fn zfs_send_progress .
+.It Dv ok, errmsg, errcode = zfs_hdl:send_saved(flags , outfd , resume_token )
+Wraps
+.Fn zfs_send_saved .
+.It Dv ok, errmsg, errcode = zfs_hdl:promote( )
+Wraps
+.Fn zfs_promote .
+.It Dv ok, errmsg, errcode = zfs_hdl:hold(snapname , tag , recursive , cleanup_fd )
+Wraps
+.Fn zfs_hold .
+.It Dv ok, errmsg, errcode = zfs_hdl:hold_nvl(cleanup_fd , nvl )
+Wraps
+.Fn zfs_hold_nvl .
+.It Dv ok, errmsg, errcode = zfs_hdl:release(snapname , tag , recursive )
+Wraps
+.Fn zfs_release .
+.It Dv holds, errmsg, errcode = zfs_hdl:get_holds( )
+Wraps
+.Fn zfs_get_holds .
+.It Dv zfs_hdl:refresh_properties( )
+Wraps
+.Fn zfs_refresh_properties .
+.It Dv parent, errmsg, errcode = zfs_hdl:parent_name( )
+Wraps
+.Fn zfs_parent_name .
+.It Dv version, errmsg, errcode = zfs_hdl:spa_version( )
+Wraps
+.Fn zfs_spa_version .
+.It Dv is_mounted, where = zfs_hdl:is_mounted( )
+Wraps
+.Fn zfs_is_mounted .
+.It Dv ok, errmsg, errcode = zfs_hdl:mount([options ] , [flags ] )
+Wraps
+.Fn zfs_mount .
+.It Dv ok, errmsg, errcode = zfs_hdl:mount_at([options ] , [flags ] , mountpoint )
+Wraps
+.Fn zfs_mount_at .
+.It Dv ok, errmsg, errcode = zfs_hdl:unmount([mountpoint ] , [flags ] )
+Wraps
+.Fn zfs_unmount .
+.It Dv ok, errmsg, errcode = zfs_hdl:unmountall([flags ] )
+Wraps
+.Fn zfs_unmountall .
+.It Dv ok, errmsg, errcode = zfs_hdl:jail(jid , attach )
+Wraps
+.Fn zfs_jail .
 .It Dv zfs_hdl:close( )
 Wraps
 .Fn zfs_close .
@@ -412,7 +564,7 @@ Get properties of a dataset:
 .Bd -literal -offset indent
 libzfs = require('zfs').init()
 
-fs = libzfs:zfs_open('zroot', libzfs.ZFS_TYPE_FILESYSTEM)
+fs = libzfs:open('zroot', libzfs.ZFS_TYPE_FILESYSTEM)
 props = fs:get_all_props()
 for _, name, value in pairs(props) do
 	print(name, value:lookup('value'))

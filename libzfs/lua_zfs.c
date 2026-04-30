@@ -604,7 +604,7 @@ l_zfs_foreach_mountpoint(lua_State *L)
 	int ref, top;
 
 	hdl = checklibzfs(L, 1);
-	luaL_argcheck(L, lua_istable(L, 2), 2, "expected table of zfs handles");
+	luaL_checktype(L, 2, LUA_TTABLE);
 	num_handles = luaL_len(L, 2);
 	nthr = luaL_checkinteger(L, 3);
 	luaL_argcheck(L, lua_isfunction(L, 4), 4, "callback function required");
@@ -794,6 +794,321 @@ l_zfs_dataset_exists(lua_State *L)
 
 	lua_pushboolean(L, zfs_dataset_exists(hdl, path, type));
 	return (1);
+}
+
+static int
+l_zfs_create(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *path;
+	zfs_type_t type;
+	nvlist_t *props;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	path = luaL_checkstring(L, 2);
+	type = luaL_checkinteger(L, 3);
+	props = optnvlist(L, 4, NULL);
+
+	if ((error = zfs_create(hdl, path, type, props)) != 0) {
+		return (libzfsfail(L, hdl, error, "zfs_create"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_create_ancestors(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *path;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	path = luaL_checkstring(L, 2);
+
+	if ((error = zfs_create_ancestors(hdl, path)) != 0) {
+		return (libzfsfail(L, hdl, error, "zfs_create_ancestors"));
+	}
+	return (success(L));
+}
+
+#if __FreeBSD_version > 1600013
+static int
+l_zfs_create_ancestors_props(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *path;
+	nvlist_t *props;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	path = luaL_checkstring(L, 2);
+	props = optnvlist(L, 3, 0);
+
+	if ((error = zfs_create_ancestors_props(hdl, path, props)) != 0) {
+		return (libzfsfail(L, hdl, error,
+		    "zfs_create_ancestors_props"));
+	}
+	return (success(L));
+}
+#endif
+
+static int
+l_zfs_destroy_snaps_nvl(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	nvlist_t *snaps;
+	boolean_t defer;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	snaps = checknvlist(L, 2);
+	defer = lua_toboolean(L, 3);
+
+	if ((error = zfs_destroy_snaps_nvl(hdl, snaps, defer)) != 0) {
+		return (libzfsfail(L, hdl, error, "zfs_destroy_snaps_nvl"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_snapshot(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *path;
+	nvlist_t *props;
+	boolean_t recursive;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	path = luaL_checkstring(L, 2);
+	recursive = lua_toboolean(L, 3);
+	props = optnvlist(L, 4, NULL);
+
+	if ((error = zfs_snapshot(hdl, path, recursive, props)) != 0) {
+		return (libzfsfail(L, hdl, error, "zfs_snapshot"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_snapshot_nvl(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	nvlist_t *snaps, *props;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	snaps = checknvlist(L, 2);
+	props = optnvlist(L, 3, NULL);
+
+	if ((error = zfs_snapshot_nvl(hdl, snaps, props)) != 0) {
+		return (libzfsfail(L, hdl, error, "zfs_snapshot_nvl"));
+	}
+	return (success(L));
+}
+
+static inline void
+checksendflags(lua_State *L, int idx, sendflags_t *flags)
+{
+	luaL_checktype(L, idx, LUA_TTABLE);
+	lua_getfield(L, idx, "verbosity");
+	flags->verbosity = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+#define	FLAG(name) ({ \
+	lua_getfield(L, idx, #name); \
+	flags->name = lua_toboolean(L, -1); \
+	lua_pop(L, 1); \
+})
+	FLAG(replicate);
+	FLAG(skipmissing);
+	FLAG(doall);
+	FLAG(fromorigin);
+	FLAG(pad);
+	FLAG(props);
+	FLAG(dryrun);
+	FLAG(parsable);
+	FLAG(progress);
+	FLAG(progressastitle);
+	FLAG(largeblock);
+	FLAG(embed_data);
+	FLAG(compress);
+	FLAG(raw);
+	FLAG(backup);
+	FLAG(holds);
+	FLAG(saved);
+#if __FreeBSD_version > 1600013
+	FLAG(no_preserve_encryption);
+#endif
+#undef FLAG
+}
+
+static int
+l_zfs_send_resume(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	sendflags_t flags;
+	const char *resume_token;
+	int outfd, error;
+
+	memset(&flags, 0, sizeof(flags));
+
+	hdl = checklibzfs(L, 1);
+	checksendflags(L, 2, &flags);
+	outfd = checkfd(L, 3);
+	resume_token = luaL_checkstring(L, 4);
+
+	if ((error = zfs_send_resume(hdl, &flags, outfd, resume_token)) != 0) {
+		return (libzfsfail(L, hdl, error, "zfs_send_resume"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_send_resume_token_to_nvlist(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *resume_token;
+	nvlist_t *nvl;
+
+	hdl = checklibzfs(L, 1);
+	resume_token = luaL_checkstring(L, 2);
+
+	if ((nvl = zfs_send_resume_token_to_nvlist(hdl, resume_token))
+	    == NULL) {
+		return (libzfsfail(L, hdl, EINVAL,
+		    "zfs_send_resume_token_to_nvlist"));
+	}
+	pushnvlist(L, nvl);
+	return (1);
+}
+
+static inline void
+checkrecvflags(lua_State *L, int idx, recvflags_t *flags)
+{
+	luaL_checktype(L, idx, LUA_TTABLE);
+#define	FLAG(name) ({ \
+	lua_getfield(L, idx, #name); \
+	flags->name = lua_toboolean(L, -1); \
+	lua_pop(L, 1); \
+})
+	FLAG(verbose);
+	FLAG(isprefix);
+	FLAG(istail);
+	FLAG(dryrun);
+	FLAG(force);
+	FLAG(canmountoff);
+	FLAG(resumable);
+	FLAG(byteswap);
+	FLAG(nomount);
+	FLAG(holds);
+	FLAG(skipholds);
+	FLAG(domount);
+	FLAG(forceunmount);
+	FLAG(heal);
+#undef FLAG
+}
+
+static int
+l_zfs_receive(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *tosnap;
+	nvlist_t *props;
+	recvflags_t flags;
+	int infd, error;
+
+	memset(&flags, 0, sizeof(flags));
+
+	hdl = checklibzfs(L, 1);
+	tosnap = luaL_checkstring(L, 2);
+	props = optnvlist(L, 3, NULL);
+	checkrecvflags(L, 4, &flags);
+	infd = checkfd(L, 5);
+
+	if ((error = zfs_receive(hdl, tosnap, props, &flags, infd, NULL))
+	    != 0) {
+		return (libzfsfail(L, hdl, error, "zfs_receive"));
+	}
+	return (success(L));
+}
+
+static int
+l_is_mounted(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *special;
+	char *where;
+	boolean_t mounted;
+
+	hdl = checklibzfs(L, 1);
+	special = luaL_checkstring(L, 2);
+
+	mounted = is_mounted(hdl, special, &where);
+	lua_pushboolean(L, mounted);
+	if (mounted) {
+		lua_pushstring(L, where);
+		return (2);
+	}
+	return (1);
+}
+
+static int
+l_zfs_nicestrtonum(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *value;
+	uint64_t num;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	value = luaL_checkstring(L, 2);
+
+	if ((error = zfs_nicestrtonum(hdl, value, &num)) != 0) {
+		return (libzfsfail(L, hdl, error, "zfs_nicestrtonum"));
+	}
+	lua_pushinteger(L, num);
+	return (1);
+}
+
+static int
+l_zpool_in_use(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	char *namestr;
+	pool_state_t state;
+	boolean_t inuse;
+	int fd, error;
+
+	hdl = checklibzfs(L, 1);
+	fd = checkfd(L, 2);
+
+	if ((error = zpool_in_use(hdl, fd, &state, &namestr, &inuse)) != 0) {
+		return (libzfsfail(L, hdl, error, "zpool_in_use"));
+	}
+	lua_pushboolean(L, inuse);
+	lua_pushstring(L, namestr);
+	lua_pushinteger(L, state);
+	return (3);
+}
+
+static int
+l_zpool_nextboot(lua_State *L)
+{
+	libzfs_handle_t *hdl;
+	const char *command;
+	uint64_t pool_guid, vdev_guid;
+	int error;
+
+	hdl = checklibzfs(L, 1);
+	pool_guid = luaL_checkinteger(L, 2);
+	vdev_guid = luaL_checkinteger(L, 3);
+	command = luaL_checkstring(L, 4);
+
+	if ((error = zpool_nextboot(hdl, pool_guid, vdev_guid, command)) != 0) {
+		return (libzfsfail(L, hdl, error, "zpool_nextboot"));
+	}
+	return (success(L));
 }
 
 static int
@@ -1661,6 +1976,25 @@ l_zfs_iter_mounted(lua_State *L)
 }
 
 static int
+l_zfs_wait_status(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	zfs_wait_activity_t activity;
+	boolean_t missing, waited;
+	int error;
+
+	zhp = checkzfs(L, 1);
+	activity = luaL_checkinteger(L, 2);
+
+	if ((error = zfs_wait_status(zhp, activity, &missing, &waited)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_wait_status"));
+	}
+	lua_pushboolean(L, missing);
+	lua_pushboolean(L, waited);
+	return (2);
+}
+
+static int
 l_zfs_crypto_get_encryption_root(lua_State *L)
 {
 	char encroot[ZFS_MAX_DATASET_NAME_LEN];
@@ -1726,6 +2060,482 @@ l_zfs_crypto_rewrap(lua_State *L)
 
 	if ((error = zfs_crypto_rewrap(zhp, raw_props, inherit_key)) != 0) {
 		return (zfsfail(L, zhp, error, "zfs_crypto_rewrap"));
+	}
+	return (success(L));
+}
+
+#if __FreeBSD_version > 1500044
+static int
+l_zfs_is_encrypted(lua_State *L)
+{
+	zfs_handle_t *zhp;
+
+	zhp = checkzfs(L, 1);
+
+	lua_pushboolean(L, zfs_is_encrypted(zhp));
+	return (1);
+}
+#endif
+
+static int
+l_zfs_destroy(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	boolean_t defer;
+	int error;
+
+	zhp = checkzfs(L, 1);
+	defer = lua_toboolean(L, 2);
+
+	if ((error = zfs_destroy(zhp, defer)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_destroy"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_destroy_snaps(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *snapname;
+	boolean_t defer;
+	int error;
+
+	zhp = checkzfs(L, 1);
+	snapname = luaL_checkstring(L, 2);
+	defer = lua_toboolean(L, 3);
+
+	if ((error = zfs_destroy_snaps(zhp, __DECONST(char *, snapname), defer))
+	    != 0) {
+		return (zfsfail(L, zhp, error, "zfs_destroy_snaps"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_clone(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *target;
+	nvlist_t *props;
+	int error;
+
+	zhp = checkzfs(L, 1);
+	target = luaL_checkstring(L, 2);
+	props = optnvlist(L, 3, NULL);
+
+	if ((error = zfs_clone(zhp, target, props)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_clone"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_rollback(lua_State *L)
+{
+	zfs_handle_t *zhp, *snap;
+	boolean_t force;
+	int error;
+
+	zhp = checkzfs(L, 1);
+	snap = checkzfs(L, 2);
+	force = lua_toboolean(L, 3);
+
+	if ((error = zfs_rollback(zhp, snap, force)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_rollback"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_rename(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *target;
+	renameflags_t flags;
+	int error;
+
+	memset(&flags, 0, sizeof(flags));
+
+	zhp = checkzfs(L, 1);
+	target = luaL_checkstring(L, 2);
+	luaL_checktype(L, 3, LUA_TTABLE);
+#define	FLAG(name) ({ \
+	lua_getfield(L, 3, #name); \
+	flags.name = lua_toboolean(L, -1); \
+	lua_pop(L, 1); \
+})
+	FLAG(forceunmount);
+	FLAG(nounmount);
+	FLAG(recursive);
+#undef FLAG
+
+	if ((error = zfs_rename(zhp, target, flags)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_rename"));
+	}
+	return (success(L));
+}
+
+static boolean_t
+snapfilter_cb(zfs_handle_t *zhp, void *arg)
+{
+	lua_State *L = arg;
+	int nargs = lua_gettop(L) - 6;
+	boolean_t result;
+	int error;
+
+	/* Copy the function. */
+	lua_pushvalue(L, -nargs); /* hdl, cb, ..., cb */
+	new(L, zhp, ZFS_HANDLE_METATABLE); /* hdl, cb, ..., cb, zhp */
+	/* Copy any additional args. */
+	for (int i = 1; i < nargs; i++) {
+		lua_pushvalue(L, -nargs);
+	}
+	if ((error = lua_pcall(L, nargs, 1, 0)) != LUA_OK) {
+		return (B_FALSE);
+	}
+	result = lua_toboolean(L, -1);
+	lua_pop(L, 1);
+	return (result);
+}
+
+static int
+l_zfs_send(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *fromsnap, *tosnap;
+	sendflags_t flags;
+	snapfilter_cb_t filter_func;
+	nvlist_t *dbg;
+	int outfd, error;
+
+	memset(&flags, 0, sizeof(flags));
+	dbg = NULL;
+
+	zhp = checkzfs(L, 1);
+	fromsnap = luaL_optstring(L, 2, NULL);
+	tosnap = luaL_optstring(L, 3, NULL);
+	checksendflags(L, 4, &flags);
+	outfd = checkfd(L, 5);
+
+	if ((error = zfs_send(zhp, fromsnap, tosnap, &flags, outfd,
+	    lua_isfunction(L, 6) ? snapfilter_cb : NULL,
+	    lua_isfunction(L, 6) ? L : NULL,
+	    flags.verbosity >= 3 ? &dbg : NULL)) != 0) {
+		zfsfail(L, zhp, error, "zfs_send");
+		if (dbg != NULL) {
+			pushnvlist(L, dbg);
+			lua_replace(L, -3);
+		}
+		return (3);
+	}
+	if (dbg != NULL) {
+		pushnvlist(L, dbg);
+		return (1);
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_send_one(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *fromsnap, *redactbook;
+	sendflags_t flags;
+	int outfd, error;
+
+	memset(&flags, 0, sizeof(flags));
+
+	zhp = checkzfs(L, 1);
+	fromsnap = luaL_optstring(L, 2, NULL);
+	outfd = checkfd(L, 3);
+	checksendflags(L, 4, &flags);
+	redactbook = luaL_optstring(L, 5, NULL);
+
+	if ((error = zfs_send_one(zhp, fromsnap, outfd, &flags, redactbook))
+	    != 0) {
+		return (zfsfail(L, zhp, error, "zfs_send_one"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_send_progress(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	uint64_t bytes_written, blocks_visited;
+	int outfd, error;
+
+	zhp = checkzfs(L, 1);
+	outfd = checkfd(L, 2);
+
+	if ((error = zfs_send_progress(zhp, outfd, &bytes_written,
+	    &blocks_visited)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_send_progress"));
+	}
+	lua_pushinteger(L, bytes_written);
+	lua_pushinteger(L, blocks_visited);
+	return (2);
+}
+
+static int
+l_zfs_send_saved(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	sendflags_t flags;
+	const char *resume_token;
+	int outfd, error;
+
+	memset(&flags, 0, sizeof(flags));
+
+	zhp = checkzfs(L, 1);
+	checksendflags(L, 2, &flags);
+	outfd = checkfd(L, 3);
+	resume_token = luaL_checkstring(L, 4);
+
+	if ((error = zfs_send_saved(zhp, &flags, outfd, resume_token)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_send_saved"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_promote(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	int error;
+
+	zhp = checkzfs(L, 1);
+
+	if ((error = zfs_promote(zhp)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_promote"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_hold(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *snapname, *tag;
+	boolean_t recursive;
+	int cleanup_fd, error;
+
+	zhp = checkzfs(L, 1);
+	snapname = luaL_checkstring(L, 2);
+	tag = luaL_checkstring(L, 3);
+	recursive = lua_toboolean(L, 4);
+	cleanup_fd = checkfd(L, 5);
+
+	if ((error = zfs_hold(zhp, snapname, tag, recursive, cleanup_fd))
+	    != 0) {
+		return (zfsfail(L, zhp, error, "zfs_hold"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_hold_nvl(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	nvlist_t *nvl;
+	int cleanup_fd, error;
+
+	zhp = checkzfs(L, 1);
+	cleanup_fd = checkfd(L, 2);
+	nvl = checknvlist(L, 3);
+
+	if ((error = zfs_hold_nvl(zhp, cleanup_fd, nvl)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_hold_nvl"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_release(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *snapname, *tag;
+	boolean_t recursive;
+	int error;
+
+	zhp = checkzfs(L, 1);
+	snapname = luaL_checkstring(L, 2);
+	tag = luaL_checkstring(L, 3);
+	recursive = lua_toboolean(L, 4);
+
+	if ((error = zfs_release(zhp, snapname, tag, recursive)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_release"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_get_holds(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	nvlist_t *holds;
+	int error;
+
+	zhp = checkzfs(L, 1);
+
+	if ((error = zfs_get_holds(zhp, &holds)) != 0) {
+		ASSERT0P(holds);
+		return (zfsfail(L, zhp, error, "zfs_get_holds"));
+	}
+	ASSERT3P(holds, !=, NULL);
+	pushnvlist(L, holds);
+	return (1);
+}
+
+#if 0 /* TODO */
+static int
+l_zfs_userspace(lua_State *L)
+{
+}
+#endif
+
+static int
+l_zfs_refresh_properties(lua_State *L)
+{
+	zfs_handle_t *zhp;
+
+	zhp = checkzfs(L, 1);
+
+	zfs_refresh_properties(zhp);
+	return (0);
+}
+
+static int
+l_zfs_parent_name(lua_State *L)
+{
+	char parent[ZFS_MAX_DATASET_NAME_LEN];
+	zfs_handle_t *zhp;
+	int error;
+
+	parent[0] = '\0';
+
+	zhp = checkzfs(L, 1);
+
+	if ((error = zfs_parent_name(zhp, parent, sizeof(parent))) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_parent_name"));
+	}
+	lua_pushstring(L, parent);
+	return (1);
+}
+
+static int
+l_zfs_spa_version(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	int version, error;
+
+	zhp = checkzfs(L, 1);
+
+	if ((error = zfs_spa_version(zhp, &version)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_spa_version"));
+	}
+	lua_pushinteger(L, version);
+	return (1);
+}
+
+static int
+l_zfs_is_mounted(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	char *where;
+
+	zhp = checkzfs(L, 1);
+
+	if (zfs_is_mounted(zhp, &where)) {
+		lua_pushboolean(L, B_TRUE);
+		lua_pushstring(L, where);
+		free(where);
+		return (2);
+	}
+	lua_pushboolean(L, B_FALSE);
+	return (1);
+}
+
+static int
+l_zfs_mount(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *options;
+	int flags, error;
+
+	zhp = checkzfs(L, 1);
+	options = luaL_optstring(L, 2, NULL);
+	flags = luaL_optinteger(L, 3, 0);
+
+	if ((error = zfs_mount(zhp, options, flags)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_mount"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_mount_at(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *options, *mountpoint;
+	int flags, error;
+
+	zhp = checkzfs(L, 1);
+	options = luaL_optstring(L, 2, NULL);
+	flags = luaL_optinteger(L, 3, 0);
+	mountpoint = luaL_checkstring(L, 4);
+
+	if ((error = zfs_mount_at(zhp, options, flags, mountpoint)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_mount_at"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_unmount(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	const char *mountpoint;
+	int flags, error;
+
+	zhp = checkzfs(L, 1);
+	mountpoint = luaL_optstring(L, 2, NULL);
+	flags = luaL_optinteger(L, 3, 0);
+
+	if ((error = zfs_unmount(zhp, mountpoint, flags)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_unmount"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_unmountall(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	int flags, error;
+
+	zhp = checkzfs(L, 1);
+	flags = luaL_optinteger(L, 2, 0);
+
+	if ((error = zfs_unmountall(zhp, flags)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_unmountall"));
+	}
+	return (success(L));
+}
+
+static int
+l_zfs_jail(lua_State *L)
+{
+	zfs_handle_t *zhp;
+	int jid, attach, error;
+
+	zhp = checkzfs(L, 1);
+	jid = luaL_checkinteger(L, 2);
+	attach = lua_toboolean(L, 3);
+
+	if ((error = zfs_jail(zhp, jid, attach)) != 0) {
+		return (zfsfail(L, zhp, error, "zfs_jail"));
 	}
 	return (success(L));
 }
@@ -1904,11 +2714,42 @@ static const struct luaL_Reg l_zfs_meta[] = {
 	{"iter_snapspec_v2", l_zfs_iter_snapspec_v2},
 	{"iter_bookmarks_v2", l_zfs_iter_bookmarks_v2},
 	{"iter_mounted", l_zfs_iter_mounted},
+	{"wait_status", l_zfs_wait_status},
 	{"crypto_get_encryption_root", l_zfs_crypto_get_encryption_root},
 	{"crypto_load_key", l_zfs_crypto_load_key},
 	{"crypto_unload_key", l_zfs_crypto_unload_key},
 	{"crypto_rewrap", l_zfs_crypto_rewrap},
-	/* TODO: so much more */
+#if __FreeBSD_version > 1500044
+	{"is_encrypted", l_zfs_is_encrypted},
+#endif
+	{"destroy", l_zfs_destroy},
+	{"destroy_snaps", l_zfs_destroy_snaps},
+	{"clone", l_zfs_clone},
+	{"rollback", l_zfs_rollback},
+	{"rename", l_zfs_rename},
+	{"send", l_zfs_send},
+	{"send_one", l_zfs_send_one},
+	{"send_progress", l_zfs_send_progress},
+	{"send_saved", l_zfs_send_saved},
+	{"promote", l_zfs_promote},
+	{"hold", l_zfs_hold},
+	{"hold_nvl", l_zfs_hold_nvl},
+	{"release", l_zfs_release},
+	{"get_holds", l_zfs_get_holds},
+#if 0 /* TODO */
+	{"userspace", l_zfs_userspace},
+#endif
+	/* TODO: fsacl methods */
+	{"refresh_properties", l_zfs_refresh_properties},
+	{"parent_name", l_zfs_parent_name},
+	{"spa_version", l_zfs_spa_version},
+	{"is_mounted", l_zfs_is_mounted},
+	{"mount", l_zfs_mount},
+	{"mount_at", l_zfs_mount_at},
+	{"unmount", l_zfs_unmount},
+	{"unmountall", l_zfs_unmountall},
+	/* TODO: sharing */
+	{"jail", l_zfs_jail},
 	{NULL, NULL}
 };
 
@@ -1935,10 +2776,10 @@ static const struct luaL_Reg l_libzfs_meta[] = {
 	{"mnttab_find", l_libzfs_mnttab_find},
 	{"mnttab_add", l_libzfs_mnttab_add},
 	{"mnttab_remove", l_libzfs_mnttab_remove},
-	{"zpool_open", l_zpool_open},
-	{"zpool_open_canfail", l_zpool_open_canfail},
-	{"zpool_iter", l_zpool_iter},
-	{"zpool_create", l_zpool_create},
+	{"open_pool", l_zpool_open},
+	{"open_pool_canfail", l_zpool_open_canfail},
+	{"iter_pools", l_zpool_iter},
+	{"create_pool", l_zpool_create},
 	{"label_disk", l_zpool_label_disk},
 	{"prepare_and_label_disk", l_zpool_prepare_and_label_disk},
 	{"import", l_zpool_import},
@@ -1949,14 +2790,30 @@ static const struct luaL_Reg l_libzfs_meta[] = {
 	{"events_seek", l_zpool_events_seek},
 	{"explain_recover", l_zpool_explain_recover},
 	{"foreach_mountpoint", l_zfs_foreach_mountpoint},
-	{"zfs_open", l_zfs_open},
-	{"zfs_iter_root", l_zfs_iter_root},
-	{"zfs_crypto_create", l_zfs_crypto_create},
-	{"zfs_crypto_clone_check", l_zfs_crypto_clone_check},
-	{"zfs_crypto_attempt_load_keys", l_zfs_crypto_attempt_load_keys},
+	{"open", l_zfs_open},
+	{"iter_root", l_zfs_iter_root},
+	{"crypto_create", l_zfs_crypto_create},
+	{"crypto_clone_check", l_zfs_crypto_clone_check},
+	{"crypto_attempt_load_keys", l_zfs_crypto_attempt_load_keys},
+	/* TODO: more zprop related functions */
 	{"valid_proplist", l_zfs_valid_proplist},
 	{"path_to_zhandle", l_zfs_path_to_zhandle},
 	{"dataset_exists", l_zfs_dataset_exists},
+	{"create", l_zfs_create},
+	{"create_ancestors", l_zfs_create_ancestors},
+#if __FreeBSD_version > 1600013
+	{"create_ancestors_props", l_zfs_create_ancestors_props},
+#endif
+	{"destroy_snaps_nvl", l_zfs_destroy_snaps_nvl},
+	{"snapshot", l_zfs_snapshot},
+	{"snapshot_nvl", l_zfs_snapshot_nvl},
+	{"send_resume", l_zfs_send_resume},
+	{"send_resume_token_to_nvlist", l_zfs_send_resume_token_to_nvlist},
+	{"receive", l_zfs_receive},
+	{"is_mounted", l_is_mounted},
+	{"nicestrtonum", l_zfs_nicestrtonum},
+	{"pool_in_use", l_zpool_in_use},
+	{"nextboot", l_zpool_nextboot},
 	{NULL, NULL}
 };
 
