@@ -293,7 +293,7 @@ l_zpool_open(lua_State *L)
 	pool = luaL_checkstring(L, 2);
 
 	if ((zhp = zpool_open(hdl, pool)) == NULL) {
-		return (libzfsfail(L, hdl, libzfs_errno(hdl), "zpool_open"));
+		return (libzfsfail(L, hdl, EZFS_UNKNOWN, "zpool_open"));
 	}
 	return (new(L, zhp, ZPOOL_HANDLE_METATABLE));
 }
@@ -309,8 +309,7 @@ l_zpool_open_canfail(lua_State *L)
 	pool = luaL_checkstring(L, 2);
 
 	if ((zhp = zpool_open_canfail(hdl, pool)) == NULL) {
-		return (libzfsfail(L, hdl, libzfs_errno(hdl),
-		    "zpool_open_canfail"));
+		return (libzfsfail(L, hdl, EZFS_UNKNOWN, "zpool_open_canfail"));
 	}
 	return (new(L, zhp, ZPOOL_HANDLE_METATABLE));
 }
@@ -409,6 +408,8 @@ l_zpool_prepare_and_label_disk(lua_State *L)
 	char **lines;
 	int nlines, error;
 
+	lines = NULL;
+
 	hdl = checklibzfs(L, 1);
 	zhp = luaL_opt(L, checkzpool, 2, NULL);
 	name = luaL_checkstring(L, 3);
@@ -417,9 +418,12 @@ l_zpool_prepare_and_label_disk(lua_State *L)
 
 	if ((error = zpool_prepare_and_label_disk(hdl, zhp, name, vdev_nv,
 	    prepare_str, &lines, &nlines)) != 0) {
+		ASSERT0P(lines);
+		ASSERT0(nlines);
 		return (libzfsfail(L, hdl, error,
 		    "zpool_prepare_and_label_disk"));
 	}
+	ASSERT3P(lines, !=, NULL);
 	lua_createtable(L, nlines, 0);
 	for (int i = 0; i < nlines; i++) {
 		lua_pushstring(L, lines[i]);
@@ -644,7 +648,7 @@ l_zfs_open(lua_State *L)
 	types = luaL_checkinteger(L, 3);
 
 	if ((zhp = zfs_open(hdl, path, types)) == NULL) {
-		return (libzfsfail(L, hdl, libzfs_errno(hdl), "zfs_open"));
+		return (libzfsfail(L, hdl, EZFS_UNKNOWN, "zfs_open"));
 	}
 	return (new(L, zhp, ZFS_HANDLE_METATABLE));
 }
@@ -756,8 +760,7 @@ l_zfs_valid_proplist(lua_State *L)
 
 	if ((ret = zfs_valid_proplist(hdl, type, props, zoned, zhp, pool_hdl,
 	    key_params_ok, errbuf)) == NULL) {
-		return (libzfsfail(L, hdl, libzfs_errno(hdl),
-		    "zfs_valid_proplist"));
+		return (libzfsfail(L, hdl, EZFS_UNKNOWN, "zfs_valid_proplist"));
 	}
 	pushnvlist(L, ret);
 	return (1);
@@ -776,7 +779,8 @@ l_zfs_path_to_zhandle(lua_State *L)
 	type = luaL_checkinteger(L, 3);
 
 	if ((zhp = zfs_path_to_zhandle(hdl, path, type)) == NULL) {
-		return (libzfsfail(L, hdl, libzfs_errno(hdl), "zfs_open"));
+		return (libzfsfail(L, hdl, EZFS_UNKNOWN,
+		    "zfs_path_to_zhandle"));
 	}
 	return (new(L, zhp, ZFS_HANDLE_METATABLE));
 }
@@ -1133,8 +1137,7 @@ l_zfs_handle_dup(lua_State *L)
 	zhp = checkzfs(L, 1);
 
 	if ((dupzhp = zfs_handle_dup(zhp)) == NULL) {
-		return (zfsfail(L, zhp, libzfs_errno(zfs_get_handle(zhp)),
-		    "zfs_handle_dup"));
+		return (zfsfail(L, zhp, EZFS_UNKNOWN, "zfs_handle_dup"));
 	}
 	return (new(L, dupzhp, ZFS_HANDLE_METATABLE));
 }
@@ -1182,8 +1185,7 @@ l_zfs_get_pool_handle(lua_State *L)
 	zhp = checkzfs(L, 1);
 
 	if ((pool_hdl = zfs_get_pool_handle(zhp)) == NULL) {
-		return (zfsfail(L, zhp, libzfs_errno(zfs_get_handle(zhp)),
-		    "zfs_get_pool_handle"));
+		return (zfsfail(L, zhp, EZFS_UNKNOWN, "zfs_get_pool_handle"));
 	}
 	/* TODO: need a refcounted handle */
 	return (new(L, pool_hdl, ZPOOL_HANDLE_METATABLE));
@@ -1499,8 +1501,7 @@ l_zfs_get_recvd_props(lua_State *L)
 	zhp = checkzfs(L, 1);
 
 	if ((props = zfs_get_recvd_props(zhp)) == NULL) {
-		return (zfsfail(L, zhp, libzfs_errno(zfs_get_handle(zhp)),
-		    "zfs_get_recvd_props"));
+		return (zfsfail(L, zhp, EZFS_UNKNOWN, "zfs_get_recvd_props"));
 	}
 	/* XXX: Need to dup to have sane lifetime. */
 	if ((error = nvlist_dup(props, &props, 0)) != 0) {
@@ -2577,6 +2578,1300 @@ l_zpool_get_state(lua_State *L)
 }
 
 static int
+l_zpool_get_state_str(lua_State *L)
+{
+	zpool_handle_t *zhp;
+
+	zhp = checkzpool(L, 1);
+
+	lua_pushstring(L, zpool_get_state_str(zhp));
+	return (1);
+}
+
+static int
+l_zpool_get_status(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *msgid;
+	zpool_errata_t errata;
+	zpool_status_t status;
+
+	zhp = checkzpool(L, 1);
+
+	status = zpool_get_status(zhp, &msgid, &errata);
+	lua_pushinteger(L, status);
+	if (msgid == NULL) {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, msgid);
+	}
+	if (status == ZPOOL_STATUS_ERRATA) {
+		lua_pushinteger(L, errata);
+		return (3);
+	}
+	return (2);
+}
+
+static int
+l_zpool_wait(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	zpool_wait_activity_t activity;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	activity = luaL_checkinteger(L, 2);
+
+	if ((error = zpool_wait(zhp, activity)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_wait"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_wait_status(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	zpool_wait_activity_t activity;
+	boolean_t missing, waited;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	activity = luaL_checkinteger(L, 2);
+
+	if ((error = zpool_wait_status(zhp, activity, &missing, &waited))
+	    != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_wait_status"));
+	}
+	lua_pushboolean(L, waited);
+	lua_pushboolean(L, missing);
+	return (2);
+}
+
+static int
+l_zpool_destroy(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *message;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	message = luaL_checkstring(L, 2);
+
+	if ((error = zpool_destroy(zhp, message)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_destroy"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_add(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	nvlist_t *nvroot;
+	boolean_t check_ashift;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	nvroot = checknvlist(L, 2);
+	check_ashift = lua_toboolean(L, 3);
+
+	if ((error = zpool_add(zhp, nvroot, check_ashift)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_add"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_scan(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	pool_scan_func_t func;
+	pool_scrub_cmd_t cmd;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	func = luaL_checkinteger(L, 2);
+	cmd = luaL_checkinteger(L, 3);
+
+	if ((error = zpool_scan(zhp, func, cmd)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_scan"));
+	}
+	return (success(L));
+}
+
+#if __FreeBSD_version > 1500056
+static int
+l_zpool_scan_range(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	pool_scan_func_t func;
+	pool_scrub_cmd_t cmd;
+	time_t date_start, date_end;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	func = luaL_checkinteger(L, 2);
+	cmd = luaL_checkinteger(L, 3);
+	date_start = luaL_optinteger(L, 4, 0);
+	date_end = luaL_optinteger(L, 5, 0);
+
+	if ((error = zpool_scan_range(zhp, func, cmd, date_start, date_end))
+	    != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_scan_range"));
+	}
+	return (success(L));
+}
+#endif
+
+#if __FreeBSD_version > 1500056
+static int
+l_zpool_initialize_one(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	initialize_cbdata_t cbdata;
+	int error;
+
+	memset(&cbdata, 0, sizeof(cbdata));
+
+	zhp = checkzpool(L, 1);
+	cbdata.cmd_type = luaL_checkinteger(L, 2);
+	cbdata.wait = lua_toboolean(L, 3);
+
+	if ((error = zpool_initialize_one(zhp, &cbdata)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_initialize_one"));
+	}
+	return (success(L));
+}
+#endif
+
+static int
+l_zpool_initialize(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	pool_initialize_func_t cmd_type;
+	nvlist_t *vdevs;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	cmd_type = luaL_checkinteger(L, 2);
+	vdevs = checknvlist(L, 3);
+
+	if ((error = zpool_initialize(zhp, cmd_type, vdevs)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_initialize"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_initialize_wait(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	pool_initialize_func_t cmd_type;
+	nvlist_t *vdevs;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	cmd_type = luaL_checkinteger(L, 2);
+	vdevs = checknvlist(L, 3);
+
+	if ((error = zpool_initialize_wait(zhp, cmd_type, vdevs)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_initialize_wait"));
+	}
+	return (success(L));
+}
+
+static inline void
+checktrimflags(lua_State *L, int idx, trimflags_t *flags)
+{
+	luaL_checktype(L, idx, LUA_TTABLE);
+	lua_getfield(L, idx, "rate");
+	flags->rate = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+#define	FLAG(name) ({ \
+	lua_getfield(L, idx, #name); \
+	flags->name = lua_toboolean(L, -1); \
+	lua_pop(L, 1); \
+})
+	FLAG(fullpool);
+	FLAG(secure);
+	FLAG(wait);
+#undef FLAG
+}
+
+static int
+l_zpool_trim(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	pool_trim_func_t cmd_type;
+	nvlist_t *vdevs;
+	trimflags_t flags;
+	int error;
+
+	memset(&flags, 0, sizeof(flags));
+
+	zhp = checkzpool(L, 1);
+	cmd_type = luaL_checkinteger(L, 2);
+	vdevs = checknvlist(L, 3);
+	checktrimflags(L, 4, &flags);
+
+	if ((error = zpool_trim(zhp, cmd_type, vdevs, &flags)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_trim"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_clear(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *path;
+	nvlist_t *rewind;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	path = luaL_optstring(L, 2, NULL);
+	rewind = optnvlist(L, 3, NULL);
+
+	if ((error = zpool_clear(zhp, path, rewind)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_clear"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_reguid(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	int error;
+
+	zhp = checkzpool(L, 1);
+
+	if ((error = zpool_reguid(zhp)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_reguid"));
+	}
+	return (success(L));
+}
+
+#if __FreeBSD_version > 1500023
+static int
+l_zpool_set_guid(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	uint64_t *guidp, guid;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	if (lua_isnoneornil(L, 2)) {
+		guidp = NULL;
+	} else {
+		guid = luaL_checkinteger(L, 2);
+		guidp = &guid;
+	}
+
+	if ((error = zpool_set_guid(zhp, guidp)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_set_guid"));
+	}
+	return (success(L));
+}
+#endif
+
+static int
+l_zpool_reopen_one(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	boolean_t scrub_restart;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	scrub_restart = lua_toboolean(L, 2);
+
+	if ((error = zpool_reopen_one(zhp, &scrub_restart)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_reopen_one"));
+	}
+	return (success(L));
+}
+
+#if __FreeBSD_version > 1500056
+static int
+l_zpool_collect_leaves(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	nvlist_t *nvroot, *vdevs;
+
+	zhp = checkzpool(L, 1);
+	nvroot = checknvlist(L, 2);
+
+	vdevs = fnvlist_alloc();
+	zpool_collect_leaves(zhp, nvroot, vdevs);
+	pushnvlist(L, vdevs);
+	return (1);
+}
+#endif
+
+static int
+l_zpool_sync_one(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	boolean_t force;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	force = lua_toboolean(L, 2);
+
+	if ((error = zpool_sync_one(zhp, &force)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_sync_one"));
+	}
+	return (success(L));
+}
+
+#if __FreeBSD_version > 1500056
+static int
+l_zpool_trim_one(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	trim_cbdata_t cbdata;
+	int error;
+
+	memset(&cbdata, 0, sizeof(cbdata));
+
+	zhp = checkzpool(L, 1);
+	cbdata.cmd_type = luaL_checkinteger(L, 2);
+	checktrimflags(L, 3, &cbdata.trim_flags);
+
+	if ((error = zpool_trim_one(zhp, &cbdata)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_trim_one"));
+	}
+	return (success(L));
+}
+#endif
+
+#if __FreeBSD_version > 1500023
+static int
+l_zpool_ddt_prune(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	zpool_ddt_prune_unit_t unit;
+	uint64_t amount;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	unit = luaL_checkinteger(L, 2);
+	amount = luaL_checkinteger(L, 3);
+
+	if ((error = zpool_ddt_prune(zhp, unit, amount)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_ddt_prune"));
+	}
+	return (success(L));
+}
+#endif
+
+static int
+l_zpool_vdev_online(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *path;
+	vdev_state_t newstate;
+	int flags, error;
+
+	zhp = checkzpool(L, 1);
+	path = luaL_checkstring(L, 2);
+	flags = luaL_checkinteger(L, 3);
+
+	if ((error = zpool_vdev_online(zhp, path, flags, &newstate)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_vdev_online"));
+	}
+	lua_pushinteger(L, newstate);
+	return (1);
+}
+
+static int
+l_zpool_vdev_offline(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *path;
+	boolean_t istmp;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	path = luaL_checkstring(L, 2);
+	istmp = lua_toboolean(L, 3);
+
+	if ((error = zpool_vdev_offline(zhp, path, istmp)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_vdev_offline"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_vdev_attach(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *old_disk, *new_disk;
+	nvlist_t *nvroot;
+	boolean_t replacing; /* XXX: integer in userspace, boolean in kernel */
+	boolean_t rebuild;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	old_disk = luaL_checkstring(L, 2);
+	new_disk = luaL_checkstring(L, 3);
+	nvroot = checknvlist(L, 4);
+	replacing = lua_toboolean(L, 5);
+	rebuild = lua_toboolean(L, 6);
+
+	if ((error = zpool_vdev_attach(zhp, old_disk, new_disk, nvroot,
+	    replacing, rebuild)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_vdev_attach"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_vdev_detach(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *path;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	path = luaL_checkstring(L, 2);
+
+	if ((error = zpool_vdev_detach(zhp, path)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_vdev_detach"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_vdev_remove(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *path;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	path = luaL_checkstring(L, 2);
+
+	if ((error = zpool_vdev_remove(zhp, path)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_vdev_remove"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_vdev_remove_cancel(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	int error;
+
+	zhp = checkzpool(L, 1);
+
+	if ((error = zpool_vdev_remove_cancel(zhp)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_vdev_remove_cancel"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_vdev_indirect_size(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *path;
+	uint64_t size;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	path = luaL_checkstring(L, 2);
+
+	if ((error = zpool_vdev_indirect_size(zhp, path, &size)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_vdev_indirect_size"));
+	}
+	lua_pushinteger(L, size);
+	return (1);
+}
+
+static inline void
+checksplitflags(lua_State *L, int idx, splitflags_t *flags)
+{
+	luaL_checktype(L, idx, LUA_TTABLE);
+	lua_getfield(L, idx, "name_flags");
+	flags->name_flags = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+#define	FLAG(name) ({ \
+	lua_getfield(L, idx, #name); \
+	flags->name = lua_toboolean(L, -1); \
+	lua_pop(L, 1); \
+})
+	FLAG(dryrun);
+	FLAG(import);
+#undef FLAG
+}
+
+static int
+l_zpool_vdev_split(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *newname;
+	nvlist_t *newroot, *props;
+	splitflags_t flags;
+	int error;
+
+	memset(&flags, 0, sizeof(flags));
+
+	zhp = checkzpool(L, 1);
+	newname = luaL_checkstring(L, 2);
+	newroot = optnvlist(L, 3, NULL);
+	props = optnvlist(L, 4, NULL);
+	checksplitflags(L, 5, &flags);
+
+	if ((error = zpool_vdev_split(zhp, __DECONST(char *, newname), &newroot,
+	    props, flags)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_vdev_split"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_vdev_remove_wanted(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *path;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	path = luaL_checkstring(L, 2);
+
+	if ((error = zpool_vdev_remove_wanted(zhp, path)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_vdev_remove_wanted"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_vdev_fault(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	uint64_t guid;
+	vdev_aux_t aux;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	guid = luaL_checkinteger(L, 2);
+	aux = luaL_checkinteger(L, 3);
+
+	if ((error = zpool_vdev_fault(zhp, guid, aux)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_vdev_fault"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_vdev_degrade(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	uint64_t guid;
+	vdev_aux_t aux;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	guid = luaL_checkinteger(L, 2);
+	aux = luaL_checkinteger(L, 3);
+
+	if ((error = zpool_vdev_degrade(zhp, guid, aux)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_vdev_degrade"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_vdev_set_removed_state(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	uint64_t guid;
+	vdev_aux_t aux;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	guid = luaL_checkinteger(L, 2);
+	aux = luaL_checkinteger(L, 3);
+
+	if ((error = zpool_vdev_set_removed_state(zhp, guid, aux)) != 0) {
+		return (zpoolfail(L, zhp, error,
+		    "zpool_vdev_set_removed_state"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_vdev_clear(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	uint64_t guid;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	guid = luaL_checkinteger(L, 2);
+
+	if ((error = zpool_vdev_clear(zhp, guid)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_vdev_clear"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_find_vdev(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *path;
+	boolean_t avail_spare, l2cache, log;
+	nvlist_t *vdev;
+
+	zhp = checkzpool(L, 1);
+	path = luaL_checkstring(L, 2);
+
+	if ((vdev = zpool_find_vdev(zhp, path, &avail_spare, &l2cache, &log))
+	    == NULL) {
+		return (zpoolfail(L, zhp, EZFS_UNKNOWN, "zpool_find_vdev"));
+	}
+	pushnvlist(L, vdev);
+	lua_pushboolean(L, avail_spare);
+	lua_pushboolean(L, l2cache);
+	lua_pushboolean(L, log);
+	return (4);
+}
+
+#if __FreeBSD_version > 1500023
+static int
+l_zpool_find_parent_vdev(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *path;
+	boolean_t avail_spare, l2cache, log;
+	nvlist_t *vdev;
+
+	zhp = checkzpool(L, 1);
+	path = luaL_checkstring(L, 2);
+
+	if ((vdev = zpool_find_parent_vdev(zhp, path, &avail_spare, &l2cache,
+	    &log)) == NULL) {
+		return (zpoolfail(L, zhp, EZFS_UNKNOWN,
+		    "zpool_find_parent_vdev"));
+	}
+	pushnvlist(L, vdev);
+	lua_pushboolean(L, avail_spare);
+	lua_pushboolean(L, l2cache);
+	lua_pushboolean(L, log);
+	return (4);
+}
+#endif
+
+static int
+l_zpool_find_vdev_by_physpath(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *physpath;
+	boolean_t avail_spare, l2cache, log;
+	nvlist_t *vdev;
+
+	zhp = checkzpool(L, 1);
+	physpath = luaL_checkstring(L, 2);
+
+	if ((vdev = zpool_find_vdev_by_physpath(zhp, physpath, &avail_spare,
+	    &l2cache, &log)) == NULL) {
+		return (zpoolfail(L, zhp, EZFS_UNKNOWN,
+		    "zpool_find_vdev_by_physpath"));
+	}
+	pushnvlist(L, vdev);
+	lua_pushboolean(L, avail_spare);
+	lua_pushboolean(L, l2cache);
+	lua_pushboolean(L, log);
+	return (4);
+}
+
+static int
+l_zpool_prepare_disk(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	nvlist_t *vdev;
+	const char *prepare_str;
+	char **lines;
+	int nlines, error;
+
+	lines = NULL;
+
+	zhp = checkzpool(L, 1);
+	vdev = checknvlist(L, 2);
+	prepare_str = luaL_checkstring(L, 3);
+
+	if ((error = zpool_prepare_disk(zhp, vdev, prepare_str, &lines,
+	    &nlines)) != 0) {
+		ASSERT0P(lines);
+		ASSERT0(nlines);
+		return (zpoolfail(L, zhp, error, "zpool_prepare_disk"));
+	}
+	ASSERT3P(lines, !=, NULL);
+	lua_createtable(L, nlines, 0);
+	for (int i = 0; i < nlines; i++) {
+		lua_pushstring(L, lines[i]);
+		lua_rawseti(L, -2, i + 1);
+	}
+	libzfs_free_str_array(lines, nlines);
+	return (1);
+}
+
+static int
+l_zpool_vdev_path_to_guid(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *path;
+
+	zhp = checkzpool(L, 1);
+	path = luaL_checkstring(L, 2);
+
+	lua_pushinteger(L, zpool_vdev_path_to_guid(zhp, path));
+	return (1);
+}
+
+static int
+l_zpool_set_prop(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *propname, *propval;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	propname = luaL_checkstring(L, 2);
+	propval = luaL_checkstring(L, 3);
+
+	if ((error = zpool_set_prop(zhp, propname, propval)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_set_prop"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_get_prop(lua_State *L)
+{
+	char value[ZPOOL_MAXPROPLEN];
+	zpool_handle_t *zhp;
+	zpool_prop_t prop;
+	zprop_source_t source;
+	boolean_t literal;
+	int error;
+
+	value[0] = '\0';
+
+	zhp = checkzpool(L, 1);
+	prop = luaL_checkinteger(L, 2); /* XXX: wrap this prop type too? */
+	literal = lua_toboolean(L, 3);
+
+	if ((error = zpool_get_prop(zhp, prop, value, sizeof(value), &source,
+	    literal)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_get_prop"));
+	}
+	lua_pushstring(L, value);
+	lua_pushinteger(L, source);
+	return (2);
+}
+
+static int
+l_zpool_get_userprop(lua_State *L)
+{
+	char value[ZPOOL_MAXPROPLEN];
+	zpool_handle_t *zhp;
+	const char *propname;
+	zprop_source_t source;
+	int error;
+
+	value[0] = '\0';
+
+	zhp = checkzpool(L, 1);
+	propname = luaL_checkstring(L, 2);
+
+	if ((error = zpool_get_userprop(zhp, propname, value, sizeof(value),
+	    &source)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_get_userprop"));
+	}
+	lua_pushstring(L, value);
+	lua_pushinteger(L, source);
+	return (2);
+}
+
+static int
+l_zpool_get_prop_int(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	zpool_prop_t prop;
+	zprop_source_t source;
+
+	zhp = checkzpool(L, 1);
+	prop = luaL_checkinteger(L, 2);
+
+	lua_pushinteger(L, zpool_get_prop_int(zhp, prop, &source));
+	lua_pushinteger(L, source);
+	return (2);
+}
+
+static int
+l_zpool_props_refresh(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	int error;
+
+	zhp = checkzpool(L, 1);
+
+	if ((error = zpool_props_refresh(zhp)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_refresh_props"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_get_vdev_prop(lua_State *L)
+{
+	char value[ZPOOL_MAXPROPLEN];
+	zpool_handle_t *zhp;
+	const char *vdevname, *propname;
+	vdev_prop_t prop;
+	zprop_source_t source;
+	boolean_t literal;
+	int error;
+
+	value[0] = '\0';
+
+	zhp = checkzpool(L, 1);
+	vdevname = luaL_checkstring(L, 2);
+	prop = luaL_optinteger(L, 3, 0);
+	propname = luaL_optstring(L, 4, NULL);
+	literal = lua_toboolean(L, 5);
+
+	if ((error = zpool_get_vdev_prop(zhp, vdevname, prop,
+	    __DECONST(char *, propname), value, sizeof(value), &source,
+	    literal)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_get_vdev_prop"));
+	}
+	lua_pushstring(L, value);
+	lua_pushinteger(L, source);
+	return (2);
+}
+
+static int
+l_zpool_get_all_vdev_props(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *vdevname;
+	nvlist_t *props;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	vdevname = luaL_checkstring(L, 2);
+
+	if ((error = zpool_get_all_vdev_props(zhp, vdevname, &props)) != 0) {
+		ASSERT0P(props);
+		return (zpoolfail(L, zhp, error, "zpool_get_all_vdev_props"));
+	}
+	ASSERT3P(props, !=, NULL);
+	pushnvlist(L, props);
+	return (1);
+}
+
+static int
+l_zpool_set_vdev_prop(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *vdevname, *propname, *propval;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	vdevname = luaL_checkstring(L, 2);
+	propname = luaL_checkstring(L, 3);
+	propval = luaL_checkstring(L, 4);
+
+	if ((error = zpool_set_vdev_prop(zhp, vdevname, propname, propval))
+	    != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_set_vdev_prop"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_get_config(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	nvlist_t *oldconfig, *config;
+
+	oldconfig = config = NULL;
+
+	zhp = checkzpool(L, 1);
+
+	if ((config = zpool_get_config(zhp, &oldconfig)) == NULL) {
+		ASSERT0P(config);
+		ASSERT0P(oldconfig);
+		return (zpoolfail(L, zhp, EZFS_UNKNOWN, "zpool_get_config"));
+	}
+	ASSERT3P(config, !=, NULL);
+	pushnvlist(L, config);
+	if (oldconfig != NULL) {
+		pushnvlist(L, oldconfig);
+		return (2);
+	}
+	return (1);
+}
+
+static int
+l_zpool_get_features(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	nvlist_t *features;
+
+	zhp = checkzpool(L, 1);
+
+	if ((features = zpool_get_features(zhp)) == NULL) {
+		return (zpoolfail(L, zhp, EZFS_UNKNOWN, "zpool_get_features"));
+	}
+	pushnvlist(L, features);
+	return (1);
+}
+
+static int
+l_zpool_refresh_stats(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	boolean_t missing;
+	int error;
+
+	zhp = checkzpool(L, 1);
+
+	if ((error = zpool_refresh_stats(zhp, &missing)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_refresh_stats"));
+	}
+	lua_pushboolean(L, missing);
+	return (1);
+}
+
+#if __FreeBSD_version > 1600001
+static int
+l_zpool_refresh_stats_from_handle(lua_State *L)
+{
+	zpool_handle_t *zhp, *fromzhp;
+
+	zhp = checkzpool(L, 1);
+	fromzhp = checkzpool(L, 2);
+
+	zpool_refresh_stats_from_handle(zhp, fromzhp);
+	return (0);
+}
+#endif
+
+static int
+l_zpool_get_errlog(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	nvlist_t *errlist;
+	int error;
+
+	errlist = NULL;
+
+	zhp = checkzpool(L, 1);
+
+	if ((error = zpool_get_errlog(zhp, &errlist)) != 0) {
+		ASSERT0P(errlist);
+		return (zpoolfail(L, zhp, error, "zpool_get_errlog"));
+	}
+	if (errlist == NULL) {
+		return (0);
+	}
+	pushnvlist(L, errlist);
+	return (1);
+}
+
+#if __FreeBSD_version > 1500023
+static int
+l_zpool_add_propname(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *propname;
+
+	zhp = checkzpool(L, 1);
+	propname = luaL_checkstring(L, 2);
+
+	zpool_add_propname(zhp, propname);
+	return (0);
+}
+#endif
+
+static int
+l_zpool_export(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *message;
+	boolean_t force;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	force = lua_toboolean(L, 2);
+	message = luaL_checkstring(L, 3);
+
+	if ((error = zpool_export(zhp, force, message)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_export"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_export_force(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *message;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	message = luaL_checkstring(L, 2);
+
+	if ((error = zpool_export_force(zhp, message)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_export_force"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_upgrade(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	uint64_t new_version;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	new_version = luaL_checkinteger(L, 2);
+
+	if ((error = zpool_upgrade(zhp, new_version)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_upgrade"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_get_history(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	nvlist_t *history;
+	uint64_t offset;
+	boolean_t eof;
+	int error;
+
+	history = NULL;
+	eof = B_FALSE;
+
+	zhp = checkzpool(L, 1);
+	offset = luaL_optinteger(L, 2, 0);
+
+	if ((error = zpool_get_history(zhp, &history, &offset, &eof)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_get_history"));
+	}
+	pushnvlist(L, history);
+	lua_pushinteger(L, offset);
+	lua_pushboolean(L, eof);
+	return (3);
+}
+
+static int
+l_zpool_obj_to_path_ds(lua_State *L)
+{
+	char path[PATH_MAX];
+	zpool_handle_t *zhp;
+	uint64_t dsobj, obj;
+
+	path[0] = '\0';
+
+	zhp = checkzpool(L, 1);
+	dsobj = luaL_checkinteger(L, 2);
+	obj = luaL_checkinteger(L, 3);
+
+	zpool_obj_to_path_ds(zhp, dsobj, obj, path, sizeof(path));
+	lua_pushstring(L, path);
+	return (1);
+}
+
+static int
+l_zpool_obj_to_path(lua_State *L)
+{
+	char path[PATH_MAX];
+	zpool_handle_t *zhp;
+	uint64_t dsobj, obj;
+
+	path[0] = '\0';
+
+	zhp = checkzpool(L, 1);
+	dsobj = luaL_checkinteger(L, 2);
+	obj = luaL_checkinteger(L, 3);
+
+	zpool_obj_to_path(zhp, dsobj, obj, path, sizeof(path));
+	lua_pushstring(L, path);
+	return (1);
+}
+
+static int
+l_zpool_checkpoint(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	int error;
+
+	zhp = checkzpool(L, 1);
+
+	if ((error = zpool_checkpoint(zhp)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_checkpoint"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_discard_checkpoint(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	int error;
+
+	zhp = checkzpool(L, 1);
+
+	if ((error = zpool_discard_checkpoint(zhp)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_discard_checkpoint"));
+	}
+	return (success(L));
+}
+
+#if __FreeBSD_version > 1500023
+static int
+l_zpool_prefetch(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	zpool_prefetch_type_t type;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	type = luaL_checkinteger(L, 2);
+
+	if ((error = zpool_prefetch(zhp, type)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_prefetch"));
+	}
+	return (success(L));
+}
+#endif
+
+static int
+l_zpool_prop_get_feature(lua_State *L)
+{
+	char value[ZPOOL_MAXPROPLEN];
+	zpool_handle_t *zhp;
+	const char *propname;
+	int error;
+
+	value[0] = '\0';
+
+	zhp = checkzpool(L, 1);
+	propname = luaL_checkstring(L, 2);
+
+	if ((error = zpool_prop_get_feature(zhp, propname, value,
+	    sizeof(value))) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_prop_get_feature"));
+	}
+	lua_pushstring(L, value);
+	return (1);
+}
+
+static int
+l_zvol_volsize_to_reservation(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	nvlist_t *props;
+	uint64_t volsize, reservation;
+
+	zhp = checkzpool(L, 1);
+	volsize = luaL_checkinteger(L, 2);
+	props = checknvlist(L, 3);
+
+	lua_pushinteger(L, zvol_volsize_to_reservation(zhp, volsize, props));
+	return (1);
+}
+
+static int
+l_zpool_set_bootenv(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const nvlist_t *envmap;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	envmap = checknvlist(L, 2);
+
+	if ((error = zpool_set_bootenv(zhp, envmap)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_set_bootenv"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_get_bootenv(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	nvlist_t *envmap;
+	int error;
+
+	envmap = NULL;
+
+	zhp = checkzpool(L, 1);
+
+	if ((error = zpool_get_bootenv(zhp, &envmap)) != 0) {
+		ASSERT0P(envmap);
+		return (zpoolfail(L, zhp, error, "zpool_get_bootenv"));
+	}
+	ASSERT3P(envmap, !=, NULL);
+	pushnvlist(L, envmap);
+	return (1);
+}
+
+#if __FreeBSD_version < 1500019
+#define	zpool_enable_datasets(zhp, mntopts, flags, nthr) ({ \
+	(void) nthr; \
+	zpool_enable_datasets((zhp), (mntopts), (flags)); \
+})
+#endif
+
+static int
+l_zpool_enable_datasets(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	const char *mntopts;
+	uint_t nthr;
+	int flags, error;
+
+	zhp = checkzpool(L, 1);
+	mntopts = luaL_optstring(L, 2, NULL);
+	flags = luaL_checkinteger(L, 3);
+	nthr = luaL_checkinteger(L, 4);
+
+	if ((error = zpool_enable_datasets(zhp, mntopts, flags, nthr)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_enable_datasets"));
+	}
+	return (success(L));
+}
+
+static int
+l_zpool_disable_datasets(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	boolean_t force;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	force = lua_toboolean(L, 2);
+
+	if ((error = zpool_disable_datasets(zhp, force)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_disable_datasets"));
+	}
+	return (success(L));
+}
+
+static int
 l_zfs_prop_default_string(lua_State *L)
 {
 	const char *string;
@@ -2759,7 +4054,95 @@ static const struct luaL_Reg l_zpool_meta[] = {
 	{"close", l_zpool_close},
 	{"get_name", l_zpool_get_name},
 	{"get_state", l_zpool_get_state},
-	/* TODO: lots more */
+	{"get_state_str", l_zpool_get_state_str},
+	{"get_status", l_zpool_get_status},
+#if 0
+	{"get_handle", l_zpool_get_handle},
+#endif
+	{"wait", l_zpool_wait},
+	{"wait_status", l_zpool_wait_status},
+	{"destroy", l_zpool_destroy},
+	{"add", l_zpool_add},
+	{"scan", l_zpool_scan},
+#if __FreeBSD_version > 1500056
+	{"scan_range", l_zpool_scan_range},
+	{"initialize_one", l_zpool_initialize_one},
+#endif
+	{"initialize", l_zpool_initialize},
+	{"initialize_wait", l_zpool_initialize_wait},
+	{"trim", l_zpool_trim},
+	{"clear", l_zpool_clear},
+	{"reguid", l_zpool_reguid},
+#if __FreeBSD_version > 1500023
+	{"set_guid", l_zpool_set_guid},
+#endif
+	{"reopen_one", l_zpool_reopen_one},
+#if __FreeBSD_version > 1500056
+	{"collect_leaves", l_zpool_collect_leaves},
+#endif
+	{"sync_one", l_zpool_sync_one},
+#if __FreeBSD_version > 1500056
+	{"trim_one", l_zpool_trim_one},
+#endif
+#if __FreeBSD_version > 1500023
+	{"ddt_prune", l_zpool_ddt_prune},
+#endif
+	{"vdev_online", l_zpool_vdev_online},
+	{"vdev_offline", l_zpool_vdev_offline},
+	{"vdev_attach", l_zpool_vdev_attach},
+	{"vdev_detach", l_zpool_vdev_detach},
+	{"vdev_remove", l_zpool_vdev_remove},
+	{"vdev_remove_cancel", l_zpool_vdev_remove_cancel},
+	{"vdev_indirect_size", l_zpool_vdev_indirect_size},
+	{"vdev_split", l_zpool_vdev_split},
+	{"vdev_remove_wanted", l_zpool_vdev_remove_wanted},
+	{"vdev_fault", l_zpool_vdev_fault},
+	{"vdev_degrade", l_zpool_vdev_degrade},
+	{"vdev_set_removed_state", l_zpool_vdev_set_removed_state},
+	{"vdev_clear", l_zpool_vdev_clear},
+	{"find_vdev", l_zpool_find_vdev},
+#if __FreeBSD_version > 1500023
+	{"find_parent_vdev", l_zpool_find_parent_vdev},
+#endif
+	{"find_vdev_by_physpath", l_zpool_find_vdev_by_physpath},
+	{"prepare_disk", l_zpool_prepare_disk},
+	{"vdev_path_to_guid", l_zpool_vdev_path_to_guid},
+	{"set_prop", l_zpool_set_prop},
+	{"get_prop", l_zpool_get_prop},
+	{"get_userprop", l_zpool_get_userprop},
+	{"get_prop_int", l_zpool_get_prop_int},
+	{"props_refresh", l_zpool_props_refresh},
+	{"get_vdev_prop", l_zpool_get_vdev_prop},
+	{"get_all_vdev_props", l_zpool_get_all_vdev_props},
+	{"set_vdev_prop", l_zpool_set_vdev_prop},
+	{"get_config", l_zpool_get_config},
+	{"get_features", l_zpool_get_features},
+	{"refresh_stats", l_zpool_refresh_stats},
+#if __FreeBSD_version > 1600001
+	{"refresh_stats_from_handle", l_zpool_refresh_stats_from_handle},
+#endif
+	{"get_errlog", l_zpool_get_errlog},
+#if __FreeBSD_version > 1500023
+	{"add_propname", l_zpool_add_propname},
+#endif
+	{"export", l_zpool_export},
+	{"export_force", l_zpool_export_force},
+	{"upgrade", l_zpool_upgrade},
+	{"get_history", l_zpool_get_history},
+	{"obj_to_path_ds", l_zpool_obj_to_path_ds},
+	{"obj_to_path", l_zpool_obj_to_path},
+	{"checkpoint", l_zpool_checkpoint},
+	{"discard_checkpoint", l_zpool_discard_checkpoint},
+#if __FreeBSD_version > 1500023
+	{"prefetch", l_zpool_prefetch},
+#endif
+	/* TODO: proplist stuff */
+	{"prop_get_feature", l_zpool_prop_get_feature},
+	{"zvol_volsize_to_reservation", l_zvol_volsize_to_reservation},
+	{"set_bootenv", l_zpool_set_bootenv},
+	{"get_bootenv", l_zpool_get_bootenv},
+	{"enable_datasets", l_zpool_enable_datasets},
+	{"disable_datasets", l_zpool_disable_datasets},
 	{NULL, NULL}
 };
 

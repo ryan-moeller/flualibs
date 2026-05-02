@@ -64,9 +64,76 @@ zfs = require('zfs')
 .It Dv count, errmsg, errcode = libzfs_hdl:events_clear( )
 .It Dv ok, errmsg, errcode = libzfs_hdl:events_seek(eid , zevent_fd )
 .It Dv action = libzfs_hdl:explain_recover(poolname , reason , config )
-.It Dv zpool_hdl:close( )
 .It Dv name = zpool_hdl:get_name( )
 .It Dv state = zpool_hdl:get_state( )
+.It Dv state_str = zpool_hdl:get_state_str( )
+.It Dv status, msgid, errata = zpool_hdl:get_status( )
+.It Dv ok, errmsg, errcode = zpool_hdl:wait(activity )
+.It Dv waited, missing_or_errmsg, errcode = zpool_hdl:wait_status(activity )
+.It Dv ok, errmsg, errcode = zpool_hdl:destroy(message )
+.It Dv ok, errmsg, errcode = zpool_hdl:add(nvroot , check_ashift )
+.It Dv ok, errmsg, errcode = zpool_hdl:scan(func , cmd )
+.It Dv ok, errmsg, errcode = zpool_hdl:scan_range(func , cmd , date_start , date_end )
+.It Dv ok, errmsg, errcode = zpool_hdl:initialize_one(cmd_type , wait )
+.It Dv ok, errmsg, errcode = zpool_hdl:initialize(cmd_type , vdevs )
+.It Dv ok, errmsg, errcode = zpool_hdl:initialize_wait(cmd_type , vdevs )
+.It Dv ok, errmsg, errcode = zpool_hdl:trim(cmd_type , vdevs , flags )
+.It Dv ok, errmsg, errcode = zpool_hdl:clear([path ] , [rewind ] )
+.It Dv ok, errmsg, errcode = zpool_hdl:reguid( )
+.It Dv ok, errmsg, errcode = zpool_hdl:set_guid([guid ] )
+.It Dv ok, errmsg, errcode = zpool_hdl:reopen_one(scrub_restart )
+.It Dv vdevs = zpool_hdl:collect_leaves(nvroot )
+.It Dv ok, errmsg, errcode = zpool_hdl:sync_one(force )
+.It Dv ok, errmsg, errcode = zpool_hdl:trim_one(cmd_type , trim_flags )
+.It Dv ok, errmsg, errcode = zpool_hdl:ddt_prune(unit , amount )
+.It Dv newstate, errmsg, errcode = zpool_hdl:vdev_online(path , flags )
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_offline(path , istmp )
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_attach(old_disk , new_disk , nvroot , replacing , rebuild )
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_detach(path )
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_remove(path )
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_remove_cancel( )
+.It Dv size, errmsg, errcode = zpool_hdl:vdev_indirect_size(path )
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_split(newname , [newroot ] , [props ] , flags )
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_remove_wanted(path )
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_fault(guid , aux )
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_degrade(guid , aux )
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_set_removed_state(guid , aux )
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_clear(guid )
+.It Dv vdev, avail_spare_or_errmsg, l2cache_or_errcode, log = zpool_hdl:find_vdev(path )
+.It Dv vdev, avail_spare_or_errmsg, l2cache_or_errcode, log = zpool_hdl:find_parent_vdev(path )
+.It Dv vdev, avail_spare_or_errmsg, l2cache_or_errcode, log = zpool_hdl:find_vdev_by_physpath(physpath )
+.It Dv lines, errmsg, errcode = zpool_hdl:prepare_disk(vdev , prepare_str )
+.It Dv guid = zpool_hdl:vdev_path_to_guid(path )
+.It Dv ok, errmsg, errcode = zpool_hdl:set_prop(propname , propval )
+.It Dv value, source_or_errmsg, errcode = zpool_hdl:get_prop(prop , literal )
+.It Dv value, source_or_errmsg, errcode = zpool_hdl:get_userprop(propname )
+.It Dv value, source = zpool_hdl:get_prop_int(prop )
+.It Dv ok, errmsg, errcode = zpool_hdl:props_refresh( )
+.It Dv value, source_or_errmsg, errcode = zpool_hdl:get_vdev_prop(vdevname , [prop ] , [propname ] , literal )
+.It Dv props, errmsg, errcode = zpool_hdl:get_all_vdev_props(vdevname )
+.It Dv ok, errmsg, errcode = zpool_hdl:set_vdev_prop(vdevname , propname , propval )
+.It Dv config, oldconfig_or_errmsg, errcode = zpool_hdl:get_config( )
+.It Dv features, errmsg, errcode = zpool_hdl:get_features( )
+.It Dv missing, errmsg, errcode = zpool_hdl:refresh_stats( )
+.It Dv zpool_hdl:refresh_stats_from_handle(from_zpool_hdl )
+.It Dv errlog, errmsg, errcode = zpool_hdl:get_errlog( )
+.It Dv zpool_hdl:add_propname(propname )
+.It Dv ok, errmsg, errcode = zpool_hdl:export(force , message )
+.It Dv ok, errmsg, errcode = zpool_hdl:export_force(message )
+.It Dv ok, errmsg, errcode = zpool_hdl:upgrade(new_version )
+.It Dv history, offset_or_errmsg, eof_or_errcode = zpool_hdl:get_history([offset ] )
+.It Dv path_ds = zpool_hdl:obj_to_path_ds(dsobj , obj )
+.It Dv path = zpool_hdl:obj_to_path(dsobj , obj )
+.It Dv ok, errmsg, errcode = zpool_hdl:checkpoint( )
+.It Dv ok, errmsg, errcode = zpool_hdl:discard_checkpoint( )
+.It Dv ok, errmsg, errcode = zpool_hdl:prefetch(type )
+.It Dv value, errmsg, errcode = zpool_hdl:prop_get_feature(propname )
+.It Dv reservation = zpool_hdl:zvol_volsize_to_reservation(volsize , props )
+.It Dv ok, errmsg, errcode = zpool_hdl:set_bootenv(envmap )
+.It Dv envmap, errmsg, errcode = zpool_hdl:get_bootenv( )
+.It Dv ok, errmsg, errcode = zpool_hdl:enable_datasets([mntopts ] , flags , nthreads )
+.It Dv ok, errmsg, errcode = zpool_hdl:disable_datasets(force )
+.It Dv zpool_hdl:close( )
 .It Dv ... = libzfs_hdl:foreach_mountpoint(zfs_handles , nthreads , callback , ... )
 .It Dv zfs_hdl, errmsg, errcode = libzfs_hdl:open(path , types )
 .It Dv ok, errmsg = libzfs_hdl:iter_root(callback , ... )
@@ -261,7 +328,7 @@ Wraps
 .It Dv zpool_hdl, errmsg, errcode = libzfs_hdl:open_pool_canfail(poolname )
 Wraps
 .Fn zpool_open_canfail .
-.It Dv libzfs_hdl:iter_pool(callback , ... )
+.It Dv libzfs_hdl:iter_pools(callback , ... )
 Wraps
 .Fn zpool_iter .
 .Fa callback
@@ -296,15 +363,216 @@ Wraps
 .It Dv action = libzfs_hdl:explain_recover(poolname , reason , config )
 Wraps
 .Fn zpool_explain_recover .
-.It Dv zpool_hdl:close( )
-Wraps
-.Fn zpool_close .
 .It Dv name = zpool_hdl:get_name( )
 Wraps
 .Fn zpool_get_name .
 .It Dv state = zpool_hdl:get_state( )
 Wraps
 .Fn zpool_get_state .
+.It Dv state_str = zpool_hdl:get_state_str( )
+Wraps
+.Fn zpool_get_state_str .
+.It Dv status, msgid, errata = zpool_hdl:get_status( )
+Wraps
+.Fn zpool_get_status .
+.It Dv ok, errmsg, errcode = zpool_hdl:wait(activity )
+Wraps
+.Fn zpool_wait .
+.It Dv waited, missing_or_errmsg, errcode = zpool_hdl:wait_status(activity )
+Wraps
+.Fn zpool_wait_status .
+.It Dv ok, errmsg, errcode = zpool_hdl:destroy(message )
+Wraps
+.Fn zpool_destroy .
+.It Dv ok, errmsg, errcode = zpool_hdl:add(nvroot , check_ashift )
+Wraps
+.Fn zpool_add .
+.It Dv ok, errmsg, errcode = zpool_hdl:scan(func , cmd )
+Wraps
+.Fn zpool_scan .
+.It Dv ok, errmsg, errcode = zpool_hdl:scan_range(func , cmd , date_start , date_end )
+Wraps
+.Fn zpool_scan_range .
+.It Dv ok, errmsg, errcode = zpool_hdl:initialize_one(cmd_type , wait )
+Wraps
+.Fn zpool_initialize_one .
+.It Dv ok, errmsg, errcode = zpool_hdl:initialize(cmd_type , vdevs )
+Wraps
+.Fn zpool_initialize .
+.It Dv ok, errmsg, errcode = zpool_hdl:initialize_wait(cmd_type , vdevs )
+Wraps
+.Fn zpool_initialize_wait .
+.It Dv ok, errmsg, errcode = zpool_hdl:trim(cmd_type , vdevs , flags )
+Wraps
+.Fn zpool_trim .
+.It Dv ok, errmsg, errcode = zpool_hdl:clear([path ] , [rewind ] )
+Wraps
+.Fn zpool_clear .
+.It Dv ok, errmsg, errcode = zpool_hdl:reguid( )
+Wraps
+.Fn zpool_reguid .
+.It Dv ok, errmsg, errcode = zpool_hdl:set_guid([guid ] )
+Wraps
+.Fn zpool_set_guid .
+.It Dv ok, errmsg, errcode = zpool_hdl:reopen_one(scrub_restart )
+Wraps
+.Fn zpool_reopen_one .
+.It Dv vdevs = zpool_hdl:collect_leaves(nvroot )
+Wraps
+.Fn zpool_collect_leaves .
+.It Dv ok, errmsg, errcode = zpool_hdl:sync_one(force )
+Wraps
+.Fn zpool_sync_one .
+.It Dv ok, errmsg, errcode = zpool_hdl:trim_one(cmd_type , trim_flags )
+Wraps
+.Fn zpool_trim_one .
+.It Dv ok, errmsg, errcode = zpool_hdl:ddt_prune(unit , amount )
+Wraps
+.Fn zpool_ddt_prune .
+.It Dv newstate, errmsg, errcode = zpool_hdl:vdev_online(path , flags )
+Wraps
+.Fn zpool_vdev_online .
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_offline(path , istmp )
+Wraps
+.Fn zpool_vdev_offline .
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_attach(old_disk , new_disk , nvroot , replacing , rebuild )
+Wraps
+.Fn zpool_vdev_attach .
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_detach(path )
+Wraps
+.Fn zpool_vdev_detach .
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_remove(path )
+Wraps
+.Fn zpool_vdev_remove .
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_remove_cancel( )
+Wraps
+.Fn zpool_vdev_remove_cancel .
+.It Dv size, errmsg, errcode = zpool_hdl:vdev_indirect_size(path )
+Wraps
+.Fn zpool_vdev_indirect_size .
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_split(newname , [newroot ] , [props ] , flags )
+Wraps
+.Fn zpool_vdev_split .
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_remove_wanted(path )
+Wraps
+.Fn zpool_vdev_remove_wanted .
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_fault(guid , aux )
+Wraps
+.Fn zpool_vdev_fault .
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_degrade(guid , aux )
+Wraps
+.Fn zpool_vdev_degrade .
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_set_removed_state(guid , aux )
+Wraps
+.Fn zpool_vdev_set_removed_state .
+.It Dv ok, errmsg, errcode = zpool_hdl:vdev_clear(guid )
+Wraps
+.Fn zpool_vdev_clear .
+.It Dv vdev, avail_spare_or_errmsg, l2cache_or_errcode, log = zpool_hdl:find_vdev(path )
+Wraps
+.Fn zpool_find_vdev .
+.It Dv vdev, avail_spare_or_errmsg, l2cache_or_errcode, log = zpool_hdl:find_parent_vdev(path )
+Wraps
+.Fn zpool_find_parent_vdev .
+.It Dv vdev, avail_spare_or_errmsg, l2cache_or_errcode, log = zpool_hdl:find_vdev_by_physpath(physpath )
+Wraps
+.Fn zpool_find_vdev_by_physpath .
+.It Dv lines, errmsg, errcode = zpool_hdl:prepare_disk(vdev , prepare_str )
+Wraps
+.Fn zpool_prepare_disk .
+.It Dv guid = zpool_hdl:vdev_path_to_guid(path )
+Wraps
+.Fn zpool_vdev_path_to_guid .
+.It Dv ok, errmsg, errcode = zpool_hdl:set_prop(propname , propval )
+Wraps
+.Fn zpool_set_prop .
+.It Dv value, source_or_errmsg, errcode = zpool_hdl:get_prop(prop , literal )
+Wraps
+.Fn zpool_get_prop .
+.It Dv value, source_or_errmsg, errcode = zpool_hdl:get_userprop(propname )
+Wraps
+.Fn zpool_get_userprop .
+.It Dv value, source = zpool_hdl:get_prop_int(prop )
+Wraps
+.Fn zpool_get_prop_int .
+.It Dv ok, errmsg, errcode = zpool_hdl:props_refresh( )
+Wraps
+.Fn zpool_props_refresh .
+.It Dv value, source_or_errmsg, errcode = zpool_hdl:get_vdev_prop(vdevname , [prop ] , [propname ] , literal )
+Wraps
+.Fn zpool_get_vdev_prop .
+.It Dv props, errmsg, errcode = zpool_hdl:get_all_vdev_props(vdevname )
+Wraps
+.Fn zpool_get_all_vdev_props .
+.It Dv ok, errmsg, errcode = zpool_hdl:set_vdev_prop(vdevname , propname , propval )
+Wraps
+.Fn zpool_set_vdev_prop .
+.It Dv config, oldconfig_or_errmsg, errcode = zpool_hdl:get_config( )
+Wraps
+.Fn zpool_get_config .
+.It Dv features, errmsg, errcode = zpool_hdl:get_features( )
+Wraps
+.Fn zpool_get_features .
+.It Dv missing, errmsg, errcode = zpool_hdl:refresh_stats( )
+Wraps
+.Fn zpool_refresh_stats .
+.It Dv zpool_hdl:refresh_stats_from_handle(from_zpool_hdl )
+Wraps
+.Fn zpool_refresh_stats_from_handle .
+.It Dv errlog, errmsg, errcode = zpool_hdl:get_errlog( )
+Wraps
+.Fn zpool_get_errlog .
+.It Dv zpool_hdl:add_propname(propname )
+Wraps
+.Fn zpool_add_propname .
+.It Dv ok, errmsg, errcode = zpool_hdl:export(force , message )
+Wraps
+.Fn zpool_export .
+.It Dv ok, errmsg, errcode = zpool_hdl:export_force(message )
+Wraps
+.Fn zpool_export_force .
+.It Dv ok, errmsg, errcode = zpool_hdl:upgrade(new_version )
+Wraps
+.Fn zpool_upgrade .
+.It Dv history, offset_or_errmsg, eof_or_errcode = zpool_hdl:get_history([offset ] )
+Wraps
+.Fn zpool_get_history .
+.It Dv path_ds = zpool_hdl:obj_to_path_ds(dsobj , obj )
+Wraps
+.Fn zpool_obj_to_path_ds .
+.It Dv path = zpool_hdl:obj_to_path(dsobj , obj )
+Wraps
+.Fn zpool_obj_to_path .
+.It Dv ok, errmsg, errcode = zpool_hdl:checkpoint( )
+Wraps
+.Fn zpool_checkpoint .
+.It Dv ok, errmsg, errcode = zpool_hdl:discard_checkpoint( )
+Wraps
+.Fn zpool_discard_checkpoint .
+.It Dv ok, errmsg, errcode = zpool_hdl:prefetch(type )
+Wraps
+.Fn zpool_prefetch .
+.It Dv value, errmsg, errcode = zpool_hdl:prop_get_feature(propname )
+Wraps
+.Fn zpool_prop_get_feature .
+.It Dv reservation = zpool_hdl:zvol_volsize_to_reservation(volsize , props )
+Wraps
+.Fn zvol_volsize_to_reservation .
+.It Dv ok, errmsg, errcode = zpool_hdl:set_bootenv(envmap )
+Wraps
+.Fn zpool_set_bootenv .
+.It Dv envmap, errmsg, errcode = zpool_hdl:get_bootenv( )
+Wraps
+.Fn zpool_get_bootenv .
+.It Dv ok, errmsg, errcode = zpool_hdl:enable_datasets([mntopts ] , flags , nthreads )
+Wraps
+.Fn zpool_enable_datasets .
+.It Dv ok, errmsg, errcode = zpool_hdl:disable_datasets(force )
+Wraps
+.Fn zpool_disable_datasets .
+.It Dv zpool_hdl:close( )
+Wraps
+.Fn zpool_close .
 .It Dv ... = libzfs_hdl:foreach_mountpoint(zfs_handles , nthreads , callback , ... )
 Wraps
 .Fn zfs_foreach_mountpoint .
