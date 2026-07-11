@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Ryan Moeller
+ * Copyright (c) 2025-2026 Ryan Moeller
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -619,9 +619,7 @@ luaopen_netinet_in(lua_State *L)
 	DEFINE(IPPROTO_PFSYNC);
 	DEFINE(IPPROTO_RESERVED_253);
 	DEFINE(IPPROTO_RESERVED_254);
-	DEFINE(IPPROTO_OLD_DIVERT);
 	DEFINE(IPPROTO_MAX);
-	DEFINE(IPPROTO_DIVERT);
 	DEFINE(IPPROTO_SEND);
 	DEFINE(IPPROTO_SPACER);
 
