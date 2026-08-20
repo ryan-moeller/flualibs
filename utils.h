@@ -158,6 +158,12 @@ testcookie(lua_State *L, int idx, const char *metatable)
 	return (cookie);
 }
 
+static inline bool
+isclosed(luaL_Stream *s)
+{
+	return (s->closef == NULL);
+}
+
 static inline int
 checkfd(lua_State *L, int idx)
 {
@@ -168,7 +174,7 @@ checkfd(lua_State *L, int idx)
 		return (lua_tointeger(L, idx));
 	}
 	s = luaL_checkudata(L, idx, LUA_FILEHANDLE);
-	luaL_argcheck(L, s->f != NULL, idx, "invalid file handle (closed)");
+	luaL_argcheck(L, !isclosed(s), idx, "invalid file handle (closed)");
 
 	if ((fd = fileno(s->f)) == -1) {
 		fatal(L, "fileno", errno);
