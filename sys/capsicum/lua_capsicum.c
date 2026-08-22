@@ -460,7 +460,11 @@ luaopen_sys_capsicum(lua_State *L)
 	DEFINE(INOTIFY_RM);
 #endif
 #ifdef CAP_RESERVED
+#ifdef CAP_PDDUPFD
+	DEFINE(PDDUPFD);
+#else
 	DEFINE(UNUSED1_24);
+#endif
 	DEFINE(UNUSED1_25);
 	DEFINE(UNUSED1_26);
 	DEFINE(UNUSED1_27);
