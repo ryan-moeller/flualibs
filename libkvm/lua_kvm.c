@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2026 Ryan Moeller
- *
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
@@ -18,9 +17,9 @@
 #include <lua.h>
 #include <lauxlib.h>
 
+#include "libkvm/lua_kvm.h"
 #include "utils.h"
 
-#define KVM_METATABLE "kvm_t *"
 #define PCPU_METATABLE "struct pcpu *" /* TODO: sys.pcpu module? */
 #define KINFO_PROC_METATABLE "struct kinfo_proc *" /* TODO: sys.user module? */
 #define KINFO_PROCS_METATABLE "struct kinfo_proc[]"
@@ -130,7 +129,7 @@ l_kvm_dpcpu_setcpu(lua_State *L)
 	kvm_t *kd;
 	u_int cpu;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 	cpu = luaL_checkinteger(L, 2);
 
 	if (kvm_dpcpu_setcpu(kd, cpu) == -1) {
@@ -145,7 +144,7 @@ l_kvm_getmaxcpu(lua_State *L)
 	kvm_t *kd;
 	int maxcpu;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 
 	if ((maxcpu = kvm_getmaxcpu(kd)) == -1) {
 		return (kvmfail(L, kd));
@@ -160,7 +159,7 @@ l_kvm_getncpus(lua_State *L)
 	kvm_t *kd;
 	int ncpus;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 
 	if ((ncpus = kvm_getncpus(kd)) == -1) {
 		return (kvmfail(L, kd));
@@ -176,7 +175,7 @@ l_kvm_getpcpu(lua_State *L)
 	struct pcpu *pcpu;
 	int cpu;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 	cpu = luaL_checkinteger(L, 2);
 
 	if ((pcpu = kvm_getpcpu(kd, cpu)) == (void *)-1) {
@@ -570,7 +569,7 @@ l_kvm_read_zpcpu(lua_State *L)
 	ssize_t result;
 	int cpu;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 	base = luaL_checkinteger(L, 2);
 	size = luaL_checkinteger(L, 3);
 	cpu = luaL_checkinteger(L, 4);
@@ -589,7 +588,7 @@ l_kvm_counter_u64_fetch(lua_State *L)
 	kvm_t *kd;
 	u_long base;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 	base = luaL_checkinteger(L, 2);
 
 	/* Can't discriminate if 0 is an error, just return it. */
@@ -603,7 +602,7 @@ l_kvm_getcptime(lua_State *L)
 	long cp_time[CPUSTATES]; /* Should this be dynamic for flexibility? */
 	kvm_t *kd;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 
 	if (kvm_getcptime(kd, cp_time) == -1) {
 		return (kvmfail(L, kd));
@@ -630,7 +629,7 @@ l_kvm_getloadavg(lua_State *L)
 	kvm_t *kd;
 	int samples;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 
 	if ((samples = kvm_getloadavg(kd, loadavg, nitems(loadavg))) == -1) {
 		return (kvmfail(L, kd));
@@ -653,7 +652,7 @@ l_kvm_getprocs(lua_State *L)
 	kvm_t *kd;
 	int op, arg, cnt;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 	op = luaL_checkinteger(L, 2);
 	arg = luaL_checkinteger(L, 3);
 
@@ -909,7 +908,7 @@ l_kvm_getargv(lua_State *L)
 	char **argv;
 	int nchr;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 	p = checkcookie(L, 2, KINFO_PROC_METATABLE);
 	nchr = luaL_optinteger(L, 3, 0);
 
@@ -932,7 +931,7 @@ l_kvm_getenvv(lua_State *L)
 	char **envv;
 	int nchr;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 	p = checkcookie(L, 2, KINFO_PROC_METATABLE);
 	nchr = luaL_optinteger(L, 3, 0);
 
@@ -970,7 +969,7 @@ l_kvm_getswapinfo(lua_State *L)
 	struct kvm_swap *ksi;
 	int maxswap, flags, nswap;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 	maxswap = 1 + luaL_optinteger(L, 2, 0); /* XXX: deviates from C API */
 	flags = luaL_optinteger(L, 3, 0);
 
@@ -1003,7 +1002,7 @@ l_kvm_native(lua_State *L)
 {
 	kvm_t *kd;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 
 	lua_pushboolean(L, kvm_native(kd));
 	return (1);
@@ -1029,7 +1028,7 @@ l_kvm_nlist2(lua_State *L)
 	size_t n;
 	int ninvalid;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 	luaL_checktype(L, 2, LUA_TTABLE);
 
 	n = luaL_len(L, 2);
@@ -1070,7 +1069,7 @@ l_kvm_read2(lua_State *L)
 	size_t nbytes;
 	ssize_t n;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 	addr = luaL_checkinteger(L, 2);
 	nbytes = luaL_checkinteger(L, 3);
 
@@ -1091,7 +1090,7 @@ l_kvm_write(lua_State *L)
 	size_t nbytes;
 	ssize_t n;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 	addr = luaL_checkinteger(L, 2);
 	buf = luaL_checklstring(L, 3, &nbytes);
 
@@ -1107,7 +1106,7 @@ l_kvm_kerndisp(lua_State *L)
 {
 	kvm_t *kd;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 
 	lua_pushinteger(L, kvm_kerndisp(kd));
 	return (1);
@@ -1153,7 +1152,7 @@ l_kvm_walk_pages(lua_State *L)
 {
 	kvm_t *kd;
 
-	kd = checkcookie(L, 1, KVM_METATABLE);
+	kd = checkkvm(L, 1);
 	luaL_checktype(L, 2, LUA_TFUNCTION);
 	luaL_checktype(L, 3, LUA_TNONE);
 
