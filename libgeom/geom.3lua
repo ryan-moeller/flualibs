@@ -1,0 +1,216 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd August 22, 2026
+.Dt GEOM 3lua
+.Os
+.Sh NAME
+.Nm geom
+.Nd Lua bindings for
+.Xr libgeom 3
+.Sh SYNOPSIS
+.Bd -literal
+geom = require('geom')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv req, errmsg, errcode = geom.gctl_get_handle( )
+.It Dv req:ro_param(name , value )
+.It Dv ok, errmsg, errcode = req:issue( )
+.It Dv req:dump(file )
+.It Dv confxml, errmsg, errcode = geom.getxml( )
+.It Dv confxml, errmsg, errcode = geom.getxml_geom(class , geom[ , parents ] )
+.It Dv gmesh, errmsg, errcode = geom.xml2tree(confxml )
+.It Dv gmesh, errmsg, errcode = geom.gettree( )
+.It Dv gmesh, errmsg, errcode = geom.gettree_geom(class , geom[ , parents ] )
+.It Dv gident, errmsg, errcode = gmesh:lookupid(id )
+.It Dv file, errmsg, errcode = geom.open(name[ , dowrite ] )
+.It Dv file, errmsg, errcode = geom.open_by_ident(ident[ , dowrite ] )
+.It Dv ok, errmsg, errcode = geom.close(fd | file )
+.It Dv mediasize = geom.mediasize(fd | file )
+.It Dv sectorsize = geom.sectorsize(fd | file )
+.It Dv stripeoffset = geom.stripeoffset(fd | file )
+.It Dv stripesize = geom.stripesize(fd | file )
+.It Dv ok, errmsg, errcode = geom.flush(fd | file )
+.It Dv ok, errmsg, errcode = geom.delete(fd | file , offset , length )
+.It Dv path, errmsg, errcode = geom.device_path(fd | file )
+.It Dv ident, errmsg, errcode = geom.get_ident(fd | file )
+.It Dv name, errmsg, errcode = geom.get_name(fd | file )
+.It Dv provider, errmsg, errcode = geom.providername(fd | file )
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for GEOM library
+.Pq libgeom
+function calls.
+Not all APIs are available, stats and rw gctl params are not finished.
+.Bl -tag -width XXXX
+.It Dv req, errmsg, errcode = geom.gctl_get_handle( )
+Wraps
+.Xr gctl_get_handle 3 .
+.It Dv req:ro_param(name , value )
+Wraps
+.Xr gctl_ro_param 3 .
+The
+.Fa value
+parameter accepts a string, which may be arbitrary bytes as needed.
+It is up to the caller to pack parameter values appropriately.
+.It Dv ok, errmsg, errcode = req:issue( )
+Wraps
+.Xr gctl_issue 3 .
+.It Dv req:dump(file )
+.It Dv confxml, errmsg, errcode = geom.getxml( )
+Wraps
+.Xr geom_getxml 3 .
+.It Dv confxml, errmsg, errcode = geom.getxml_geom(class , geom[ , parents ] )
+Wraps
+.Fn geom_getxml_geom .
+.It Dv gmesh, errmsg, errcode = geom.xml2tree(confxml )
+Wraps
+.Xr geom_xml2tree 3 .
+.It Dv gmesh, errmsg, errcode = geom.gettree( )
+Wraps
+.Xr geom_gettree 3 .
+The returned mesh is a cyclic graph of
+.Vt userdata
+objects with index access to struct fields.
+List fields are exposed as a
+.Vt function
+that returns a generic iterator to use in a for-loop.
+The config fields provide tables where the value is either a
+.Vt string
+or
+.Dv true .
+.It Dv gmesh, errmsg, errcode = geom.gettree_geom(class , geom[ , parents ] )
+Wraps
+.Fn geom_gettree_geom .
+See
+.Fn geom.gettree .
+.It Dv gident, errmsg, errcode = gmesh:lookupid(id )
+Wraps
+.Fn geom_lookupid .
+.Fa id
+is a
+.Vt lightuserdata
+value obtained from a GEOM mesh.
+.It Dv file, errmsg, errcode = geom.open(name[ , dowrite ] )
+Wraps
+.Xr g_open 3 .
+If
+.Fa dowrite
+is
+.Dv true ,
+the device is opened for writing, otherwise it is opened read-only.
+Returns a Lua
+.Vt file
+object.
+.It Dv file, errmsg, errcode = geom.open_by_ident(ident[ , dowrite ] )
+Wraps
+.Xr g_open_by_ident 3 .
+If
+.Fa dowrite
+is
+.Dv true ,
+the device is opened for writing, otherwise it is opened read-only.
+Returns a Lua
+.Vt file
+object.
+.It Dv ok, errmsg, errcode = geom.close(fd | file )
+Wraps
+.Xr g_close 3 .
+.It Dv mediasize = geom.mediasize(fd | file )
+Wraps
+.Xr g_mediasize 3 .
+.It Dv sectorsize = geom.sectorsize(fd | file )
+Wraps
+.Xr g_sectorsize 3 .
+.It Dv stripeoffset = geom.stripeoffset(fd | file )
+Wraps
+.Xr g_stripeoffset 3 .
+.It Dv stripesize = geom.stripesize(fd | file )
+Wraps
+.Xr g_stripesize 3 .
+.It Dv ok, errmsg, errcode = geom.flush(fd | file )
+Wraps
+.Xr g_flush 3 .
+.It Dv ok, errmsg, errcode = geom.delete(fd | file , offset , length )
+Wraps
+.Xr g_delete 3 .
+.It Dv path, errmsg, errcode = geom.device_path(fd | file )
+Wraps
+.Xr g_device_path 3 .
+.It Dv ident, errmsg, errcode = geom.get_ident(fd | file )
+Wraps
+.Xr g_get_ident 3 .
+.It Dv name, errmsg, errcode = geom.get_name(fd | file )
+Wraps
+.Xr g_get_name 3 .
+.It Dv provider, errmsg, errcode = geom.providername(fd | file )
+Wraps
+.Xr g_providername 3 .
+.El
+.Sh EXAMPLES
+Dump the GEOM mesh as JSON:
+.Bd -literal -offset indent
+geom = require('geom')
+ucl = require('ucl')
+
+-- Break mesh cycles to form a tree that ucl can handle.
+gmesh = geom.gettree()
+tree = { classes={} }
+for gclass in gmesh:class() do
+	class = {
+		id = gclass.id,
+		name = gclass.name,
+		geom = {},
+		config = gclass.config,
+	}
+	tree.classes[#tree.classes + 1] = class
+	for ggeom in gclass:geom() do
+		geom = {
+			id = ggeom.id,
+			class = ggeom.class.id,
+			name = ggeom.name,
+			rank = ggeom.rank,
+			consumer = {},
+			provider = {},
+			config = ggeom.config,
+		}
+		class.geom[#class.geom + 1] = geom
+		for gconsumer in ggeom:consumer() do
+			consumer = {
+				id = gconsumer.id,
+				geom = gconsumer.geom.id,
+				provider = gconsumer.provider.id,
+				mode = gconsumer.mode,
+				config = gconsumer.config,
+			}
+			geom.consumer[#geom.consumer + 1] = consumer
+		end
+		for gprovider in ggeom:provider() do
+			provider = {
+				id = gprovider.id,
+				name = gprovider.name,
+				geom = gprovider.geom.id,
+				consumers = {},
+				mode = gprovider.mode,
+				mediasize = gprovider.mediasize,
+				sectorsize = gprovider.sectorsize,
+				stripeoffset = gprovider.stripeoffset,
+				stripesize = gprovider.stripesize,
+				config = gprovider.config,
+			}
+			geom.provider[#geom.provider + 1] = provider
+		end
+	end
+end
+print(ucl.to_json(tree))
+.Ed
+.Sh SEE ALSO
+.Xr libgeom 3 ,
+.Xr geom 4 ,
+.Xr geom 8
+.Sh AUTHORS
+.An Ryan Moeller

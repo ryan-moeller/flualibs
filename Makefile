@@ -7,6 +7,7 @@ SUBDIR= \
 	grp \
 	libcasper \
 	libfetch \
+	libgeom \
 	libifconfig \
 	libkvm \
 	libmagic \
