@@ -1107,6 +1107,11 @@ luaopen_geom(lua_State *L)
 	luaL_newmetatable(L, GIDENT_METATABLE);
 	luaL_setfuncs(L, l_gident_meta, 0);
 
+	luaL_newmetatable(L, GCTL_REQ_METATABLE);
+	lua_pushvalue(L, -1);
+	lua_setfield(L, -2, "__index");
+	luaL_setfuncs(L, l_gctl_req_meta, 0);
+
 	luaL_newmetatable(L, GMESH_METATABLE);
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
