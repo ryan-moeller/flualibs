@@ -11,23 +11,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef NOTYET
 #include <devstat.h>
-#endif
 #include <libgeom.h>
 
 #include <lua.h>
 #include <lauxlib.h>
 
-#ifdef NOTYET
 #include "libdevstat/lua_devstat.h"
-#endif
 #include "utils.h"
 
-#ifdef NOTYET
 #define GEOM_STATS_METATABLE "geom stats"
 #define GEOM_STATS_SNAPSHOT_METATABLE "geom stats snapshot"
-#endif
 #define GCTL_REQ_METATABLE "struct gctl_req *"
 #define GIDENT_METATABLE "struct gident *"
 #define GMESH_METATABLE "struct gmesh *"
@@ -38,10 +32,13 @@
 
 int luaopen_geom(lua_State *);
 
-#ifdef NOTYET
 static int
 l_geom_stats_open(lua_State *L)
 {
+	lua_getglobal(L, "require");
+	lua_pushliteral(L, "devstat");
+	lua_call(L, 1, 0);
+
 	if (geom_stats_open() != 0) {
 		return (fail(L, errno));
 	}
@@ -84,12 +81,9 @@ l_geom_stats_snapshot_free(lua_State *L)
 {
 	void *snapshot;
 
-	snapshot = checkcookienull(L, 1, GEOM_STATS_SNAPSHOT_METATABLE);
+	snapshot = checkcookie(L, 1, GEOM_STATS_SNAPSHOT_METATABLE);
 
-	if (snapshot != NULL) {
-		geom_stats_snapshot_free(snapshot);
-		setcookie(L, 1, NULL);
-	}
+	geom_stats_snapshot_free(snapshot);
 	return (0);
 }
 
@@ -121,17 +115,16 @@ l_geom_stats_snapshot_reset(lua_State *L)
 static int
 l_geom_stats_snapshot_next(lua_State *L)
 {
-	struct devstat *stat;
+	struct devstat *ds;
 	void *snapshot;
 
 	snapshot = checkcookie(L, 1, GEOM_STATS_SNAPSHOT_METATABLE);
 
-	if ((stat = geom_stats_snapshot_next(snapshot)) == NULL) {
+	if ((ds = geom_stats_snapshot_next(snapshot)) == NULL) {
 		return (0);
 	}
-	return (newref(L, 1, stat, DEVSTAT_METATABLE);
+	return (newref(L, 1, ds, DEVSTAT_METATABLE));
 }
-#endif
 
 static int
 l_gctl_get_handle(lua_State *L)
@@ -1002,9 +995,7 @@ l_g_providername(lua_State *L)
 }
 
 static const struct luaL_Reg l_geom_funcs[] = {
-#ifdef NOTYET
 	{"stats_open", l_geom_stats_open},
-#endif
 	{"gctl_get_handle", l_gctl_get_handle},
 	{"getxml", l_geom_getxml},
 	{"getxml_geom", l_geom_getxml_geom},
@@ -1027,25 +1018,22 @@ static const struct luaL_Reg l_geom_funcs[] = {
 	{NULL, NULL}
 };
 
-#ifdef NOTYET
 static const struct luaL_Reg l_geom_stats_meta[] = {
 	{"__close", l_geom_stats_close},
 	{"__gc", l_geom_stats_close},
 	{"close", l_geom_stats_close},
 	{"resync", l_geom_stats_resync},
-	{"snapshot_get", l_geom_stats_snapshot_get},
+	{"snapshot", l_geom_stats_snapshot_get},
 	{NULL, NULL}
 };
 
 static const struct luaL_Reg l_geom_stats_snapshot_meta[] = {
-	{"__close", l_geom_stats_snapshot_free},
 	{"__gc", l_geom_stats_snapshot_free},
 	{"timestamp", l_geom_stats_snapshot_timestamp},
 	{"reset", l_geom_stats_snapshot_reset},
 	{"next", l_geom_stats_snapshot_next},
 	{NULL, NULL}
 };
-#endif
 
 static const struct luaL_Reg l_gctl_req_meta[] = {
 	{"__gc", l_gctl_free},
@@ -1096,14 +1084,16 @@ static const struct luaL_Reg l_gprovider_meta[] = {
 int
 luaopen_geom(lua_State *L)
 {
-	/* TODO: devstat, require devstat */
-#ifdef NOTYET
 	luaL_newmetatable(L, GEOM_STATS_METATABLE);
+	lua_pushvalue(L, -1);
+	lua_setfield(L, -2, "__index");
 	luaL_setfuncs(L, l_geom_stats_meta, 0);
 
 	luaL_newmetatable(L, GEOM_STATS_SNAPSHOT_METATABLE);
+	lua_pushvalue(L, -1);
+	lua_setfield(L, -2, "__index");
 	luaL_setfuncs(L, l_geom_stats_snapshot_meta, 0);
-#endif
+
 	luaL_newmetatable(L, GIDENT_METATABLE);
 	luaL_setfuncs(L, l_gident_meta, 0);
 

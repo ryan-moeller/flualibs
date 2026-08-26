@@ -2,7 +2,7 @@
 .\" Copyright (c) 2026 Ryan Moeller
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd August 22, 2026
+.Dd August 25, 2026
 .Dt GEOM 3lua
 .Os
 .Sh NAME
@@ -15,6 +15,13 @@ geom = require('geom')
 .Ed
 .Pp
 .Bl -tag -width XXXX -compact
+.It Dv gstat = geom.stats_open( )
+.It Dv gstat:close( )
+.It Dv gstat:resync( )
+.It Dv snap, errmsg, errcode = gstat:snapshot( )
+.It Dv sec, nsec = snap:timestamp( )
+.It Dv snap:reset( )
+.It Dv devstat = snap:next( )
 .It Dv req, errmsg, errcode = geom.gctl_get_handle( )
 .It Dv req:ro_param(name , value )
 .It Dv ok, errmsg, errcode = req:issue( )
@@ -47,6 +54,43 @@ module provides bindings for GEOM library
 function calls.
 Not all APIs are available, stats and rw gctl params are not finished.
 .Bl -tag -width XXXX
+.It Dv gstat = geom.stats_open( )
+Wraps
+.Xr geom_stats_open 3 ,
+returning a
+.Vt userdata
+stats handle.
+.It Dv gstat:close( )
+Wraps
+.Xr geom_stats_close 3 .
+.It Dv gstat:resync( )
+Wraps
+.Xr geom_stats_resync 3 .
+.It Dv snap, errmsg, errcode = gstat:snapshot( )
+Wraps
+.Xr geom_stats_snapshot_get 3 ,
+returning a
+.Vt userdata
+snapshot handle.
+.It Dv sec, nsec = snap:timestamp( )
+Wraps
+.Xr geom_stats_snapshot_timestamp 3 ,
+returning the timestamp as two
+.Vt integer
+values for
+seconds and nanoseconds.
+.It Dv snap:reset( )
+Wraps
+.Xr geom_stats_snapshot_reset 3 .
+.It Dv devstat = snap:next( )
+Wraps
+.Xr geom_stats_snapshot_next 3 ,
+returning a
+.Vt userdata
+devstat handle.
+See
+.Xr devstat 3lua
+for more information about the devstat object.
 .It Dv req, errmsg, errcode = geom.gctl_get_handle( )
 Wraps
 .Xr gctl_get_handle 3 .
@@ -210,6 +254,7 @@ print(ucl.to_json(tree))
 .Ed
 .Sh SEE ALSO
 .Xr libgeom 3 ,
+.Xr devstat 3lua ,
 .Xr geom 4 ,
 .Xr geom 8
 .Sh AUTHORS
