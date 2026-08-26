@@ -6,6 +6,7 @@ SUBDIR= \
 	fcntl \
 	grp \
 	libcasper \
+	libdevstat \
 	libfetch \
 	libgeom \
 	libifconfig \

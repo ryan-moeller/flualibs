@@ -1,0 +1,91 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd August 25, 2026
+.Dt DEVSTAT 3lua
+.Os
+.Sh NAME
+.Nm devstat
+.Nd Lua bindings for
+.Xr devstat 3
+.Sh SYNOPSIS
+.Bd -literal
+devstat = require('devstat')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv numdevs, errmsg = devstat.getnumdevs([kvm ] )
+.It Dv generation, errmsg = devstat.getgeneration([kvm ] )
+.It Dv version, errmsg = devstat.getversion([kvm ] )
+.It Dv ok, errmsg = devstat.checkversion([kvm ] )
+.It Dv statinfo, errmsg, errcode = devstat.getdevs([kvm ] )
+.It Dv metrics, errmsg = devstat.compute_statistics(current[ , previous ] )
+.It Dv etime = devstat.compute_etime(cur_time[ , prev_time ] )
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for Device Statistics Library
+.Pq libdevstat
+function calls.
+.Pp
+Where structures or functions deal with
+.Vt long double
+values, they are coerced to/from
+.Vt double
+precision Lua numbers.
+.Bl -tag -width XXXX
+.It Dv numdevs, errmsg = devstat.getnumdevs([kvm ] )
+Wraps
+.Xr devstat_getnumdevs 3 .
+.It Dv generation, errmsg = devstat.getgeneration([kvm ] )
+Wraps
+.Xr devstat_getgeneration 3 .
+.It Dv version, errmsg = devstat.getversion([kvm ] )
+Wraps
+.Xr devstat_getversion 3 .
+.It Dv ok, errmsg = devstat.checkversion([kvm ] )
+Wraps
+.Xr devstat_checkversion 3 .
+.It Dv statinfo, errmsg, errcode = devstat.getdevs([kvm ] )
+Wraps
+.Xr devstat_getdevs 3 ,
+returning a
+.Vt userdata
+wrapper around the
+.Vt struct statinfo *
+handle.
+.It Dv metrics, errmsg = devstat.compute_statistics(current[ , previous ] )
+Wraps
+.Xr devstat_compute_statistics 3 ,
+returning a
+.Vt table
+of all the metrics.
+.It Dv etime = devstat.compute_etime(cur_time[ , prev_time ] )
+Wraps
+.Xr devstat_compute_etime 3 ,
+accepting an
+.Vt integer
+seconds
+or
+.Vt table
+pair of
+.Vt integer
+seconds and nanoseconds for both time parameters.
+.El
+.Sh EXAMPLES
+Check the kernel
+.Xr devstat 9
+version:
+.Bd -literal -offset indent
+local devstat = require('devstat')
+
+assert(devstat.checkversion())
+.Ed
+.Sh SEE ALSO
+.Xr devstat 3 ,
+.Xr geom 3lua ,
+.Xr devstat 9
+.Sh AUTHORS
+.An Ryan Moeller
