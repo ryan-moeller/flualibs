@@ -1,0 +1,110 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd August 30, 2026
+.Dt DEVINFO 3lua
+.Os
+.Sh NAME
+.Nm devinfo
+.Nd Lua bindings for
+.Xr devinfo 3
+.Sh SYNOPSIS
+.Bd -literal
+devinfo = require('devinfo')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv devs <close> = devinfo.snapshot( )
+.It Dv devs:free( )
+.It Dv devinfo.ROOT_DEVICE
+.It Dv device = devs:handle_to_device(handle )
+.It Dv resource = devs:handle_to_resource(handle )
+.It Dv rman = devs:handle_to_rman(handle )
+.It Dv children = devs:device_children(handle )
+.It Dv resources = devs:device_resources(handle )
+.It Dv resources = devs:rman_resources(handle )
+.It Dv rmans = devs:rmans( )
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for Device and Resource Information Utility Library
+.Pq libdevinfo
+function calls.
+.Pp
+.Vt devinfo_handle_t
+handles are represented as opaque
+.Vt lightuserdata
+values in this module.
+.Bl -tag -width XXXX
+.It Dv devs <close> = devinfo.snapshot( )
+Wraps
+.Xr devinfo_init 3 ,
+returning a
+.Vt userdata
+handle owning the lifetime of the global snapshot.
+Use it as a to-be-closed variable for automatic freeing of the snapshot at the
+end of the variable's scope to avoid uncontrolled timing from GC when multiple
+snapshots will be taken.
+.It Dv devs:free( )
+Wraps
+.Xr devinfo_free 3 .
+This is provided as an explicit alternative to the
+.Qq __close
+metamethod.
+.It Dv devinfo.ROOT_DEVICE
+.Dv DEVINFO_ROOT_DEVICE
+.It Dv device = devs:handle_to_device(handle )
+Wraps
+.Xr devinfo_handle_to_device 3 ,
+returning a
+.Vt table .
+.It Dv resource = devs:handle_to_resource(handle )
+Wraps
+.Xr devinfo_handle_to_resource 3 ,
+returning a
+.Vt table .
+.It Dv rman = devs:handle_to_rman(handle )
+Wraps
+.Xr devinfo_handle_to_rman 3 ,
+returning a
+.Vt table .
+.It Dv children = devs:device_children(handle )
+Returns a
+.Vt table
+of child devices obtained using
+.Xr devinfo_foreach_device_child 3 .
+.It Dv resources = devs:device_resources(handle )
+Returns a
+.Vt table
+of device resources obtained using
+.Xr devinfo_foreach_device_resource 3 .
+.It Dv resources = devs:rman_resources(handle )
+Returns a
+.Vt table
+of resource manager resources obtained using
+.Xr devinfo_foreach_rman_resource 3 .
+.It Dv rmans = devs:rmans( )
+Returns a
+.Vt table
+of resource managers obtained using
+.Xr devinfo_foreach_rman 3 .
+.El
+.Sh EXAMPLES
+Describe all resource managers:
+.Bd -literal -offset indent
+local devinfo = require('devinfo')
+
+local devs <close> = devinfo.snapshot()
+for _, rman in ipairs(devs:rmans()) do
+	print(rman.start, rman.size, rman.desc)
+end
+.Ed
+.Sh SEE ALSO
+.Xr devinfo 3 ,
+.Xr devstat 3lua ,
+.Xr devinfo 8 ,
+.Xr rman 9
+.Sh AUTHORS
+.An Ryan Moeller
