@@ -25,4 +25,8 @@ SUBDIR=	\
 SUBDIR+=inotify
 .endif
 
+.if exists(/usr/include/sys/timerfd.h)
+SUBDIR+=timerfd
+.endif
+
 .include <bsd.subdir.mk>

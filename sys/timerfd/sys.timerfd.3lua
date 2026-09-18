@@ -1,0 +1,113 @@
+.\"
+.\" Copyright (c) 2026 Ryan Moeller
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd September 17, 2026
+.Dt SYS.TIMERFD 3lua
+.Os
+.Sh NAME
+.Nm sys.timerfd
+.Nd Lua bindings for
+.Xr timerfd 2
+.Sh SYNOPSIS
+.Bd -literal
+local timerfd = require('sys.timerfd')
+.Ed
+.Pp
+.Bl -tag -width XXXX -compact
+.It Dv tfd, errmsg, errcode = timerfd.create(clockid[ , flags ] )
+.It Dv tfd = timerfd.wrap(fd )
+.It Dv fd = tfd:fileno( )
+.It Dv counter, errmsg, errcode = tfd:read( )
+.It Dv ok, errmsg, errcode = tfd:ioctl(command , value )
+.It Dv spec, errmsg, errcode = tfd:gettime( )
+.It Dv oldspec, errmsg, errcode = tfd:settime(fd , flags , newspec )
+.It Dv ok, errmsg, errcode = tfd:close( )
+.It Dv timerfd.NONBLOCK
+.It Dv timerfd.CLOEXEC
+.El
+.Sh DESCRIPTION
+The
+.Nm
+module provides bindings for
+.Xr timerfd 2
+system calls.
+.Pp
+The
+.Fn :gettime
+and
+.Fn :settime
+methods translate
+.Vt struct itimerspec
+structures as the following
+.Vt table
+format:
+.Bd -literal -offset indent
+{
+	value = <timespec>,
+	interval = <timespec>,
+}
+.Ed
+A
+.Vt timespec
+can be supplied as either an
+.Vt integer
+seconds value or a
+.Vt table
+of the form:
+.Bt -literal -offset indent
+{
+	sec = <integer>,
+	nsec = <integer>,
+}
+.Ed
+.Bl -tag -width XXXX
+.It Dv tfd, errmsg, errcode = timerfd.create(clockid[ , flags ] )
+Wraps
+.Xr timerfd_create 2 ,
+returning a
+.Vt userdata
+object wrapping the descriptor number.
+.It Dv tfd = timerfd.wrap(fd )
+Create a
+.Vt userdata
+object from an existing descriptor number.
+.It Dv fd = tfd:fileno( )
+Returns the underlying file descriptor number.
+.It Dv counter, errmsg, errcode = tfd:read( )
+Read the number of timer expirations since last reset, as an
+.Vt integer .
+.It Dv ok, errmsg, errcode = tfd:ioctl(command , value )
+Execute an
+.Xr ioctl 2
+on the file descriptor.
+See
+.Xr timerfd 2 .
+.It Dv spec, errmsg, errcode = tfd:gettime( )
+Wraps
+.Xr timerfd_gettime 2 .
+.It Dv oldspec, errmsg, errcode = tfd:settime(fd , flags , newspec )
+Wraps
+.Xr timerfd_settime 2 .
+.It Dv ok, errmsg, errcode = tfd:close( )
+Explicictly
+.Xr close 2
+the timer file descriptor.
+.El
+.Sh EXAMPLES
+Wait a second:
+.Bd -literal -offset indent
+local timerfd = require('sys.timerfd')
+local time = require('time')
+
+local tfd <close> = timerfd.create(time.CLOCK_REALTIME)
+assert(tfd:settime(0, {value=1, interval=0}))
+print('before')
+assert(tfd:read() == 1)
+print('after')
+.Ed
+.Sh SEE ALSO
+.Xr timerfd 2
+.Xr time 3lua
+.Sh AUTHORS
+.An Ryan Moeller
