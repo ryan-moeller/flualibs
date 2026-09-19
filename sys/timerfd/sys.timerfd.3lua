@@ -55,7 +55,7 @@ can be supplied as either an
 seconds value or a
 .Vt table
 of the form:
-.Bt -literal -offset indent
+.Bd -literal -offset indent
 {
 	sec = <integer>,
 	nsec = <integer>,
@@ -107,7 +107,7 @@ assert(tfd:read() == 1)
 print('after')
 .Ed
 .Sh SEE ALSO
-.Xr timerfd 2
+.Xr timerfd 2 ,
 .Xr time 3lua
 .Sh AUTHORS
 .An Ryan Moeller
