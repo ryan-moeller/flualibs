@@ -465,7 +465,11 @@ luaopen_sys_capsicum(lua_State *L)
 #else
 	DEFINE(UNUSED1_24);
 #endif
+#ifdef CAP_PTRACE
+	DEFINE(PTRACE);
+#else
 	DEFINE(UNUSED1_25);
+#endif
 	DEFINE(UNUSED1_26);
 	DEFINE(UNUSED1_27);
 	DEFINE(UNUSED1_28);
