@@ -20,6 +20,7 @@ SUBDIR=	\
 	stat \
 	sysctl \
 	uio \
+	user \
 
 .if exists(/usr/include/sys/inotify.h)
 SUBDIR+=inotify
