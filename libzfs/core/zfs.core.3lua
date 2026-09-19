@@ -1,9 +1,8 @@
 .\"
 .\" Copyright (c) 2026 Ryan Moeller
-.\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd April 25, 2026
+.Dd September 19, 2026
 .Dt ZFS.CORE 3lua
 .Os
 .Sh NAME
@@ -29,7 +28,7 @@ lzc = require('zfs.core')
 .It Dv ok, errmsg, errcode = lzc.load_key(dsname , noop , wkey )
 .It Dv ok, errmsg, errcode = lzc.unload_key(dsname )
 .It Dv ok, errmsg, errcode = lzc.change_key(dsname , crypt_cmd[ , props[ , wkey ] ] )
-.It Dv ok_or_errlist, errmsg, errcode = lzc.initialize(poolname , cmd_type , vdevs )
+.It Dv ok_or_errlist, errmsg, errcode = lzc.initialize(poolname , cmd_type , value , vdevs )
 .It Dv ok_or_errlist, errmsg, errcode = lzc.trim(poolname , cmd_type , rate, secure , vdevs )
 .It Dv ok, errmsg, errcode = lzc.redact(snapshot , bookmark , snaplist )
 .It Dv used, errmsg, errcode = lzc.snaprange_space(firstsnap , lastsnap )
@@ -154,7 +153,7 @@ Wraps
 .It Dv ok, errmsg, errcode = lzc.change_key(dsname , crypt_cmd[ , props[ , wkey ] ] )
 Wraps
 .Fn lzc_change_key .
-.It Dv ok_or_errlist, errmsg, errcode = lzc.initialize(poolname , cmd_type , vdevs )
+.It Dv ok_or_errlist, errmsg, errcode = lzc.initialize(poolname , cmd_type , value , vdevs )
 Wraps
 .Fn lzc_initialize .
 .It Dv ok_or_errlist, errmsg, errcode = lzc.trim(poolname , cmd_type , rate, secure , vdevs )

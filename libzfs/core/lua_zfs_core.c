@@ -260,6 +260,39 @@ l_lzc_change_key(lua_State *L)
 	return (success(L));
 }
 
+#if __FreeBSD_version > 1600020
+static int
+l_lzc_initialize(lua_State *L)
+{
+	const char *poolname;
+	pool_initialize_func_t cmd_type;
+	nvlist_t *vdevs, *errlist;
+	uint64_t value;
+	boolean_t value_provided;
+	int error;
+
+	poolname = luaL_checkstring(L, 1);
+	cmd_type = luaL_checkinteger(L, 2);
+	value = luaL_optinteger(L, 3, 0);
+	value_provided = !lua_isnoneornil(L, 3);
+	vdevs = checknvlist(L, 4);
+
+	if ((error = lzc_initialize(poolname, cmd_type, value, value_provided,
+	    vdevs, &errlist)) != 0) {
+		fail(L, error);
+		if (errlist != NULL) {
+			pushnvlist(L, errlist);
+			lua_replace(L, -3);
+		}
+		return (3);
+	}
+	if (errlist != NULL) {
+		pushnvlist(L, errlist);
+		return (1);
+	}
+	return (success(L));
+}
+#else
 static int
 l_lzc_initialize(lua_State *L)
 {
@@ -287,6 +320,7 @@ l_lzc_initialize(lua_State *L)
 	}
 	return (success(L));
 }
+#endif
 
 static int
 l_lzc_trim(lua_State *L)

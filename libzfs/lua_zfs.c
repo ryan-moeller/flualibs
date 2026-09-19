@@ -2700,7 +2700,31 @@ l_zpool_scan(lua_State *L)
 	return (success(L));
 }
 
-#if __FreeBSD_version > 1500056
+#if __FreeBSD_version > 1600020
+static int
+l_zpool_scan_range(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	pool_scan_func_t func;
+	pool_scrub_cmd_t cmd;
+	pool_scrub_flags_t flags;
+	time_t date_start, date_end;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	func = luaL_checkinteger(L, 2);
+	cmd = luaL_checkinteger(L, 3);
+	flags = luaL_optinteger(L, 4, 0);
+	date_start = luaL_optinteger(L, 5, 0);
+	date_end = luaL_optinteger(L, 6, 0);
+
+	if ((error = zpool_scan_range(zhp, func, cmd, flags, date_start,
+	    date_end)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_scan_range"));
+	}
+	return (success(L));
+}
+#elif __FreeBSD_version > 1500056
 static int
 l_zpool_scan_range(lua_State *L)
 {
@@ -2745,6 +2769,30 @@ l_zpool_initialize_one(lua_State *L)
 }
 #endif
 
+#if __FreeBSD_version > 1600020
+static int
+l_zpool_initialize(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	pool_initialize_func_t cmd_type;
+	nvlist_t *vdevs;
+	uint64_t value;
+	boolean_t value_provided;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	cmd_type = luaL_checkinteger(L, 2);
+	vdevs = checknvlist(L, 3);
+	value = luaL_optinteger(L, 4, 0);
+	value_provided = !lua_isnoneornil(L, 4);
+
+	if ((error = zpool_initialize(zhp, cmd_type, vdevs, value,
+	    value_provided)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_initialize"));
+	}
+	return (success(L));
+}
+#else
 static int
 l_zpool_initialize(lua_State *L)
 {
@@ -2762,7 +2810,32 @@ l_zpool_initialize(lua_State *L)
 	}
 	return (success(L));
 }
+#endif
 
+#if __FreeBSD_version > 1600020
+static int
+l_zpool_initialize_wait(lua_State *L)
+{
+	zpool_handle_t *zhp;
+	pool_initialize_func_t cmd_type;
+	nvlist_t *vdevs;
+	uint64_t value;
+	boolean_t value_provided;
+	int error;
+
+	zhp = checkzpool(L, 1);
+	cmd_type = luaL_checkinteger(L, 2);
+	vdevs = checknvlist(L, 3);
+	value = luaL_optinteger(L, 4, 0);
+	value_provided = !lua_isnoneornil(L, 4);
+
+	if ((error = zpool_initialize_wait(zhp, cmd_type, vdevs, value,
+	    value_provided)) != 0) {
+		return (zpoolfail(L, zhp, error, "zpool_initialize_wait"));
+	}
+	return (success(L));
+}
+#else
 static int
 l_zpool_initialize_wait(lua_State *L)
 {
@@ -2780,6 +2853,7 @@ l_zpool_initialize_wait(lua_State *L)
 	}
 	return (success(L));
 }
+#endif
 
 static inline void
 checktrimflags(lua_State *L, int idx, trimflags_t *flags)

@@ -1,9 +1,8 @@
 .\"
 .\" Copyright (c) 2026 Ryan Moeller
-.\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd May 1, 2026
+.Dd September 19, 2026
 .Dt ZFS 3lua
 .Os
 .Sh NAME
@@ -75,8 +74,8 @@ zfs = require('zfs')
 .It Dv ok, errmsg, errcode = zpool_hdl:scan(func , cmd )
 .It Dv ok, errmsg, errcode = zpool_hdl:scan_range(func , cmd , date_start , date_end )
 .It Dv ok, errmsg, errcode = zpool_hdl:initialize_one(cmd_type , wait )
-.It Dv ok, errmsg, errcode = zpool_hdl:initialize(cmd_type , vdevs )
-.It Dv ok, errmsg, errcode = zpool_hdl:initialize_wait(cmd_type , vdevs )
+.It Dv ok, errmsg, errcode = zpool_hdl:initialize(cmd_type , vdevs[ , value ] )
+.It Dv ok, errmsg, errcode = zpool_hdl:initialize_wait(cmd_type , vdevs[ , value ] )
 .It Dv ok, errmsg, errcode = zpool_hdl:trim(cmd_type , vdevs , flags )
 .It Dv ok, errmsg, errcode = zpool_hdl:clear([path ] , [rewind ] )
 .It Dv ok, errmsg, errcode = zpool_hdl:reguid( )
@@ -396,10 +395,10 @@ Wraps
 .It Dv ok, errmsg, errcode = zpool_hdl:initialize_one(cmd_type , wait )
 Wraps
 .Fn zpool_initialize_one .
-.It Dv ok, errmsg, errcode = zpool_hdl:initialize(cmd_type , vdevs )
+.It Dv ok, errmsg, errcode = zpool_hdl:initialize(cmd_type , vdevs[ , value ] )
 Wraps
 .Fn zpool_initialize .
-.It Dv ok, errmsg, errcode = zpool_hdl:initialize_wait(cmd_type , vdevs )
+.It Dv ok, errmsg, errcode = zpool_hdl:initialize_wait(cmd_type , vdevs[ , value ] )
 Wraps
 .Fn zpool_initialize_wait .
 .It Dv ok, errmsg, errcode = zpool_hdl:trim(cmd_type , vdevs , flags )
