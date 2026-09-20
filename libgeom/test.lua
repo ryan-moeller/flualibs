@@ -54,6 +54,10 @@ for gclass in gmesh:class() do
 				stripesize = gprovider.stripesize,
 				config = gprovider.config,
 			}
+			for gconsumer in gprovider:consumers() do
+				local i = id(gconsumer)
+				provider.consumers[#provider.consumers + 1] = i
+			end
 			geom.provider[#geom.provider + 1] = provider
 		end
 	end

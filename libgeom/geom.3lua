@@ -2,7 +2,7 @@
 .\" Copyright (c) 2026 Ryan Moeller
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd August 25, 2026
+.Dd September 20, 2026
 .Dt GEOM 3lua
 .Os
 .Sh NAME
@@ -251,6 +251,10 @@ for gclass in gmesh:class() do
 				stripesize = gprovider.stripesize,
 				config = gprovider.config,
 			}
+			for gconsumer in gprovider:consumers() do
+				i = id(gconsumer)
+				provider.consumers[#provider.consumers + 1] = i
+			end
 			geom.provider[#geom.provider + 1] = provider
 		end
 	end
