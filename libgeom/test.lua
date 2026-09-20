@@ -4,12 +4,17 @@
 local geom = require('geom')
 local ucl = require('ucl')
 
+-- Coerce a lightuserdata pointer to a reasonable string representation.
+function id(obj)
+	return tostring(obj.id):sub(11)
+end
+
 -- Break mesh cycles to form a tree that ucl can handle.
 gmesh = geom.gettree()
 tree = { classes={} }
 for gclass in gmesh:class() do
 	local class = {
-		id = gclass.id,
+		id = id(gclass),
 		name = gclass.name,
 		geom = {},
 		config = gclass.config,
@@ -17,8 +22,8 @@ for gclass in gmesh:class() do
 	tree.classes[#tree.classes + 1] = class
 	for ggeom in gclass:geom() do
 		local geom = {
-			id = ggeom.id,
-			class = ggeom.class.id,
+			id = id(ggeom),
+			class = id(ggeom.class),
 			name = ggeom.name,
 			rank = ggeom.rank,
 			consumer = {},
@@ -28,9 +33,9 @@ for gclass in gmesh:class() do
 		class.geom[#class.geom + 1] = geom
 		for gconsumer in ggeom:consumer() do
 			local consumer = {
-				id = gconsumer.id,
-				geom = gconsumer.geom.id,
-				provider = gconsumer.provider.id,
+				id = id(gconsumer),
+				geom = id(gconsumer.geom),
+				provider = id(gconsumer.provider),
 				mode = gconsumer.mode,
 				config = gconsumer.config,
 			}
@@ -38,9 +43,9 @@ for gclass in gmesh:class() do
 		end
 		for gprovider in ggeom:provider() do
 			local provider = {
-				id = gprovider.id,
+				id = id(gprovider),
 				name = gprovider.name,
-				geom = gprovider.geom.id,
+				geom = id(gprovider.geom),
 				consumers = {},
 				mode = gprovider.mode,
 				mediasize = gprovider.mediasize,
