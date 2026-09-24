@@ -1,9 +1,5 @@
 # FreeBSD Lua Libraries
 
-[![13.5-RELEASE Build Status](https://api.cirrus-ci.com/github/ryan-moeller/flualibs.svg?branch=main&task=releases/amd64/13.5-RELEASE)](https://cirrus-ci.com/github/ryan-moeller/flualibs)
-[![14.4-RELEASE Build Status](https://api.cirrus-ci.com/github/ryan-moeller/flualibs.svg?branch=main&task=releases/amd64/14.4-RELEASE)](https://cirrus-ci.com/github/ryan-moeller/flualibs)
-[![15.0-RELEASE Build Status](https://api.cirrus-ci.com/github/ryan-moeller/flualibs.svg?branch=main&task=releases/amd64/15.0-RELEASE)](https://cirrus-ci.com/github/ryan-moeller/flualibs)
-
 flualibs is a collection of Lua modules for the FreeBSD base system.  It has no
 dependencies outside of the FreeBSD base system and sources.
 
@@ -20,6 +16,7 @@ $ make
 
 ## TODO
 
+- replace Cirrus CI
 - more modules
 - improve tests, samples, and documentation
 - enable targetting Lua from ports instead of flua
