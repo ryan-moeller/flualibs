@@ -1,5 +1,7 @@
 # FreeBSD Lua Libraries
 
+[![FreeBSD 15.1](https://github.com/ryan-moeller/flualibs/workflows/FreeBSD%2015.1/badge.svg)](https://github.com/ryan-moeller/flualibs/actions/workflows/test.yml)
+
 flualibs is a collection of Lua modules for the FreeBSD base system.  It has no
 dependencies outside of the FreeBSD base system and sources.
 
@@ -16,7 +18,6 @@ $ make
 
 ## TODO
 
-- replace Cirrus CI
 - more modules
 - improve tests, samples, and documentation
 - enable targetting Lua from ports instead of flua
