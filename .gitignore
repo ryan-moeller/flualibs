@@ -1,7 +1,4 @@
 *.gz
-.*
-!.cirrus.yml
-!.gitignore
 *.so
 *.so.*
 *.core
