@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#include <errno.h>
-#include <stdlib.h>
-
 #include <lua.h>
 #include <lauxlib.h>
 
@@ -22,6 +19,7 @@ l_xor_apply(lua_State *L)
 	unsigned char key[keylen];
 	const char *input;
 	size_t len;
+	luaL_Buffer b;
 	char *output;
 
 	input = luaL_checklstring(L, 1, &len);
@@ -38,19 +36,13 @@ l_xor_apply(lua_State *L)
 	}
 	lua_pop(L, keylen);
 
-	output = malloc(len);
-	if (output == NULL) {
-		return (fatal(L, "malloc", ENOMEM));
-	}
+	output = luaL_buffinitsize(L, &b, len);
 
 	for (size_t i = 0; i < len; ++i) {
 		output[i] = input[i] ^ key[i % keylen];
 	}
 
-	lua_pushlstring(L, output, len);
-
-	free(output);
-	
+	luaL_pushresultsize(&b, len);
 	return (1);
 }
 
