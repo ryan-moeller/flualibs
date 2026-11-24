@@ -974,6 +974,7 @@ static const struct luaL_Reg l_kvm_meta[] = {
 	{"counter_u64_fetch", l_kvm_counter_u64_fetch},
 	{"getcptime", l_kvm_getcptime},
 	{"getloadavg", l_kvm_getloadavg},
+	{"getprocs", l_kvm_getprocs},
 	{"getargv", l_kvm_getargv},
 	{"getenvv", l_kvm_getenvv},
 	{"getswapinfo", l_kvm_getswapinfo},
