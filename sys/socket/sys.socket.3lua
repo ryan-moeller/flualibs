@@ -339,6 +339,11 @@ Wraps
 .It Dv data, from_or_errmsg, errcode = socket.recvfrom(s , n[ , flags ] )
 Wraps
 .Xr recvfrom 2 .
+.Va from
+is
+.Dv nil
+if the socket does not provide a source address, as with a connected stream
+socket.
 .It Dv n, errmsg, errcode = socket.send(s , data[ , flags ] )
 Wraps
 .Xr send 2 .

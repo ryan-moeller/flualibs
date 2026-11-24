@@ -237,6 +237,7 @@ l_recvfrom(lua_State *L)
 	ssize_t len;
 	int s, flags;
 
+	memset(&ss, 0, sizeof(ss));
 	from = (struct sockaddr *)&ss;
 	fromlen = sizeof(ss);
 
@@ -251,7 +252,7 @@ l_recvfrom(lua_State *L)
 	assert(ss.ss_len == fromlen);
 	luaL_pushresultsize(&b, len);
 	pushaddr(L, from);
-	return (1);
+	return (2);
 }
 
 static int
