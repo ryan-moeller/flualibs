@@ -16,6 +16,10 @@
 static inline void
 pushaddr(lua_State *L, const struct sockaddr *addr)
 {
+	if (addr == NULL || addr->sa_len < offsetof(struct sockaddr, sa_data)) {
+		lua_pushnil(L);
+		return;
+	}
 	lua_createtable(L, 0, 2);
 	lua_pushinteger(L, addr->sa_family);
 	lua_setfield(L, -2, "family");

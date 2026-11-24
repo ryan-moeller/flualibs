@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd December 25, 2025
+.Dd November 24, 2026
 .Dt SYS.SOCKET 3lua
 .Os
 .Sh NAME
@@ -291,6 +291,8 @@ Addresses are tables of the form
 where
 .Va data
 is the unformatted address as raw bytes.
+An address that is not set is
+.Dv nil .
 .Bl -tag -width XXXX
 .It Dv client, clientaddr_or_errmsg, errcode = socket.accept(s[ , flags ] )
 Wraps

@@ -3,7 +3,7 @@
 .\"
 .\" SPDX-License-Identifier: BSD-2-Clause
 .\"
-.Dd January 4, 2026
+.Dd November 24, 2026
 .Dt IFCONFIG 3lua
 .Os
 .Sh NAME
@@ -617,11 +617,15 @@ table for the address assigned to this interface.
 .It Dv netmask = ifaddr:netmask( )
 Get a
 .Vt sockaddr
-table for the netmask assigned to this interface.
+table for the netmask assigned to this interface, or
+.Dv nil
+if there is none.
 .It Dv dstaddr = ifaddr:dstaddr( )
 Get a
 .Vt sockaddr
-table for the destination address assigned to this interface.
+table for the destination address assigned to this interface, or
+.Dv nil
+if there is none.
 .El
 A
 .Vt sockaddr
