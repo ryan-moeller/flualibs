@@ -22,7 +22,6 @@
 #include "utils.h"
 
 #define PCPU_METATABLE "struct pcpu *" /* TODO: sys.pcpu module? */
-#define KINFO_PROCS_METATABLE "struct kinfo_proc[]"
 
 int luaopen_kvm(lua_State *);
 
@@ -643,12 +642,10 @@ l_kvm_getloadavg(lua_State *L)
 	return (1);
 }
 
-enum { CNT = 1 };
-
 static int
 l_kvm_getprocs(lua_State *L)
 {
-	struct kinfo_proc *procs, *copy;
+	struct kinfo_proc *procs;
 	kvm_t *kd;
 	int op, arg, cnt;
 
@@ -659,37 +656,7 @@ l_kvm_getprocs(lua_State *L)
 	if ((procs = kvm_getprocs(kd, op, arg, &cnt)) == NULL) {
 		return (kvmfail(L, kd));
 	}
-	copy = lua_newuserdatauv(L, cnt * sizeof(*copy), 1);
-	memcpy(copy, procs, cnt * sizeof(*copy));
-	lua_pushinteger(L, cnt);
-	lua_setiuservalue(L, -2, CNT);
-	luaL_setmetatable(L, KINFO_PROCS_METATABLE);
-	return (1);
-}
-
-static int
-l_kinfo_procs_index(lua_State *L)
-{
-	struct kinfo_proc *procs;
-	size_t i, cnt;
-
-	procs = luaL_checkudata(L, 1, KINFO_PROCS_METATABLE);
-	i = luaL_checkinteger(L, 2);
-
-	lua_getiuservalue(L, 1, CNT);
-	cnt = lua_tointeger(L, -1);
-	if (i == 0 || i > cnt) {
-		return (0);
-	}
-	return (newref(L, 1, &procs[i - 1], KINFO_PROC_METATABLE));
-}
-
-static int
-l_kinfo_procs_len(lua_State *L)
-{
-	luaL_checkudata(L, 1, KINFO_PROCS_METATABLE);
-
-	lua_getiuservalue(L, 1, CNT);
+	pushkinfoprocs(L, procs, cnt);
 	return (1);
 }
 
@@ -995,12 +962,6 @@ static const struct luaL_Reg l_pcpu_meta[] = {
 	{NULL, NULL}
 };
 
-static const struct luaL_Reg l_kinfo_procs_meta[] = {
-	{"__index", l_kinfo_procs_index},
-	{"__len", l_kinfo_procs_len},
-	{NULL, NULL}
-};
-
 int
 luaopen_kvm(lua_State *L)
 {
@@ -1015,9 +976,6 @@ luaopen_kvm(lua_State *L)
 
 	luaL_newmetatable(L, PCPU_METATABLE);
 	luaL_setfuncs(L, l_pcpu_meta, 0);
-
-	luaL_newmetatable(L, KINFO_PROCS_METATABLE);
-	luaL_setfuncs(L, l_kinfo_procs_meta, 0);
 
 	luaL_newlib(L, l_kvm_funcs);
 #define DEFINE(ident) ({ \

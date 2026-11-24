@@ -12,6 +12,7 @@
 #include <lauxlib.h>
 
 #include "sys/user/lua_user.h"
+#include "array.h"
 #include "utils.h"
 
 int luaopen_sys_user(lua_State *);
@@ -188,5 +189,8 @@ luaopen_sys_user(lua_State *L)
 {
 	luaL_newmetatable(L, KINFO_PROC_METATABLE);
 	luaL_setfuncs(L, l_kinfo_proc_meta, 0);
+
+	newarraymeta(L, KINFO_PROCS_METATABLE,
+	    sizeof(struct kinfo_proc), KINFO_PROC_METATABLE);
 	return (0);
 }

@@ -5,14 +5,26 @@
 
 #pragma once
 
+#include <sys/param.h>
 #include <sys/user.h>
+#include <string.h>
 
 #include <lua.h>
 #include <lauxlib.h>
 
-#include "utils.h"
+#include "array.h"
 
 #define KINFO_PROC_METATABLE "struct kinfo_proc *"
+#define KINFO_PROCS_METATABLE "struct kinfo_proc[]"
+
+static inline void
+pushkinfoprocs(lua_State *L, const struct kinfo_proc *procs, int count)
+{
+	struct kinfo_proc *array;
+
+	array = newarray(L, count, sizeof(*procs), KINFO_PROCS_METATABLE);
+	memcpy(array, procs, count * sizeof(*procs));
+}
 
 static inline void
 pushtimeval(lua_State *L, struct timeval *tv)
